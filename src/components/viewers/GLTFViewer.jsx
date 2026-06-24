@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState, useCallback } from 'react'
 import * as THREE from 'three'
-import { STLLoader } from 'three/examples/jsm/loaders/STLLoader.js'
+import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js'
 import useQuaternion from '../../hooks/useQuaternion.js'
 import ProgressionSlider from './ProgressionSlider.jsx'
 import AlphaSlider from './AlphaSlider.jsx'
@@ -8,18 +8,24 @@ import styles from './STLViewer.module.css'
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 
-const MODEL_COLOR    = '#C8A96E'  // accent — gives warmth on dark bg
-const MODEL_COLOR_TRANSLUCENT_ALPHA = 0.18
-const AMBIENT_INTENSITY  = 1.2
+const AMBIENT_INTENSITY   = 1.2
 const DIR_LIGHT_INTENSITY = 1.8
 const DIR_LIGHT_POSITION  = [5, 8, 5]
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
+// GLTF meshes can have multi-material arrays; this handles both cases.
+function setMeshMat(mesh, opacity, depthWrite) {
+  const mats = Array.isArray(mesh.material) ? mesh.material : [mesh.material]
+  mats.forEach(mat => {
+    mat.opacity    = opacity
+    mat.depthWrite = depthWrite
+  })
+}
+
 /**
  * Per-frame crossfade for progression mode.
- * Sets mesh opacity based on fractional slider position so steps blend
- * over fadeMs rather than snapping.
+ * Identical semantics to the STL version; uses setMeshMat for multi-material support.
  */
 function applyCrossfade(meshes, position, steps) {
   const count = steps.length
@@ -27,13 +33,10 @@ function applyCrossfade(meshes, position, steps) {
 
   const clamped = Math.max(0, Math.min(count - 1, position))
   const floor   = Math.floor(clamped)
-  const t       = clamped - floor                       // 0..1 within transition
-  const atRest  = t === 0                               // waiting at an integer step
+  const t       = clamped - floor
 
-  const idxA   = floor
-  const idxB   = Math.min(floor + 1, count - 1)
-  const pathsA = new Set(steps[idxA]?.models ?? [])
-  const pathsB = new Set(steps[idxB]?.models ?? [])
+  const pathsA = new Set(steps[floor]?.models ?? [])
+  const pathsB = new Set(steps[Math.min(floor + 1, count - 1)]?.models ?? [])
 
   meshes.forEach(m => {
     const path = m.userData.basePath
@@ -41,79 +44,57 @@ function applyCrossfade(meshes, position, steps) {
     const inB  = pathsB.has(path)
 
     if (inA && inB) {
-      m.visible             = true
-      m.material.opacity    = 1.0
-      m.material.depthWrite = true
-      m.renderOrder         = 0
+      m.visible     = true
+      m.renderOrder = 0
+      setMeshMat(m, 1.0, true)
     } else if (inA) {
       const op = Math.max(0, 1.0 - t)
-      m.visible             = op > 0
-      m.material.opacity    = op
-      // Outgoing: disable depth writes during fade so its near-zero-opacity
-      // geometry can't occlude the incoming mesh at the same depth. renderOrder=0
-      // ensures it renders before the incoming mesh.
-      m.material.depthWrite = true
-      m.renderOrder         = 0
+      m.visible     = op > 0
+      m.renderOrder = 0
+      setMeshMat(m, op, true)
     } else if (inB) {
-      m.visible             = t > 0
-      m.material.opacity    = t
-      // Incoming: keep depth writes for correct self-occlusion. renderOrder=1
-      // ensures it renders after the outgoing mesh, so it only depth-tests
-      // against the opaque scene — not against A's depth-write-disabled pass.
-      m.material.depthWrite = true
-      m.renderOrder         = 1
+      m.visible     = t > 0
+      m.renderOrder = 1
+      setMeshMat(m, t, true)
     } else {
-      m.visible             = false
-      m.material.depthWrite = true
-      m.renderOrder         = 0
+      m.visible     = false
+      m.renderOrder = 0
+      setMeshMat(m, 0, true)
     }
   })
 }
 
 /**
- * Project a 3D point (in model-local coords) to 2D canvas pixel coords.
+ * Project a 3D point (in object-local coords) to 2D canvas pixel coords.
  * Returns null if the point is behind the camera.
  */
-function projectToScreen(point3d, mesh, camera, canvasWidth, canvasHeight) {
-  const worldPos = point3d.clone().applyMatrix4(mesh.matrixWorld)
+function projectToScreen(point3d, object, camera, w, h) {
+  const worldPos  = point3d.clone().applyMatrix4(object.matrixWorld)
   const projected = worldPos.clone().project(camera)
-
-  // Behind camera
   if (projected.z > 1) return null
-
   return {
-    x: ( projected.x * 0.5 + 0.5) * canvasWidth,
-    y: (-projected.y * 0.5 + 0.5) * canvasHeight,
-    z:  projected.z,   // used for occlusion estimate
+    x: ( projected.x * 0.5 + 0.5) * w,
+    y: (-projected.y * 0.5 + 0.5) * h,
+    z:  projected.z,
   }
 }
 
 // ─── Component ────────────────────────────────────────────────────────────────
 
 /**
- * STLViewer
+ * GLTFViewer
  *
- * Props:
+ * Props: identical interface to STLViewer — same modes, same config, same
+ * annotation API. Accepts .gltf / .glb files and preserves their PBR materials.
+ *
  *   mode          'basic' | 'progression' | 'internal'
- *
- *   // mode: basic
- *   model         string   path to a single STL file
- *
- *   // mode: progression
- *   steps         { label: string, models: string[] }[]
- *
- *   // mode: internal
- *   models        { path: string, label: string, opacity: number }[]
+ *   model         string                                          (basic)
+ *   steps         { label: string, models: string[] }[]          (progression)
+ *   models        { path: string, label: string, opacity: number }[]  (internal)
  *   annotations   { label: string, headPosition: {x,y,z}, textOffset: {x,y} }[]
- *
- *   config        {
- *                   rotationSpeed:  number   // radians/s  (default 0.4)
- *                   initialEuler:   [rx,ry,rz] (default [0,0,0])
- *                   waitMs:         number   // progression only (default 2500)
- *                   fadeMs:         number   // progression only (default 600)
- *                 }
+ *   config        { rotationSpeed, initialEuler, waitMs, fadeMs }
  */
-export default function STLViewer({
+export default function GLTFViewer({
   mode = 'basic',
   model,
   steps,
@@ -122,64 +103,54 @@ export default function STLViewer({
   config = {},
 }) {
   const {
-    rotationSpeed  = 0.4,
-    initialEuler   = [0, 0, 0],
-    waitMs         = 2500,
-    fadeMs         = 600,
+    rotationSpeed = 0.4,
+    initialEuler  = [0, 0, 0],
+    waitMs        = 2500,
+    fadeMs        = 600,
   } = config
 
   // ── Refs ──────────────────────────────────────────────────────────────
-  const containerRef  = useRef(null)
-  const canvasRef     = useRef(null)
-  const overlayRef    = useRef(null)   // 2D canvas for annotations
-  const rendererRef   = useRef(null)
-  const sceneRef      = useRef(null)
-  const cameraRef     = useRef(null)
-  const meshGroupRef  = useRef(null)   // group holding all model meshes
-  const meshesRef     = useRef([])     // array of THREE.Mesh, one per model path
-  const rafRef        = useRef(null)
-  const clockRef      = useRef(new THREE.Clock())
+  const containerRef   = useRef(null)
+  const canvasRef      = useRef(null)
+  const overlayRef     = useRef(null)
+  const rendererRef    = useRef(null)
+  const sceneRef       = useRef(null)
+  const cameraRef      = useRef(null)
+  const meshGroupRef   = useRef(null)
+  const flatMeshesRef  = useRef([])    // every THREE.Mesh from every GLTF file
+  const gltfScenesRef  = useRef([])    // gltf.scene roots — kept for disposal
+  const rafRef         = useRef(null)
+  const clockRef       = useRef(new THREE.Clock())
   const isDraggingRef  = useRef(false)
   const lastPointerRef = useRef({ x: 0, y: 0 })
-  const sliderPosRef   = useRef(0)    // fractional progression position for crossfade
+  const sliderPosRef   = useRef(0)
 
   // ── State ─────────────────────────────────────────────────────────────
-  const [loading, setLoading]           = useState(true)
-  const [error, setError]               = useState(null)
-  const [stepIndex, setStepIndex]         = useState(0)   // progression mode
-  const [internalPos, setInternalPos]     = useState(0)   // internal mode: 0..N-1 (fractional)
+  const [loading, setLoading]               = useState(true)
+  const [error, setError]                   = useState(null)
+  const [stepIndex, setStepIndex]           = useState(0)
+  const [internalPos, setInternalPos]       = useState(0)
   const [canvasDragging, setCanvasDragging] = useState(false)
-  const [dimensions, setDimensions]     = useState({ w: 0, h: 0 })
+  const [dimensions, setDimensions]         = useState({ w: 0, h: 0 })
 
   // ── Quaternion ────────────────────────────────────────────────────────
   const { quaternionRef, applyAutoRotation, applyPointerDelta } =
     useQuaternion(initialEuler)
 
   // ── Derived model list ────────────────────────────────────────────────
-  // Normalise the three modes into a single flat list of
-  // { path, opacity, visibleInStep[] } objects so the loader and
-  // step-visibility logic share one code path.
   const modelList = (() => {
-    if (mode === 'basic') {
-      return [{ path: model, opacity: 1.0 }]
-    }
+    if (mode === 'basic') return [{ path: model, opacity: 1.0 }]
     if (mode === 'progression') {
-      // Each step has its own set of models; collect unique paths
       const seen = new Set()
       const list = []
-      steps.forEach((step, si) => {
+      steps.forEach(step => {
         step.models.forEach(path => {
-          if (!seen.has(path)) {
-            seen.add(path)
-            list.push({ path, opacity: 1.0 })
-          }
+          if (!seen.has(path)) { seen.add(path); list.push({ path, opacity: 1.0 }) }
         })
       })
       return list
     }
-    if (mode === 'internal') {
-      return models.map(m => ({ path: m.path, opacity: m.opacity }))
-    }
+    if (mode === 'internal') return models.map(m => ({ path: m.path, opacity: m.opacity }))
     return []
   })()
 
@@ -198,39 +169,36 @@ export default function STLViewer({
     camera.position.set(0, 0, 3.5)
     cameraRef.current = camera
 
-    // Renderer
-    const renderer = new THREE.WebGLRenderer({
-      canvas: canvasRef.current,
-      antialias: true,
-    })
+    // Renderer — sRGB + tone-mapping for correct PBR output
+    const renderer = new THREE.WebGLRenderer({ canvas: canvasRef.current, antialias: true })
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
+    renderer.outputColorSpace    = THREE.SRGBColorSpace
+    renderer.toneMapping         = THREE.ACESFilmicToneMapping
+    renderer.toneMappingExposure = 1.0
     rendererRef.current = renderer
 
     // Lights
     const ambient = new THREE.AmbientLight(0xffffff, AMBIENT_INTENSITY)
     scene.add(ambient)
-
     const dir = new THREE.DirectionalLight(0xffffff, DIR_LIGHT_INTENSITY)
     dir.position.set(...DIR_LIGHT_POSITION)
     scene.add(dir)
-
-    // A softer fill light from below
     const fill = new THREE.DirectionalLight(0xffffff, 0.4)
     fill.position.set(-3, -4, -3)
     scene.add(fill)
 
-    // Model group — rotation applied to this
+    // Model group — rotation is applied to this
     const group = new THREE.Group()
     scene.add(group)
     meshGroupRef.current = group
 
-    // Load STLs
-    const loader = new STLLoader()
-    const loadPromises = modelList.map(({ path, opacity }) =>
+    // Load GLTFs — resolve with raw gltf objects; normalise after all are loaded
+    const loader = new GLTFLoader()
+    const loadPromises = modelList.map(({ path, opacity }, modelIndex) =>
       new Promise((resolve, reject) => {
         loader.load(
           path,
-          (geometry) => resolve({ geometry, path, opacity }),
+          gltf => resolve({ gltf, path, opacity, modelIndex }),
           undefined,
           reject
         )
@@ -239,57 +207,63 @@ export default function STLViewer({
 
     Promise.all(loadPromises)
       .then((loaded) => {
-        // Build a combined bounding box across all raw geometries so every
-        // model is translated and scaled by the same shared transform.
-        // This keeps stacked models (internal / progression) properly aligned.
+        // Build a combined bounding box across all GLTF scenes so every file
+        // is translated and scaled by the same shared transform — keeping
+        // stacked models (internal / progression) correctly aligned.
         const combinedBox = new THREE.Box3()
-        loaded.forEach(({ geometry }) => {
-          geometry.computeBoundingBox()
-          combinedBox.union(geometry.boundingBox)
+        loaded.forEach(({ gltf }) => {
+          gltf.scene.updateMatrixWorld(true)
+          combinedBox.union(new THREE.Box3().setFromObject(gltf.scene))
         })
 
         const sharedCenter = new THREE.Vector3()
         combinedBox.getCenter(sharedCenter)
-
         const size = new THREE.Vector3()
         combinedBox.getSize(size)
         const radius = size.length() / 2   // half-diagonal → conservative bounding sphere
         const scale  = radius > 0 ? 1 / radius : 1
 
-        const meshes = loaded.map(({ geometry, path, opacity }) => {
-          geometry.translate(-sharedCenter.x, -sharedCenter.y, -sharedCenter.z)
-          geometry.scale(scale, scale, scale)
+        const flatMeshes = []
+        const gltfScenes = []
+
+        loaded.forEach(({ gltf, path, opacity, modelIndex }) => {
+          // Wrapper group applies the shared normalisation transform so the
+          // geometry data itself is never mutated (unlike STLViewer).
+          const wrapper = new THREE.Group()
+          wrapper.position.set(-sharedCenter.x, -sharedCenter.y, -sharedCenter.z)
+          wrapper.scale.setScalar(scale)
+          wrapper.add(gltf.scene)
+          group.add(wrapper)
+          gltfScenes.push(gltf.scene)
 
           const isHousing     = opacity < 1.0
           const isProgression = mode === 'progression'
-          const material = new THREE.MeshPhongMaterial({
-            color:     new THREE.Color(MODEL_COLOR),
-            specular:  new THREE.Color(0x222222),
-            shininess: 30,
-            // transparent=true lets opacity be animated.  depthWrite=true is
-            // kept on for both housing and progression so triangles within the
-            // same mesh correctly occlude each other (prevents far-faces
-            // appearing in front of near-faces).  Blending with what's already
-            // in the framebuffer (internals, drawn in the opaque pass first)
-            // still works correctly because transparent objects render last.
-            transparent: isHousing || isProgression,
-            opacity:     1.0,
-            side:      THREE.DoubleSide,
-            depthWrite: true,
+
+          gltf.scene.traverse(child => {
+            if (!child.isMesh) return
+            child.userData.basePath    = path
+            child.userData.baseOpacity = opacity
+            // modelIndex lets the internal-mode opacity effect group by file
+            // rather than by flat-mesh index (one GLTF file → many meshes).
+            child.userData.modelIndex  = modelIndex
+            // Pre-enable transparency on every material so opacity changes
+            // applied at runtime (crossfade / internal slider) are visible.
+            const mats = Array.isArray(child.material) ? child.material : [child.material]
+            mats.forEach(mat => {
+              mat.transparent = isHousing || isProgression
+              mat.depthWrite  = true
+            })
+            flatMeshes.push(child)
           })
-          const mesh = new THREE.Mesh(geometry, material)
-          mesh.userData.basePath    = path
-          mesh.userData.baseOpacity = opacity
-          group.add(mesh)
-          return mesh
         })
 
-        meshesRef.current = meshes
-        applyStepVisibility(meshes, stepIndex)
+        flatMeshesRef.current = flatMeshes
+        gltfScenesRef.current = gltfScenes
+        applyStepVisibility(flatMeshes, stepIndex)
         setLoading(false)
       })
-      .catch((err) => {
-        console.error('STLViewer load error:', err)
+      .catch(err => {
+        console.error('GLTFViewer load error:', err)
         setError('Failed to load model.')
         setLoading(false)
       })
@@ -298,16 +272,14 @@ export default function STLViewer({
     const ro = new ResizeObserver(entries => {
       for (const entry of entries) {
         const { width } = entry.contentRect
-        const height = width * (9 / 16)  // fixed 16:9
+        const height = width * (9 / 16)
         renderer.setSize(width, height, false)
         camera.aspect = width / height
         camera.updateProjectionMatrix()
-
         if (overlayRef.current) {
           overlayRef.current.width  = width
           overlayRef.current.height = height
         }
-
         setDimensions({ w: width, h: height })
       }
     })
@@ -317,9 +289,13 @@ export default function STLViewer({
       ro.disconnect()
       cancelAnimationFrame(rafRef.current)
       renderer.dispose()
-      meshesRef.current.forEach(m => {
-        m.geometry.dispose()
-        m.material.dispose()
+      gltfScenesRef.current.forEach(s => {
+        s.traverse(child => {
+          if (!child.isMesh) return
+          child.geometry.dispose()
+          const mats = Array.isArray(child.material) ? child.material : [child.material]
+          mats.forEach(mat => mat.dispose())
+        })
       })
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -328,52 +304,46 @@ export default function STLViewer({
   // ── Step visibility ───────────────────────────────────────────────────
   function applyStepVisibility(meshes, idx) {
     if (mode === 'basic' || mode === 'internal') {
-      // All meshes always visible
       meshes.forEach(m => { m.visible = true })
       return
     }
     if (mode === 'progression' && steps) {
       const visiblePaths = new Set(steps[idx]?.models ?? [])
-      meshes.forEach(m => {
-        m.visible = visiblePaths.has(m.userData.basePath)
-      })
+      meshes.forEach(m => { m.visible = visiblePaths.has(m.userData.basePath) })
     }
   }
 
-  // Keep visibility in sync when stepIndex changes.
-  // Progression mode skips this — the render loop owns crossfade per-frame.
   useEffect(() => {
     if (mode === 'progression') return
-    if (meshesRef.current.length > 0) {
-      applyStepVisibility(meshesRef.current, stepIndex)
+    if (flatMeshesRef.current.length > 0) {
+      applyStepVisibility(flatMeshesRef.current, stepIndex)
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [stepIndex])
 
-  // Sync all internal-mode mesh opacities to the slider position each frame.
-  // internalPos = 0      → all models fully opaque (outer shell visible)
-  // internalPos = 1      → first model at its translucent opacity, rest opaque
-  // internalPos = N-1    → all models at their translucent opacities (deepest view)
-  //
-  // At fractional position s, model[i] is:
-  //   i  < floor(s)  → already at its translucent opacity (models[i].opacity)
-  //   i == floor(s)  → animating: lerp(1.0, models[i].opacity, frac(s))
-  //   i  > floor(s)  → still fully opaque (1.0)
+  // ── Internal mode opacity ─────────────────────────────────────────────
+  // Uses userData.modelIndex (per-file) rather than a flat-mesh index so
+  // all sub-meshes within a single GLTF file fade together.
   useEffect(() => {
     if (mode !== 'internal') return
     const s      = internalPos
-    const floorS = Math.floor(Math.min(s, meshesRef.current.length - 1))
+    const count  = modelList.length
+    const floorS = Math.floor(Math.min(s, count - 1))
     const fracS  = s - floorS
 
-    meshesRef.current.forEach((m, i) => {
-      const target = m.userData.baseOpacity   // translucent opacity for this model
+    flatMeshesRef.current.forEach(m => {
+      const i      = m.userData.modelIndex
+      const target = m.userData.baseOpacity
+      let opacity
       if (i < floorS) {
-        m.material.opacity = target
+        opacity = target
       } else if (i === floorS) {
-        m.material.opacity = 1.0 - fracS * (1.0 - target)
+        opacity = 1.0 - fracS * (1.0 - target)
       } else {
-        m.material.opacity = 1.0
+        opacity = 1.0
       }
+      const mats = Array.isArray(m.material) ? m.material : [m.material]
+      mats.forEach(mat => { mat.opacity = opacity })
     })
   }, [internalPos, mode])
 
@@ -386,34 +356,18 @@ export default function STLViewer({
 
     const camera = cameraRef.current
     const group  = meshGroupRef.current
-    if (!camera || !group) return
-
-    // Use first mesh as the reference for matrix (all share the same group transform)
-    const refMesh = meshesRef.current[0]
-    if (!refMesh) return
+    if (!camera || !group || !flatMeshesRef.current.length) return
 
     annotations.forEach(({ label, headPosition, textOffset }) => {
-      const head3d = new THREE.Vector3(
-        headPosition.x, headPosition.y, headPosition.z
-      )
-
-      // Project head to screen
-      const screen = projectToScreen(
-        head3d, group, camera, canvas.width, canvas.height
-      )
+      const head3d = new THREE.Vector3(headPosition.x, headPosition.y, headPosition.z)
+      const screen = projectToScreen(head3d, group, camera, canvas.width, canvas.height)
       if (!screen) return
 
-      // Text anchor is offset from the projected head point
-      const textX = screen.x + textOffset.x
-      const textY = screen.y + textOffset.y
-
-      // Estimate occlusion using depth: if depth > 0.85 it's likely behind
+      const textX    = screen.x + textOffset.x
+      const textY    = screen.y + textOffset.y
       const occluded = screen.z > 0.85
-      const alpha = occluded ? 0.25 : 1.0
+      ctx.globalAlpha = occluded ? 0.25 : 1.0
 
-      ctx.globalAlpha = alpha
-
-      // Arrow line from text anchor to head
       ctx.beginPath()
       ctx.moveTo(textX, textY)
       ctx.lineTo(screen.x, screen.y)
@@ -421,8 +375,7 @@ export default function STLViewer({
       ctx.lineWidth   = 1.5
       ctx.stroke()
 
-      // Arrowhead
-      const angle = Math.atan2(screen.y - textY, screen.x - textX)
+      const angle   = Math.atan2(screen.y - textY, screen.x - textX)
       const headLen = 8
       ctx.beginPath()
       ctx.moveTo(screen.x, screen.y)
@@ -439,30 +392,22 @@ export default function STLViewer({
       ctx.lineWidth   = 1.5
       ctx.stroke()
 
-      // Label text — fixed at text anchor, not rotating with model
       ctx.font         = '12px Inter, sans-serif'
-      ctx.fillStyle    = '#F0F0F0'
       ctx.textAlign    = textOffset.x >= 0 ? 'left' : 'right'
       ctx.textBaseline = 'middle'
 
-      // Small background pill for readability
       const textMetrics = ctx.measureText(label)
-      const padX = 6, padY = 3
+      const padX = 6
       const pillX = textOffset.x >= 0
         ? textX - padX
         : textX - textMetrics.width - padX
-      ctx.fillStyle    = 'rgba(15,15,15,0.75)'
+      ctx.fillStyle = 'rgba(15,15,15,0.75)'
       ctx.beginPath()
-      ctx.roundRect(
-        pillX, textY - 9,
-        textMetrics.width + padX * 2, 18,
-        4
-      )
+      ctx.roundRect(pillX, textY - 9, textMetrics.width + padX * 2, 18, 4)
       ctx.fill()
 
       ctx.fillStyle = '#F0F0F0'
       ctx.fillText(label, textX, textY)
-
       ctx.globalAlpha = 1.0
     })
   }, [annotations])
@@ -475,19 +420,16 @@ export default function STLViewer({
       rafRef.current = requestAnimationFrame(loop)
       const delta = clockRef.current.getDelta()
 
-      // Auto-rotate when not dragging
       if (!isDraggingRef.current) {
         applyAutoRotation(delta, rotationSpeed)
       }
 
-      // Apply quaternion to group
       if (meshGroupRef.current) {
         meshGroupRef.current.quaternion.copy(quaternionRef.current)
       }
 
-      // Per-frame crossfade blend for progression mode
-      if (mode === 'progression' && steps && meshesRef.current.length > 0) {
-        applyCrossfade(meshesRef.current, sliderPosRef.current, steps)
+      if (mode === 'progression' && steps && flatMeshesRef.current.length > 0) {
+        applyCrossfade(flatMeshesRef.current, sliderPosRef.current, steps)
       }
 
       rendererRef.current.render(sceneRef.current, cameraRef.current)
@@ -522,15 +464,8 @@ export default function STLViewer({
   }, [])
 
   // ── Progression step handler ──────────────────────────────────────────
-  const handleStepChange = useCallback((idx) => {
-    setStepIndex(idx)
-  }, [])
-
-  // Receives fractional slider position every frame from ProgressionSlider
-  // and stores it in a ref so the render loop can drive per-frame crossfade.
-  const handleSliderPosition = useCallback((pos) => {
-    sliderPosRef.current = pos
-  }, [])
+  const handleStepChange     = useCallback((idx) => { setStepIndex(idx) }, [])
+  const handleSliderPosition = useCallback((pos) => { sliderPosRef.current = pos }, [])
 
   // ── Render ────────────────────────────────────────────────────────────
   const progressionStepsForSlider = mode === 'progression'
@@ -550,7 +485,7 @@ export default function STLViewer({
         style={{ cursor: isDraggingRef.current ? 'grabbing' : 'grab' }}
       />
 
-      {/* 2D annotation overlay — same dimensions as canvas */}
+      {/* 2D annotation overlay */}
       {annotations.length > 0 && (
         <canvas
           ref={overlayRef}
@@ -575,7 +510,7 @@ export default function STLViewer({
         </div>
       )}
 
-      {/* Progression slider — docked inside the viewer box */}
+      {/* Progression slider */}
       {mode === 'progression' && progressionStepsForSlider && !loading && (
         <div className={styles.sliderDock}>
           <ProgressionSlider

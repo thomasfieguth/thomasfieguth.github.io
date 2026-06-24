@@ -1,66 +1,101 @@
 import STLViewer from '../components/viewers/STLViewer.jsx'
+import GLTFViewer from '../components/viewers/GLTFViewer.jsx'
 import styles from './Projects.module.css'
-
-// ── Temporary test page ───────────────────────────────────────────────────────
-// Replace with real ProjectEntry components once content is ready.
-// To test: drop any .stl file into public/assets/models/ and update the paths.
 
 export default function Projects() {
   return (
     <div className={styles.page}>
-      <div className={styles.testContainer}>
-        <h2 className={styles.testHeading}>STL Viewer — Basic</h2>
-        <STLViewer
-          mode="basic"
-          model="/assets/models/stormbreaker/Final.stl"
-          config={{
-            rotationSpeed: 0.4,
-            initialEuler: [0.3, 0, 0],
-          }}
-        />
 
-        <h2 className={styles.testHeading} style={{ marginTop: '3rem' }}>
-          STL Viewer — Progression
-        </h2>
-        <STLViewer
-          mode="progression"
-          steps={[
-            { label: 'V1', models: ['/assets/models/stormbreaker/v1.stl'] },
-            { label: 'V2', models: ['/assets/models/stormbreaker/v2.stl'] },
-            { label: 'V3', models: ['/assets/models/stormbreaker/v3.stl'] },
-            { label: 'V4', models: ['/assets/models/stormbreaker/v4.stl'] },
-            { label: 'V5', models: ['/assets/models/stormbreaker/Final.stl'] },
-          ]}
-          config={{
-            rotationSpeed: 0.4,
-            initialEuler: [0.3, 0, 0],
-            waitMs: 2500,
-            fadeMs: 600,
-          }}
-        />
-
-        <h2 className={styles.testHeading} style={{ marginTop: '3rem' }}>
-          STL Viewer — Internal
-        </h2>
-        <STLViewer
-          mode="internal"
-          models={[
-            { path: '/assets/models/stormbreaker/housing.stl',   label: 'Housing',   opacity: 0.25 },
-            { path: '/assets/models/stormbreaker/internals.stl', label: 'Internals', opacity: 1.0  },
-          ]}
-          annotations={[
-            {
-              label: 'Sensor mount',
-              headPosition: { x: 10, y: 5, z: 20 },
-              textOffset:   { x: 80, y: -30 },
-            },
-          ]}
-          config={{
-            rotationSpeed: 0.3,
-            initialEuler: [0.2, 0.4, 0],
-          }}
-        />
+      {/* ── Basic ── */}
+      <div className={styles.compareContainer}>
+        <h2 className={styles.testHeading}>Basic</h2>
+        <div className={styles.compareRow}>
+          <div>
+            <p className={styles.compareLabel}>STL</p>
+            <STLViewer
+              mode="basic"
+              model="/assets/models/stormbreaker/skeleton.stl"
+              config={{ rotationSpeed: 0.4, initialEuler: [0.3, 0, 0] }}
+            />
+          </div>
+          <div>
+            <p className={styles.compareLabel}>GLTF</p>
+            <GLTFViewer
+              mode="basic"
+              model="/assets/models/stormbreaker/skeleton.gltf"
+              config={{ rotationSpeed: 0.4, initialEuler: [0.3, 0, 0] }}
+            />
+          </div>
+        </div>
       </div>
+
+      {/* ── Progression ── */}
+      <div className={styles.compareContainer}>
+        <h2 className={styles.testHeading}>Progression</h2>
+        <div className={styles.compareRow}>
+          <div>
+            <p className={styles.compareLabel}>STL</p>
+            <STLViewer
+              mode="progression"
+              steps={[
+                { label: 'V1', models: ['/assets/models/stormbreaker/v1.stl'] },
+                { label: 'V2', models: ['/assets/models/stormbreaker/v2.stl'] },
+                { label: 'V3', models: ['/assets/models/stormbreaker/v3.stl'] },
+                { label: 'V4', models: ['/assets/models/stormbreaker/v4.stl'] },
+                { label: 'V5', models: ['/assets/models/stormbreaker/Final.stl'] },
+              ]}
+              config={{ rotationSpeed: 0.4, initialEuler: [0.3, 0, 0], waitMs: 2500, fadeMs: 600 }}
+            />
+          </div>
+          <div>
+            <p className={styles.compareLabel}>GLTF</p>
+            <GLTFViewer
+              mode="progression"
+              steps={[
+                { label: 'V1', models: ['/assets/models/stormbreaker/v1.gltf'] },
+                { label: 'V2', models: ['/assets/models/stormbreaker/v2.gltf'] },
+                { label: 'V3', models: ['/assets/models/stormbreaker/v3.gltf'] },
+                { label: 'V4', models: ['/assets/models/stormbreaker/v4.gltf'] },
+                { label: 'V5', models: ['/assets/models/stormbreaker/v5.gltf'] },
+              ]}
+              config={{ rotationSpeed: 0.4, initialEuler: [0.3, 0, 0], waitMs: 2500, fadeMs: 600 }}
+            />
+          </div>
+        </div>
+      </div>
+
+      {/* ── Internal ── */}
+      <div className={styles.compareContainer}>
+        <h2 className={styles.testHeading}>Internal</h2>
+        <div className={styles.compareRow}>
+          <div>
+            <p className={styles.compareLabel}>STL</p>
+            <STLViewer
+              mode="internal"
+              models={[
+                { path: '/assets/models/stormbreaker/housing.stl',   label: 'Housing',   opacity: 0.1 },
+                { path: '/assets/models/stormbreaker/internals.stl', label: 'Internals', opacity: 0.1 },
+                { path: '/assets/models/stormbreaker/skeleton.stl',  label: 'Skeleton',  opacity: 1.0 },
+              ]}
+              config={{ rotationSpeed: 0.3, initialEuler: [0.2, 0.4, 0] }}
+            />
+          </div>
+          <div>
+            <p className={styles.compareLabel}>GLTF</p>
+            <GLTFViewer
+              mode="internal"
+              models={[
+                { path: '/assets/models/stormbreaker/cosmetics.gltf',  label: 'Cosmetics',      opacity: 0.1 },
+                { path: '/assets/models/stormbreaker/shell.gltf',      label: 'Shell',      opacity: 0.1 },
+                { path: '/assets/models/stormbreaker/internals.gltf',  label: 'Internals',  opacity: 0.1 },
+                { path: '/assets/models/stormbreaker/skeleton.gltf',   label: 'Skeleton',   opacity: 1.0 },
+              ]}
+              config={{ rotationSpeed: 0.3, initialEuler: [0.2, 0.4, 0] }}
+            />
+          </div>
+        </div>
+      </div>
+
     </div>
   )
 }

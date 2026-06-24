@@ -34,8 +34,14 @@ export default function useAutoPlay({
     phaseStart: null,
     position: 0,
   })
-  const rafRef    = useRef(null)
-  const pausedRef = useRef(paused)
+  const rafRef       = useRef(null)
+  const pausedRef    = useRef(paused)
+  // Keep callback refs in sync on every render so tick never goes stale
+  // without being recreated (avoiding loop restarts that reset animation state).
+  const onStepRef    = useRef(onStep)
+  const onPositionRef = useRef(onPosition)
+  onStepRef.current    = onStep
+  onPositionRef.current = onPosition
 
   // Keep pausedRef in sync without restarting the loop
   useEffect(() => {
@@ -62,7 +68,7 @@ export default function useAutoPlay({
 
     if (s.phase === 'waiting') {
       // Hold at current integer step
-      onPosition?.(s.currentStep)
+      onPositionRef.current?.(s.currentStep)
       if (elapsed >= waitMs) {
         s.phase      = 'animating'
         s.phaseStart = now
@@ -73,16 +79,16 @@ export default function useAutoPlay({
       const t        = Math.min(elapsed / animMs, 1)
       const position = s.currentStep + t   // fractional position
 
-      onPosition?.(position >= count ? 0 : position)
+      onPositionRef.current?.(position >= count ? 0 : position)
 
       if (t >= 1) {
         s.currentStep = nextStep
         s.phase       = 'waiting'
         s.phaseStart  = now
-        onStep?.(nextStep)
+        onStepRef.current?.(nextStep)
       }
     }
-  }, [count, waitMs, animMs, onStep, onPosition])
+  }, [count, waitMs, animMs])   // callbacks intentionally excluded — kept via refs
 
   useEffect(() => {
     stateRef.current = {

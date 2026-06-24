@@ -52,7 +52,7 @@
   background-color: var(--color-accent);
   border-radius: 2px;
   pointer-events: none;
-  transition: width 16ms linear;  /* smooth at 60fps */
+  /* No CSS transition — per-frame React updates from useAutoPlay drive smoothness */
 }
 
 /* ─── Thumb ───────────────────────────────────────────────────────────────── */

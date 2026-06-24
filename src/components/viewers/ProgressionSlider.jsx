@@ -9,39 +9,50 @@ import styles from './ProgressionSlider.module.css'
  * Used inside STLViewer (progression mode) and by PhotoProgression.
  *
  * Props:
- *   steps         { label: string }[]   — step definitions
- *   currentIndex  number                — controlled current step
- *   onChange      (index: number) => void
- *   waitMs        number  — ms to hold at each step
- *   fadeMs        number  — ms for the position animation
+ *   steps              { label: string }[]   — step definitions
+ *   currentIndex       number                — controlled current step
+ *   onChange           (index: number) => void
+ *   onSliderPosition   (pos: number) => void  — fractional position every frame
+ *   paused             boolean               — external pause (e.g. canvas drag)
+ *   waitMs             number  — ms to hold at each step
+ *   fadeMs             number  — ms for the position animation
  */
 export default function ProgressionSlider({
   steps,
   currentIndex,
   onChange,
+  onSliderPosition,
+  paused = false,
   waitMs = 2500,
   fadeMs = 600,
 }) {
-  const [sliderPos, setSliderPos]   = useState(0)   // fractional 0..N-1
-  const [isPaused,  setIsPaused]    = useState(false)
-  const isDraggingRef               = useRef(false)
-  const trackRef                    = useRef(null)
+  const [sliderPos, setSliderPos]     = useState(0)   // fractional 0..N-1
+  const [isInteracting, setIsInteracting] = useState(false)
+  const isDraggingRef                 = useRef(false)
+  const trackRef                      = useRef(null)
+  const onSliderPositionRef           = useRef(onSliderPosition)
+  onSliderPositionRef.current         = onSliderPosition
 
   const count = steps.length
+
+  const effectivePaused = paused || isInteracting
 
   // Auto-play drives sliderPos and calls onChange at each integer step
   useAutoPlay({
     count,
     waitMs,
     animMs: fadeMs,
-    paused: isPaused,
+    paused: effectivePaused,
     onStep:     (idx) => onChange(idx),
     onPosition: (pos) => {
-      if (!isDraggingRef.current) setSliderPos(pos)
+      if (!isDraggingRef.current) {
+        setSliderPos(pos)
+        onSliderPositionRef.current?.(pos)
+      }
     },
   })
 
-  // ── Manual drag ────────────────────────────────────────────────────────
+  // ── Manual drag ────────────────────────────────────────────────────────────
   const posFromPointer = useCallback((clientX) => {
     const track = trackRef.current
     if (!track) return 0
@@ -52,10 +63,11 @@ export default function ProgressionSlider({
 
   const onTrackPointerDown = useCallback((e) => {
     isDraggingRef.current = true
-    setIsPaused(true)
+    setIsInteracting(true)
     e.currentTarget.setPointerCapture(e.pointerId)
     const pos = posFromPointer(e.clientX)
     setSliderPos(pos)
+    onSliderPositionRef.current?.(pos)
     onChange(Math.round(pos))
   }, [posFromPointer, onChange])
 
@@ -63,16 +75,18 @@ export default function ProgressionSlider({
     if (!isDraggingRef.current) return
     const pos = posFromPointer(e.clientX)
     setSliderPos(pos)
+    onSliderPositionRef.current?.(pos)
     onChange(Math.round(pos))
   }, [posFromPointer, onChange])
 
   const onTrackPointerUp = useCallback(() => {
     isDraggingRef.current = false
-    // Snap to nearest integer
-    setSliderPos(prev => Math.round(prev))
+    const snapped = Math.round(sliderPos)
+    setSliderPos(snapped)
+    onSliderPositionRef.current?.(snapped)
     // Resume auto-play after a short grace period
-    setTimeout(() => setIsPaused(false), 800)
-  }, [])
+    setTimeout(() => setIsInteracting(false), 800)
+  }, [sliderPos])
 
   // Thumb position as a percentage of track width
   const thumbPct = count > 1 ? (sliderPos / (count - 1)) * 100 : 0
@@ -86,10 +100,11 @@ export default function ProgressionSlider({
             key={i}
             className={`${styles.label} ${i === currentIndex ? styles.labelActive : ''}`}
             onClick={() => {
-              setIsPaused(true)
+              setIsInteracting(true)
               setSliderPos(i)
+              onSliderPositionRef.current?.(i)
               onChange(i)
-              setTimeout(() => setIsPaused(false), waitMs)
+              setTimeout(() => setIsInteracting(false), waitMs)
             }}
           >
             {step.label ?? i + 1}
