@@ -1,0 +1,72 @@
+.wrapper {
+  position: relative;
+  width: 100%;
+  /* Height is driven by the canvas (16:9), which is sized by ResizeObserver */
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  /* Ensure the wrapper grows with the canvas */
+  display: flex;
+  flex-direction: column;
+}
+
+.canvas {
+  display: block;
+  width: 100%;
+  /* Height set programmatically by the ResizeObserver in the component */
+  touch-action: none;  /* prevent scroll while dragging on mobile */
+}
+
+/* 2D annotation overlay — sits exactly on top of the WebGL canvas */
+.overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  /* Height matched to canvas via ResizeObserver */
+  pointer-events: none;  /* clicks pass through to the WebGL canvas */
+}
+
+/* ─── Loading / error overlay ─────────────────────────────────────────────── */
+.loadingOverlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-3);
+  background-color: var(--color-surface);
+}
+
+.spinner {
+  width: 32px;
+  height: 32px;
+  border: 2px solid var(--color-border);
+  border-top-color: var(--color-accent);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.loadingText {
+  font-size: var(--text-sm);
+  color: var(--color-text-secondary);
+}
+
+.errorText {
+  font-size: var(--text-sm);
+  color: #e05555;
+}
+
+/* ─── Progression slider dock ─────────────────────────────────────────────── */
+.sliderDock {
+  /* Sits below the canvas, inside the same rounded box */
+  padding: var(--space-4) var(--space-6);
+  border-top: 1px solid var(--color-border);
+  background-color: var(--color-surface);
+}
