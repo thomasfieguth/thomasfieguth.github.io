@@ -8,6 +8,7 @@ import styles from './STLViewer.module.css'
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 
+const MODEL_COLOR         = '#C8A96E'
 const AMBIENT_INTENSITY   = 1.2
 const DIR_LIGHT_INTENSITY = 1.8
 const DIR_LIGHT_POSITION  = [5, 8, 5]
@@ -31,12 +32,17 @@ function applyCrossfade(meshes, position, steps) {
   const count = steps.length
   if (!count || !meshes.length) return
 
-  const clamped = Math.max(0, Math.min(count - 1, position))
-  const floor   = Math.floor(clamped)
-  const t       = clamped - floor
+  // Allow position up to `count` to support the last→first wrap animation.
+  const pos   = Math.max(0, position)
+  const floor = Math.min(Math.floor(pos), count - 1)
+  const t     = pos - floor   // 0..1 within transition
 
   const pathsA = new Set(steps[floor]?.models ?? [])
-  const pathsB = new Set(steps[Math.min(floor + 1, count - 1)]?.models ?? [])
+  const pathsB = new Set(steps[(floor + 1) % count]?.models ?? [])
+
+  // B fades in over [t=0..0.5], A fades out over [t=0.5..1]
+  const opA = t <= 0.5 ? 1.0 : (1.0 - t) * 2
+  const opB = t <= 0.5 ? t * 2        : 1.0
 
   meshes.forEach(m => {
     const path = m.userData.basePath
@@ -48,14 +54,13 @@ function applyCrossfade(meshes, position, steps) {
       m.renderOrder = 0
       setMeshMat(m, 1.0, true)
     } else if (inA) {
-      const op = Math.max(0, 1.0 - t)
-      m.visible     = op > 0
+      m.visible     = opA > 0
       m.renderOrder = 0
-      setMeshMat(m, op, true)
+      setMeshMat(m, opA, true)
     } else if (inB) {
-      m.visible     = t > 0
+      m.visible     = opB > 0
       m.renderOrder = 1
-      setMeshMat(m, t, true)
+      setMeshMat(m, opB, true)
     } else {
       m.visible     = false
       m.renderOrder = 0
@@ -123,7 +128,6 @@ export default function GLTFViewer({
   const clockRef       = useRef(new THREE.Clock())
   const isDraggingRef  = useRef(false)
   const lastPointerRef = useRef({ x: 0, y: 0 })
-  const sliderPosRef   = useRef(0)
 
   // ── State ─────────────────────────────────────────────────────────────
   const [loading, setLoading]               = useState(true)
@@ -246,12 +250,20 @@ export default function GLTFViewer({
             // modelIndex lets the internal-mode opacity effect group by file
             // rather than by flat-mesh index (one GLTF file → many meshes).
             child.userData.modelIndex  = modelIndex
-            // Pre-enable transparency on every material so opacity changes
-            // applied at runtime (crossfade / internal slider) are visible.
-            const mats = Array.isArray(child.material) ? child.material : [child.material]
-            mats.forEach(mat => {
-              mat.transparent = isHousing || isProgression
-              mat.depthWrite  = true
+
+            // Replace GLTF materials with a Phong material using MODEL_COLOR
+            // so the viewer has a consistent look independent of the file's
+            // embedded textures/colors, and gets the same specular highlights
+            // as the STL viewer.
+            const oldMats = Array.isArray(child.material) ? child.material : [child.material]
+            oldMats.forEach(mat => mat.dispose())
+            child.material = new THREE.MeshPhongMaterial({
+              color:       new THREE.Color(MODEL_COLOR),
+              specular:    new THREE.Color(0x666666),
+              shininess:   70,
+              transparent: isHousing || isProgression,
+              depthWrite:  true,
+              side:        THREE.DoubleSide,
             })
             flatMeshes.push(child)
           })
@@ -314,7 +326,6 @@ export default function GLTFViewer({
   }
 
   useEffect(() => {
-    if (mode === 'progression') return
     if (flatMeshesRef.current.length > 0) {
       applyStepVisibility(flatMeshesRef.current, stepIndex)
     }
@@ -428,10 +439,6 @@ export default function GLTFViewer({
         meshGroupRef.current.quaternion.copy(quaternionRef.current)
       }
 
-      if (mode === 'progression' && steps && flatMeshesRef.current.length > 0) {
-        applyCrossfade(flatMeshesRef.current, sliderPosRef.current, steps)
-      }
-
       rendererRef.current.render(sceneRef.current, cameraRef.current)
       drawAnnotations()
     }
@@ -464,8 +471,7 @@ export default function GLTFViewer({
   }, [])
 
   // ── Progression step handler ──────────────────────────────────────────
-  const handleStepChange     = useCallback((idx) => { setStepIndex(idx) }, [])
-  const handleSliderPosition = useCallback((pos) => { sliderPosRef.current = pos }, [])
+  const handleStepChange = useCallback((idx) => { setStepIndex(idx) }, [])
 
   // ── Render ────────────────────────────────────────────────────────────
   const progressionStepsForSlider = mode === 'progression'
@@ -517,7 +523,6 @@ export default function GLTFViewer({
             steps={progressionStepsForSlider}
             currentIndex={stepIndex}
             onChange={handleStepChange}
-            onSliderPosition={handleSliderPosition}
             paused={canvasDragging}
             waitMs={waitMs}
             fadeMs={fadeMs}

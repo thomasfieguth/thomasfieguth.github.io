@@ -25,15 +25,19 @@ function applyCrossfade(meshes, position, steps) {
   const count = steps.length
   if (!count || !meshes.length) return
 
-  const clamped = Math.max(0, Math.min(count - 1, position))
-  const floor   = Math.floor(clamped)
-  const t       = clamped - floor                       // 0..1 within transition
-  const atRest  = t === 0                               // waiting at an integer step
+  // Allow position up to `count` to support the last→first wrap animation.
+  const pos   = Math.max(0, position)
+  const floor = Math.min(Math.floor(pos), count - 1)
+  const t     = pos - floor   // 0..1 within transition
 
   const idxA   = floor
-  const idxB   = Math.min(floor + 1, count - 1)
+  const idxB   = (floor + 1) % count   // wraps last → first
   const pathsA = new Set(steps[idxA]?.models ?? [])
   const pathsB = new Set(steps[idxB]?.models ?? [])
+
+  // B fades in over [t=0..0.5], A fades out over [t=0.5..1]
+  const opA = t <= 0.5 ? 1.0 : (1.0 - t) * 2
+  const opB = t <= 0.5 ? t * 2        : 1.0
 
   meshes.forEach(m => {
     const path = m.userData.basePath
@@ -46,20 +50,13 @@ function applyCrossfade(meshes, position, steps) {
       m.material.depthWrite = true
       m.renderOrder         = 0
     } else if (inA) {
-      const op = Math.max(0, 1.0 - t)
-      m.visible             = op > 0
-      m.material.opacity    = op
-      // Outgoing: disable depth writes during fade so its near-zero-opacity
-      // geometry can't occlude the incoming mesh at the same depth. renderOrder=0
-      // ensures it renders before the incoming mesh.
+      m.visible             = opA > 0
+      m.material.opacity    = opA
       m.material.depthWrite = true
       m.renderOrder         = 0
     } else if (inB) {
-      m.visible             = t > 0
-      m.material.opacity    = t
-      // Incoming: keep depth writes for correct self-occlusion. renderOrder=1
-      // ensures it renders after the outgoing mesh, so it only depth-tests
-      // against the opaque scene — not against A's depth-write-disabled pass.
+      m.visible             = opB > 0
+      m.material.opacity    = opB
       m.material.depthWrite = true
       m.renderOrder         = 1
     } else {
@@ -141,7 +138,6 @@ export default function STLViewer({
   const clockRef      = useRef(new THREE.Clock())
   const isDraggingRef  = useRef(false)
   const lastPointerRef = useRef({ x: 0, y: 0 })
-  const sliderPosRef   = useRef(0)    // fractional progression position for crossfade
 
   // ── State ─────────────────────────────────────────────────────────────
   const [loading, setLoading]           = useState(true)
@@ -264,8 +260,8 @@ export default function STLViewer({
           const isProgression = mode === 'progression'
           const material = new THREE.MeshPhongMaterial({
             color:     new THREE.Color(MODEL_COLOR),
-            specular:  new THREE.Color(0x222222),
-            shininess: 30,
+            specular:  new THREE.Color(0x666666),
+            shininess: 70,
             // transparent=true lets opacity be animated.  depthWrite=true is
             // kept on for both housing and progression so triangles within the
             // same mesh correctly occlude each other (prevents far-faces
@@ -340,10 +336,7 @@ export default function STLViewer({
     }
   }
 
-  // Keep visibility in sync when stepIndex changes.
-  // Progression mode skips this — the render loop owns crossfade per-frame.
   useEffect(() => {
-    if (mode === 'progression') return
     if (meshesRef.current.length > 0) {
       applyStepVisibility(meshesRef.current, stepIndex)
     }
@@ -485,11 +478,6 @@ export default function STLViewer({
         meshGroupRef.current.quaternion.copy(quaternionRef.current)
       }
 
-      // Per-frame crossfade blend for progression mode
-      if (mode === 'progression' && steps && meshesRef.current.length > 0) {
-        applyCrossfade(meshesRef.current, sliderPosRef.current, steps)
-      }
-
       rendererRef.current.render(sceneRef.current, cameraRef.current)
       drawAnnotations()
     }
@@ -524,12 +512,6 @@ export default function STLViewer({
   // ── Progression step handler ──────────────────────────────────────────
   const handleStepChange = useCallback((idx) => {
     setStepIndex(idx)
-  }, [])
-
-  // Receives fractional slider position every frame from ProgressionSlider
-  // and stores it in a ref so the render loop can drive per-frame crossfade.
-  const handleSliderPosition = useCallback((pos) => {
-    sliderPosRef.current = pos
   }, [])
 
   // ── Render ────────────────────────────────────────────────────────────
@@ -582,7 +564,6 @@ export default function STLViewer({
             steps={progressionStepsForSlider}
             currentIndex={stepIndex}
             onChange={handleStepChange}
-            onSliderPosition={handleSliderPosition}
             paused={canvasDragging}
             waitMs={waitMs}
             fadeMs={fadeMs}

@@ -85,7 +85,7 @@ export default function Projects() {
             <GLTFViewer
               mode="internal"
               models={[
-                { path: '/assets/models/stormbreaker/cosmetics.gltf',  label: 'Cosmetics',      opacity: 0.1 },
+                { path: '/assets/models/stormbreaker/cosmetics.gltf',  label: 'Cosmetics',  opacity: 0.1 },
                 { path: '/assets/models/stormbreaker/shell.gltf',      label: 'Shell',      opacity: 0.1 },
                 { path: '/assets/models/stormbreaker/internals.gltf',  label: 'Internals',  opacity: 0.1 },
                 { path: '/assets/models/stormbreaker/skeleton.gltf',   label: 'Skeleton',   opacity: 1.0 },

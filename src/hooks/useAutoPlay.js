@@ -74,19 +74,13 @@ export default function useAutoPlay({
         s.phaseStart = now
       }
     } else {
-      // Animate position from currentStep toward nextStep
+      // Jump immediately to the next step — no interpolation
       const nextStep = (s.currentStep + 1) % count
-      const t        = Math.min(elapsed / animMs, 1)
-      const position = s.currentStep + t   // fractional position
-
-      onPositionRef.current?.(position >= count ? 0 : position)
-
-      if (t >= 1) {
-        s.currentStep = nextStep
-        s.phase       = 'waiting'
-        s.phaseStart  = now
-        onStepRef.current?.(nextStep)
-      }
+      s.currentStep  = nextStep
+      s.phase        = 'waiting'
+      s.phaseStart   = now
+      onPositionRef.current?.(nextStep)
+      onStepRef.current?.(nextStep)
     }
   }, [count, waitMs, animMs])   // callbacks intentionally excluded — kept via refs
 
