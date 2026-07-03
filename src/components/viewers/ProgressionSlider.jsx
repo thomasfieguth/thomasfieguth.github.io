@@ -38,7 +38,7 @@ export default function ProgressionSlider({
   const effectivePaused = paused || isInteracting
 
   // Auto-play drives sliderPos and calls onChange at each integer step
-  useAutoPlay({
+  const { seek } = useAutoPlay({
     count,
     waitMs,
     animMs: fadeMs,
@@ -84,9 +84,12 @@ export default function ProgressionSlider({
     const snapped = Math.round(sliderPos)
     setSliderPos(snapped)
     onSliderPositionRef.current?.(snapped)
+    // Re-point auto-play's cursor so it resumes from here, not from
+    // wherever it was automatically before the user grabbed the slider.
+    seek(snapped)
     // Resume auto-play after a short grace period
     setTimeout(() => setIsInteracting(false), 800)
-  }, [sliderPos])
+  }, [sliderPos, seek])
 
   // Thumb position as a percentage of track width
   const thumbPct = count > 1 ? (sliderPos / (count - 1)) * 100 : 0
@@ -104,6 +107,7 @@ export default function ProgressionSlider({
               setSliderPos(i)
               onSliderPositionRef.current?.(i)
               onChange(i)
+              seek(i)
               setTimeout(() => setIsInteracting(false), waitMs)
             }}
           >

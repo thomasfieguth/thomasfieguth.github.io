@@ -4,6 +4,7 @@ import { STLLoader } from 'three/examples/jsm/loaders/STLLoader.js'
 import useQuaternion from '../../hooks/useQuaternion.js'
 import ProgressionSlider from './ProgressionSlider.jsx'
 import AlphaSlider from './AlphaSlider.jsx'
+import { parseAspectRatio } from '../../utils/aspectRatio.js'
 import styles from './STLViewer.module.css'
 
 // ─── Constants ────────────────────────────────────────────────────────────────
@@ -108,6 +109,9 @@ function projectToScreen(point3d, mesh, camera, canvasWidth, canvasHeight) {
  *                   initialEuler:   [rx,ry,rz] (default [0,0,0])
  *                   waitMs:         number   // progression only (default 2500)
  *                   fadeMs:         number   // progression only (default 600)
+ *                   aspectRatio:    string|number  // canvas w/h ratio, e.g. '16 / 9' (default '16 / 9')
+ *                   maxWidth:       string|number  // CSS max-width of the viewer
+ *                   maxHeight:      number   // caps the canvas height in px
  *                 }
  */
 export default function STLViewer({
@@ -123,6 +127,9 @@ export default function STLViewer({
     initialEuler   = [0, 0, 0],
     waitMs         = 2500,
     fadeMs         = 600,
+    aspectRatio    = '16 / 9',
+    maxWidth,
+    maxHeight,
   } = config
 
   // ── Refs ──────────────────────────────────────────────────────────────
@@ -291,10 +298,12 @@ export default function STLViewer({
       })
 
     // Resize observer — keeps renderer and camera in sync with container
+    const ratio = parseAspectRatio(aspectRatio)
     const ro = new ResizeObserver(entries => {
       for (const entry of entries) {
         const { width } = entry.contentRect
-        const height = width * (9 / 16)  // fixed 16:9
+        let height = width / ratio
+        if (maxHeight && height > maxHeight) height = maxHeight
         renderer.setSize(width, height, false)
         camera.aspect = width / height
         camera.updateProjectionMatrix()
@@ -520,7 +529,7 @@ export default function STLViewer({
     : null
 
   return (
-    <div className={styles.wrapper} ref={containerRef}>
+    <div className={styles.wrapper} ref={containerRef} style={{ maxWidth }}>
       {/* WebGL canvas */}
       <canvas
         ref={canvasRef}

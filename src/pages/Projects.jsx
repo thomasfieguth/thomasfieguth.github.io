@@ -109,7 +109,7 @@ export default function Projects() {
               { label: 'V4', image: '/assets/images/projects/tractor/full_4.svg' },
               { label: 'V5', image: '/assets/images/projects/tractor/full_5.svg' },
             ]}
-            config={{ waitMs: 2500, fadeMs: 600, aspectRatio: '16 / 9' }}
+            config={{ waitMs: 2500, fadeMs: 600, aspectRatio: 'auto' }}
           />
         </div>
       </div>

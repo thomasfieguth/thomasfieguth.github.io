@@ -4,6 +4,7 @@ import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js'
 import useQuaternion from '../../hooks/useQuaternion.js'
 import ProgressionSlider from './ProgressionSlider.jsx'
 import AlphaSlider from './AlphaSlider.jsx'
+import { parseAspectRatio } from '../../utils/aspectRatio.js'
 import styles from './STLViewer.module.css'
 
 // ─── Constants ────────────────────────────────────────────────────────────────
@@ -97,7 +98,7 @@ function projectToScreen(point3d, object, camera, w, h) {
  *   steps         { label: string, models: string[] }[]          (progression)
  *   models        { path: string, label: string, opacity: number }[]  (internal)
  *   annotations   { label: string, headPosition: {x,y,z}, textOffset: {x,y} }[]
- *   config        { rotationSpeed, initialEuler, waitMs, fadeMs }
+ *   config        { rotationSpeed, initialEuler, waitMs, fadeMs, aspectRatio, maxWidth, maxHeight }
  */
 export default function GLTFViewer({
   mode = 'basic',
@@ -112,6 +113,9 @@ export default function GLTFViewer({
     initialEuler  = [0, 0, 0],
     waitMs        = 2500,
     fadeMs        = 600,
+    aspectRatio   = '16 / 9',
+    maxWidth,
+    maxHeight,
   } = config
 
   // ── Refs ──────────────────────────────────────────────────────────────
@@ -281,10 +285,12 @@ export default function GLTFViewer({
       })
 
     // Resize observer — keeps renderer and camera in sync with container
+    const ratio = parseAspectRatio(aspectRatio)
     const ro = new ResizeObserver(entries => {
       for (const entry of entries) {
         const { width } = entry.contentRect
-        const height = width * (9 / 16)
+        let height = width / ratio
+        if (maxHeight && height > maxHeight) height = maxHeight
         renderer.setSize(width, height, false)
         camera.aspect = width / height
         camera.updateProjectionMatrix()
@@ -479,7 +485,7 @@ export default function GLTFViewer({
     : null
 
   return (
-    <div className={styles.wrapper} ref={containerRef}>
+    <div className={styles.wrapper} ref={containerRef} style={{ maxWidth }}>
       {/* WebGL canvas */}
       <canvas
         ref={canvasRef}

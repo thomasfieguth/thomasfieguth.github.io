@@ -117,6 +117,10 @@ export default function AlphaSlider({
     isDraggingRef.current = false
     const cur      = valueRef.current
     const curStage = Math.round(Math.max(0, Math.min(count - 1, cur)))
+    // Snap the displayed value to the integer stage immediately, rather
+    // than leaving it at the raw drag position until the next animation
+    // frame reaches it.
+    onChangeRef.current(curStage)
     // Resume animation from current stage, heading toward the far end
     stateRef.current = {
       stage:      curStage,

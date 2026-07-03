@@ -11,20 +11,28 @@ import styles from './PhotoProgression.module.css'
  * Props:
  *   steps   { label: string, image: string }[]   — ordered photo steps
  *   config  {
- *     waitMs   number   — ms to hold at each step before advancing  (default 2500)
- *     fadeMs   number   — ms for the crossfade transition            (default 600)
- *     aspectRatio  string — CSS aspect-ratio of the photo frame      (default '16/9')
+ *     waitMs       number  — ms to hold at each step before advancing  (default 2500)
+ *     fadeMs       number  — ms for the crossfade transition            (default 600)
+ *     aspectRatio  string  — CSS aspect-ratio of the photo frame, e.g. '16 / 9',
+ *                            or 'auto' to match the first loaded image's own
+ *                            aspect ratio                                (default 'auto')
+ *     maxWidth     string|number  — CSS max-width of the whole component
+ *     maxHeight    string|number  — CSS max-height of the photo frame
  *   }
  */
 export default function PhotoProgression({ steps = [], config = {} }) {
   const {
     waitMs      = 2500,
     fadeMs      = 600,
-    aspectRatio = '16 / 9',
+    aspectRatio = 'auto',
+    maxWidth,
+    maxHeight,
   } = config
 
   // Fractional position 0..N-1, driven by AlphaSlider
   const [position, setPosition] = useState(0)
+  // Measured natural aspect ratio, used when aspectRatio === 'auto'
+  const [autoAspect, setAutoAspect] = useState(null)
 
   const count = steps.length
   if (count === 0) return null
@@ -38,10 +46,22 @@ export default function PhotoProgression({ steps = [], config = {} }) {
   const imageA = steps[indexA]?.image
   const imageB = steps[indexB]?.image
 
+  // Once the first image loads, lock the frame to its natural ratio so
+  // nothing gets cropped. Falls back to 16:9 until that measurement lands.
+  const handleImageLoad = (e) => {
+    if (aspectRatio !== 'auto' || autoAspect) return
+    const { naturalWidth, naturalHeight } = e.target
+    if (naturalWidth && naturalHeight) {
+      setAutoAspect(`${naturalWidth} / ${naturalHeight}`)
+    }
+  }
+
+  const frameAspectRatio = aspectRatio === 'auto' ? (autoAspect ?? '16 / 9') : aspectRatio
+
   return (
-    <div className={styles.wrapper}>
+    <div className={styles.wrapper} style={{ maxWidth }}>
       {/* Photo frame */}
-      <div className={styles.frame} style={{ aspectRatio }}>
+      <div className={styles.frame} style={{ aspectRatio: frameAspectRatio, maxHeight }}>
 
         {/* Base image — always rendered */}
         <img
@@ -51,6 +71,7 @@ export default function PhotoProgression({ steps = [], config = {} }) {
           className={styles.photo}
           style={{ opacity: 1 }}
           draggable={false}
+          onLoad={handleImageLoad}
         />
 
         {/* Overlay image — fades in as alpha increases */}

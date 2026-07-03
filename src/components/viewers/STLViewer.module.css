@@ -1,7 +1,9 @@
 .wrapper {
   position: relative;
   width: 100%;
-  /* Height is driven by the canvas (16:9), which is sized by ResizeObserver */
+  /* max-width set inline from props; centers the box when narrower than its parent */
+  margin: 0 auto;
+  /* Height is driven by the canvas, sized by ResizeObserver per config.aspectRatio */
   background-color: var(--color-surface);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-lg);

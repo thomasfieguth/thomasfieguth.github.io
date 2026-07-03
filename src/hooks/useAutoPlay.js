@@ -11,6 +11,10 @@ import { useEffect, useRef, useCallback } from 'react'
  * Pauses when `paused` is true (user is interacting).
  * Resumes automatically when `paused` returns to false.
  *
+ * Returns `{ seek }` — call `seek(step)` to re-point the internal cursor
+ * (e.g. after a manual drag) so playback resumes from that step instead
+ * of wherever the automatic cursor happened to be.
+ *
  * @param {object} options
  *   count        number of steps
  *   waitMs       ms to hold at each step before advancing
@@ -51,6 +55,14 @@ export default function useAutoPlay({
       stateRef.current.phaseStart = performance.now()
     }
   }, [paused])
+
+  // Re-point the cursor (e.g. after a manual drag) so the next resume
+  // continues from `step` instead of the stale automatic position.
+  const seek = useCallback((step) => {
+    stateRef.current.currentStep = step
+    stateRef.current.phase       = 'waiting'
+    stateRef.current.phaseStart  = null
+  }, [])
 
   const tick = useCallback((now) => {
     rafRef.current = requestAnimationFrame(tick)
@@ -94,4 +106,6 @@ export default function useAutoPlay({
     rafRef.current = requestAnimationFrame(tick)
     return () => cancelAnimationFrame(rafRef.current)
   }, [tick])
+
+  return { seek }
 }
