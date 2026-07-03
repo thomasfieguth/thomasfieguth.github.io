@@ -1,6 +1,7 @@
 import STLViewer from '../components/viewers/STLViewer.jsx'
 import GLTFViewer from '../components/viewers/GLTFViewer.jsx'
 import PhotoProgression from '../components/viewers/PhotoProgression.jsx'
+import PhotoGrid from '../components/viewers/PhotoGrid.jsx'
 import styles from './Projects.module.css'
 
 export default function Projects() {
@@ -110,6 +111,22 @@ export default function Projects() {
               { label: 'V5', image: '/assets/images/projects/tractor/full_5.svg' },
             ]}
             config={{ waitMs: 2500, fadeMs: 600, aspectRatio: 'auto' }}
+          />
+        </div>
+      </div>
+
+      {/* ── Photos ── */}
+      <div className={styles.compareContainer} style={{ paddingBottom: 'var(--space-12)' }}>
+        <h2 className={styles.testHeading}>Photos</h2>
+        <div className={styles.singleCol}>
+          <PhotoGrid
+            images={[
+              '/assets/images/projects/tractor/full_1.svg',
+              '/assets/images/projects/tractor/full_2.svg',
+              '/assets/images/projects/tractor/full_3.svg',
+              '/assets/images/projects/tractor/full_4.svg',
+              '/assets/images/projects/tractor/full_5.svg',
+            ]}
           />
         </div>
       </div>

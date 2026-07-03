@@ -72,3 +72,9 @@
   border-top: 1px solid var(--color-border);
   background-color: var(--color-surface);
 }
+
+/* ─── Fullscreen modal content ────────────────────────────────────────────── */
+.fullscreenContent {
+  width: min(1400px, 90vw);
+  cursor: default;
+}

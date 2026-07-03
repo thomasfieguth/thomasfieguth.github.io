@@ -1,5 +1,6 @@
-import { useState, useRef, useCallback, useEffect } from 'react'
+import { useState } from 'react'
 import AlphaSlider from './AlphaSlider.jsx'
+import Overlay from './Overlay.jsx'
 import styles from './PhotoProgression.module.css'
 
 /**
@@ -7,6 +8,8 @@ import styles from './PhotoProgression.module.css'
  *
  * Displays a sequence of photos with crossfade transitions.
  * Auto-advances using a bounce pattern (via AlphaSlider): 0→1→…→N-1→…→0.
+ * Clicking the frame opens a lightbox with whichever photo was dominant
+ * at that moment; auto-advance pauses while the lightbox is open.
  *
  * Props:
  *   steps   { label: string, image: string }[]   — ordered photo steps
@@ -33,6 +36,8 @@ export default function PhotoProgression({ steps = [], config = {} }) {
   const [position, setPosition] = useState(0)
   // Measured natural aspect ratio, used when aspectRatio === 'auto'
   const [autoAspect, setAutoAspect] = useState(null)
+  // Snapshot of whichever image was dominant when the frame was clicked
+  const [lightboxStep, setLightboxStep] = useState(null)
 
   const count = steps.length
   if (count === 0) return null
@@ -45,6 +50,9 @@ export default function PhotoProgression({ steps = [], config = {} }) {
 
   const imageA = steps[indexA]?.image
   const imageB = steps[indexB]?.image
+
+  // Whichever image is more visible right now is "the" current photo
+  const dominantIndex = alpha < 0.5 ? indexA : indexB
 
   // Once the first image loads, lock the frame to its natural ratio so
   // nothing gets cropped. Falls back to 16:9 until that measurement lands.
@@ -61,7 +69,17 @@ export default function PhotoProgression({ steps = [], config = {} }) {
   return (
     <div className={styles.wrapper} style={{ maxWidth }}>
       {/* Photo frame */}
-      <div className={styles.frame} style={{ aspectRatio: frameAspectRatio, maxHeight }}>
+      <div
+        className={styles.frame}
+        style={{ aspectRatio: frameAspectRatio, maxHeight }}
+        onClick={() => setLightboxStep(steps[dominantIndex])}
+        role="button"
+        tabIndex={0}
+        aria-label="View larger photo"
+        onKeyDown={(e) => {
+          if (e.key === 'Enter' || e.key === ' ') setLightboxStep(steps[dominantIndex])
+        }}
+      >
 
         {/* Base image — always rendered */}
         <img
@@ -93,10 +111,23 @@ export default function PhotoProgression({ steps = [], config = {} }) {
           value={position}
           onChange={setPosition}
           labels={steps.map(s => s.label)}
+          paused={lightboxStep !== null}
           waitMs={waitMs}
           fadeMs={fadeMs}
         />
       </div>
+
+      {/* Lightbox — frozen on whichever photo was showing at click time */}
+      {lightboxStep && (
+        <Overlay onClose={() => setLightboxStep(null)}>
+          <img
+            src={lightboxStep.image}
+            alt={lightboxStep.label ?? ''}
+            className={styles.lightboxImage}
+            draggable={false}
+          />
+        </Overlay>
+      )}
     </div>
   )
 }

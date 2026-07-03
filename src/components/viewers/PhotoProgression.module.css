@@ -16,6 +16,7 @@
   width: 100%;
   overflow: hidden;
   background-color: var(--color-bg);
+  cursor: zoom-in;
   /* aspect-ratio set inline from props */
 }
 
@@ -28,8 +29,20 @@
   object-fit: contain;
   display: block;
   user-select: none;
-  /* Smooth opacity transitions driven by inline style */
-  transition: opacity 0ms linear;
+  transition: opacity 0ms linear, transform var(--transition-fast);
+}
+
+/* Subtle zoom on hover to signal the frame is clickable */
+.frame:hover .photo {
+  transform: scale(1.03);
+}
+
+/* ─── Lightbox ────────────────────────────────────────────────────────────── */
+.lightboxImage {
+  display: block;
+  max-width: 90vw;
+  max-height: 90vh;
+  object-fit: contain;
 }
 
 .overlay {

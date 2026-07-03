@@ -4,6 +4,7 @@ import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js'
 import useQuaternion from '../../hooks/useQuaternion.js'
 import ProgressionSlider from './ProgressionSlider.jsx'
 import AlphaSlider from './AlphaSlider.jsx'
+import Overlay from './Overlay.jsx'
 import { parseAspectRatio } from '../../utils/aspectRatio.js'
 import styles from './STLViewer.module.css'
 
@@ -13,6 +14,15 @@ const MODEL_COLOR         = '#C8A96E'
 const AMBIENT_INTENSITY   = 1.2
 const DIR_LIGHT_INTENSITY = 1.8
 const DIR_LIGHT_POSITION  = [5, 8, 5]
+
+// Accumulated pointer travel below this (px) counts as a click, not a drag
+const CLICK_DRAG_THRESHOLD = 6
+// Camera dolly-zoom distance bounds. Models are normalized to a ~1-unit
+// bounding radius, so anything much closer than ~1.6 puts the camera
+// almost inside the model, producing extreme near-field perspective
+// distortion that reads as "rotating off-center".
+const ZOOM_MIN = 1.6
+const ZOOM_MAX = 8
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -99,6 +109,12 @@ function projectToScreen(point3d, object, camera, w, h) {
  *   models        { path: string, label: string, opacity: number }[]  (internal)
  *   annotations   { label: string, headPosition: {x,y,z}, textOffset: {x,y} }[]
  *   config        { rotationSpeed, initialEuler, waitMs, fadeMs, aspectRatio, maxWidth, maxHeight }
+ *
+ *   hideControls        boolean  // suppress the docked slider + auto-advance (default false)
+ *   initialStepIndex    number   // seed for progression mode's step (default 0)
+ *   initialInternalPos  number   // seed for internal mode's position (default 0)
+ *   enableZoom          boolean  // mouse-wheel dolly zoom (default false)
+ *   allowFullscreen     boolean  // click-to-expand into a fullscreen viewer (default true)
  */
 export default function GLTFViewer({
   mode = 'basic',
@@ -107,6 +123,11 @@ export default function GLTFViewer({
   models,
   annotations = [],
   config = {},
+  hideControls = false,
+  initialStepIndex,
+  initialInternalPos,
+  enableZoom = false,
+  allowFullscreen = true,
 }) {
   const {
     rotationSpeed = 0.4,
@@ -132,14 +153,16 @@ export default function GLTFViewer({
   const clockRef       = useRef(new THREE.Clock())
   const isDraggingRef  = useRef(false)
   const lastPointerRef = useRef({ x: 0, y: 0 })
+  const dragDistanceRef = useRef(0)    // accumulated pointer travel — click vs. drag
 
   // ── State ─────────────────────────────────────────────────────────────
   const [loading, setLoading]               = useState(true)
   const [error, setError]                   = useState(null)
-  const [stepIndex, setStepIndex]           = useState(0)
-  const [internalPos, setInternalPos]       = useState(0)
+  const [stepIndex, setStepIndex]           = useState(initialStepIndex ?? 0)
+  const [internalPos, setInternalPos]       = useState(initialInternalPos ?? 0)
   const [canvasDragging, setCanvasDragging] = useState(false)
   const [dimensions, setDimensions]         = useState({ w: 0, h: 0 })
+  const [fullscreen, setFullscreen]         = useState(false)
 
   // ── Quaternion ────────────────────────────────────────────────────────
   const { quaternionRef, applyAutoRotation, applyPointerDelta } =
@@ -175,6 +198,7 @@ export default function GLTFViewer({
     // Camera
     const camera = new THREE.PerspectiveCamera(45, 1, 0.01, 100)
     camera.position.set(0, 0, 3.5)
+    camera.lookAt(0, 0, 0)
     cameraRef.current = camera
 
     // Renderer — sRGB + tone-mapping for correct PBR output
@@ -276,6 +300,7 @@ export default function GLTFViewer({
         flatMeshesRef.current = flatMeshes
         gltfScenesRef.current = gltfScenes
         applyStepVisibility(flatMeshes, stepIndex)
+        if (mode === 'internal') applyInternalOpacity(flatMeshes, internalPos)
         setLoading(false)
       })
       .catch(err => {
@@ -319,6 +344,24 @@ export default function GLTFViewer({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])   // run once on mount
 
+  // ── Mouse-wheel dolly zoom (fullscreen viewer only) ───────────────────
+  useEffect(() => {
+    if (!enableZoom) return
+    const canvas = canvasRef.current
+    if (!canvas) return
+
+    const onWheel = (e) => {
+      e.preventDefault()
+      const camera = cameraRef.current
+      if (!camera) return
+      const factor = Math.exp(e.deltaY * 0.001)
+      camera.position.z = THREE.MathUtils.clamp(camera.position.z * factor, ZOOM_MIN, ZOOM_MAX)
+    }
+
+    canvas.addEventListener('wheel', onWheel, { passive: false })
+    return () => canvas.removeEventListener('wheel', onWheel)
+  }, [enableZoom])
+
   // ── Step visibility ───────────────────────────────────────────────────
   function applyStepVisibility(meshes, idx) {
     if (mode === 'basic' || mode === 'internal') {
@@ -341,14 +384,12 @@ export default function GLTFViewer({
   // ── Internal mode opacity ─────────────────────────────────────────────
   // Uses userData.modelIndex (per-file) rather than a flat-mesh index so
   // all sub-meshes within a single GLTF file fade together.
-  useEffect(() => {
-    if (mode !== 'internal') return
-    const s      = internalPos
+  function applyInternalOpacity(meshes, pos) {
     const count  = modelList.length
-    const floorS = Math.floor(Math.min(s, count - 1))
-    const fracS  = s - floorS
+    const floorS = Math.floor(Math.min(pos, count - 1))
+    const fracS  = pos - floorS
 
-    flatMeshesRef.current.forEach(m => {
+    meshes.forEach(m => {
       const i      = m.userData.modelIndex
       const target = m.userData.baseOpacity
       let opacity
@@ -362,6 +403,14 @@ export default function GLTFViewer({
       const mats = Array.isArray(m.material) ? m.material : [m.material]
       mats.forEach(mat => { mat.opacity = opacity })
     })
+  }
+
+  useEffect(() => {
+    // Also applied right after load (mount effect) so a frozen fullscreen
+    // snapshot — whose internalPos never changes again — still gets its
+    // opacities set instead of staying at the material's default (opaque).
+    if (mode !== 'internal' || flatMeshesRef.current.length === 0) return
+    applyInternalOpacity(flatMeshesRef.current, internalPos)
   }, [internalPos, mode])
 
   // ── Annotation drawing ────────────────────────────────────────────────
@@ -458,6 +507,7 @@ export default function GLTFViewer({
   // ── Pointer handlers ──────────────────────────────────────────────────
   const onPointerDown = useCallback((e) => {
     isDraggingRef.current = true
+    dragDistanceRef.current = 0
     lastPointerRef.current = { x: e.clientX, y: e.clientY }
     e.currentTarget.setPointerCapture(e.pointerId)
     setCanvasDragging(true)
@@ -468,13 +518,21 @@ export default function GLTFViewer({
     const dx = e.clientX - lastPointerRef.current.x
     const dy = e.clientY - lastPointerRef.current.y
     lastPointerRef.current = { x: e.clientX, y: e.clientY }
+    dragDistanceRef.current += Math.sqrt(dx * dx + dy * dy)
     applyPointerDelta(dx, dy)
   }, [applyPointerDelta])
 
   const onPointerUp = useCallback(() => {
+    // onPointerLeave is wired to this same handler, and fires on every
+    // mouse-out — including a hover with no pointerdown at all. Only
+    // treat it as a click if a drag was actually in progress.
+    const wasDragging = isDraggingRef.current
     isDraggingRef.current = false
     setCanvasDragging(false)
-  }, [])
+    if (wasDragging && allowFullscreen && !loading && !error && dragDistanceRef.current < CLICK_DRAG_THRESHOLD) {
+      setFullscreen(true)
+    }
+  }, [allowFullscreen, loading, error])
 
   // ── Progression step handler ──────────────────────────────────────────
   const handleStepChange = useCallback((idx) => { setStepIndex(idx) }, [])
@@ -485,6 +543,7 @@ export default function GLTFViewer({
     : null
 
   return (
+    <>
     <div className={styles.wrapper} ref={containerRef} style={{ maxWidth }}>
       {/* WebGL canvas */}
       <canvas
@@ -523,7 +582,7 @@ export default function GLTFViewer({
       )}
 
       {/* Progression slider */}
-      {mode === 'progression' && progressionStepsForSlider && !loading && (
+      {mode === 'progression' && progressionStepsForSlider && !loading && !hideControls && (
         <div className={styles.sliderDock}>
           <ProgressionSlider
             steps={progressionStepsForSlider}
@@ -537,7 +596,7 @@ export default function GLTFViewer({
       )}
 
       {/* Housing alpha slider — internal mode only */}
-      {mode === 'internal' && !loading && (
+      {mode === 'internal' && !loading && !hideControls && (
         <div className={styles.sliderDock}>
           <AlphaSlider
             value={internalPos}
@@ -549,6 +608,34 @@ export default function GLTFViewer({
           />
         </div>
       )}
-    </div>
+      </div>
+
+      {/* Fullscreen — reopens the same model(s), frozen at the current
+          step/position, with auto-rotate off and zoom on instead of the
+          docked slider. */}
+      {fullscreen && allowFullscreen && (
+        <Overlay onClose={() => setFullscreen(false)} contentClassName={styles.fullscreenContent}>
+          <GLTFViewer
+            mode={mode}
+            model={model}
+            steps={steps}
+            models={models}
+            annotations={annotations}
+            config={{
+              initialEuler,
+              waitMs, fadeMs,
+              aspectRatio,
+              rotationSpeed: 0,
+              maxHeight: Math.round(window.innerHeight * 0.85),
+            }}
+            hideControls
+            initialStepIndex={stepIndex}
+            initialInternalPos={internalPos}
+            enableZoom
+            allowFullscreen={false}
+          />
+        </Overlay>
+      )}
+    </>
   )
 }
