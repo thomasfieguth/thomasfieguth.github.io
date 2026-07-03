@@ -37,3 +37,7 @@
   color: var(--color-text-primary);
   margin-bottom: var(--space-4);
 }
+
+.singleCol {
+  max-width: 800px;
+}

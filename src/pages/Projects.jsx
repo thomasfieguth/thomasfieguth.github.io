@@ -1,5 +1,6 @@
 import STLViewer from '../components/viewers/STLViewer.jsx'
 import GLTFViewer from '../components/viewers/GLTFViewer.jsx'
+import PhotoProgression from '../components/viewers/PhotoProgression.jsx'
 import styles from './Projects.module.css'
 
 export default function Projects() {
@@ -14,7 +15,7 @@ export default function Projects() {
             <p className={styles.compareLabel}>STL</p>
             <STLViewer
               mode="basic"
-              model="/assets/models/stormbreaker/skeleton.stl"
+              model="/assets/models/stormbreaker/Final.stl"
               config={{ rotationSpeed: 0.4, initialEuler: [0.3, 0, 0] }}
             />
           </div>
@@ -22,7 +23,7 @@ export default function Projects() {
             <p className={styles.compareLabel}>GLTF</p>
             <GLTFViewer
               mode="basic"
-              model="/assets/models/stormbreaker/skeleton.gltf"
+              model="/assets/models/stormbreaker/v5.gltf"
               config={{ rotationSpeed: 0.4, initialEuler: [0.3, 0, 0] }}
             />
           </div>
@@ -93,6 +94,23 @@ export default function Projects() {
               config={{ rotationSpeed: 0.3, initialEuler: [0.2, 0.4, 0] }}
             />
           </div>
+        </div>
+      </div>
+
+      {/* ── Photo Progression ── */}
+      <div className={styles.compareContainer} style={{ paddingBottom: 'var(--space-12)' }}>
+        <h2 className={styles.testHeading}>Photo Progression</h2>
+        <div className={styles.singleCol}>
+          <PhotoProgression
+            steps={[
+              { label: 'V1', image: '/assets/images/projects/tractor/full_1.svg' },
+              { label: 'V2', image: '/assets/images/projects/tractor/full_2.svg' },
+              { label: 'V3', image: '/assets/images/projects/tractor/full_3.svg' },
+              { label: 'V4', image: '/assets/images/projects/tractor/full_4.svg' },
+              { label: 'V5', image: '/assets/images/projects/tractor/full_5.svg' },
+            ]}
+            config={{ waitMs: 2500, fadeMs: 600, aspectRatio: '16 / 9' }}
+          />
         </div>
       </div>
 
