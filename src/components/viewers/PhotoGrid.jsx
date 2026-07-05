@@ -1,49 +1,28 @@
-import { useState } from 'react'
-import Overlay from './Overlay.jsx'
+import PhotoTile from './PhotoTile.jsx'
 import styles from './PhotoGrid.module.css'
 
 /**
  * PhotoGrid
  *
- * A static grid of photos. Hovering a photo zooms it slightly to signal
- * it's clickable; clicking opens a lightbox with the full-size image.
+ * A static, uniform-cell grid of photos, each cropped to a fixed 4:3 box.
+ * For layouts that preserve each photo's own aspect ratio instead, see
+ * RowFillGrid / ColumnFillGrid / JustifiedGrid in src/components/grids —
+ * this component is now a thin, fixed-ratio special case built on the
+ * same PhotoTile used there.
  *
  * Props:
  *   images  string[]  — photo paths
  */
 export default function PhotoGrid({ images = [] }) {
-  const [lightboxSrc, setLightboxSrc] = useState(null)
-
   if (images.length === 0) return null
 
   return (
     <div className={styles.grid}>
       {images.map((src, i) => (
-        <button
-          key={src}
-          type="button"
-          className={styles.thumbButton}
-          onClick={() => setLightboxSrc(src)}
-        >
-          <img
-            src={src}
-            alt={`Photo ${i + 1}`}
-            className={styles.thumb}
-            draggable={false}
-          />
-        </button>
+        <div key={src} className={styles.cell}>
+          <PhotoTile src={src} alt={`Photo ${i + 1}`} />
+        </div>
       ))}
-
-      {lightboxSrc && (
-        <Overlay onClose={() => setLightboxSrc(null)}>
-          <img
-            src={lightboxSrc}
-            alt=""
-            className={styles.lightboxImage}
-            draggable={false}
-          />
-        </Overlay>
-      )}
     </div>
   )
 }

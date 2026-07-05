@@ -125,6 +125,9 @@ function projectToScreen(point3d, mesh, camera, canvasWidth, canvasHeight) {
  *                 }
  *
  *   hideControls        boolean  // suppress the docked slider + auto-advance (default false)
+ *   compact             boolean  // hide step-name labels in the docked slider, keep the
+ *                                // track/thumb (default false). Set by grid layouts once
+ *                                // an item's rendered size drops below a legibility threshold.
  *   initialStepIndex    number   // seed for progression mode's step (default 0)
  *   initialInternalPos  number   // seed for internal mode's position (default 0)
  *   enableZoom          boolean  // mouse-wheel dolly zoom (default false)
@@ -138,6 +141,7 @@ export default function STLViewer({
   annotations = [],
   config = {},
   hideControls = false,
+  compact = false,
   initialStepIndex,
   initialInternalPos,
   enableZoom = false,
@@ -635,6 +639,7 @@ export default function STLViewer({
             paused={canvasDragging}
             waitMs={waitMs}
             fadeMs={fadeMs}
+            showLabels={!compact}
           />
         </div>
       )}
@@ -649,6 +654,7 @@ export default function STLViewer({
             paused={canvasDragging}
             waitMs={waitMs}
             fadeMs={fadeMs}
+            showLabels={!compact}
           />
         </div>
       )}
@@ -673,6 +679,7 @@ export default function STLViewer({
               maxHeight: Math.round(window.innerHeight * 0.85),
             }}
             hideControls
+            compact={false}
             initialStepIndex={stepIndex}
             initialInternalPos={internalPos}
             enableZoom

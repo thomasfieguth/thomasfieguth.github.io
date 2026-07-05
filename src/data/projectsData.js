@@ -51,6 +51,26 @@
  *     models: { path: string, label: string, opacity: number }[],
  *     config: { rotationSpeed?, initialEuler? },
  *     annotations?: { label: string, headPosition: {x,y,z}, textOffset: {x,y} }[] }
+ *
+ *   { type: 'grid',
+ *     layout: 'rowFill' | 'columnFill' | 'justified',
+ *     config?: object,   // passed straight through to the grid component's
+ *                         // props (sizeConfig, gap, compactThreshold, and for
+ *                         // 'justified' also defaultMinRatio/defaultMaxRatio) —
+ *                         // see src/components/grids/*.jsx for exact shapes
+ *     items: GridItem[] }
+ *     A mixed grid of photos, viewers, and progressions laid out by one of
+ *     the three grid components in src/components/grids. See
+ *     src/components/grids/GridItem.jsx for the full item-type mapping.
+ *
+ *   GridItem types (used only inside a 'grid' block's items[]):
+ *     { type: 'photo', src: string, alt?: string, minRatio?: number, maxRatio?: number }
+ *     { type: 'photoProgression', steps, config }
+ *     { type: 'stlBasic' | 'stlProgression' | 'stlInternal', ...same fields as above, minRatio?, maxRatio? }
+ *     { type: 'gltfBasic' | 'gltfProgression' | 'gltfInternal', ...same fields as above, minRatio?, maxRatio? }
+ *     minRatio/maxRatio only matter for layout: 'justified' — they bound how far
+ *     that item's rendered aspect ratio may be nudged from its preferred ratio
+ *     to make a row fit exactly.
  */
 
 const projectsData = [
@@ -88,6 +108,19 @@ const projectsData = [
           '/assets/images/projects/capstone/photo1.jpg',
           '/assets/images/projects/capstone/photo2.jpg',
           '/assets/images/projects/capstone/photo3.jpg',
+        ],
+      },
+      // Demo of the 'justified' grid layout, mixing photos with a real
+      // model — items keep their own aspect ratio except where a row
+      // needs a slight nudge (within minRatio/maxRatio) to fill exactly.
+      {
+        type: 'grid',
+        layout: 'justified',
+        items: [
+          { type: 'photo', src: '/assets/images/projects/capstone/photo1.jpg' },
+          { type: 'stlBasic', model: '/assets/models/capstone/v3.stl', config: { rotationSpeed: 0.3 } },
+          { type: 'photo', src: '/assets/images/projects/capstone/photo2.jpg' },
+          { type: 'photo', src: '/assets/images/projects/capstone/photo3.jpg' },
         ],
       },
     ],
@@ -222,6 +255,21 @@ const projectsData = [
           { label: 'Final', image: '/assets/images/projects/stormbreaker/final.jpg' },
         ],
         config: { waitMs: 2500, fadeMs: 600 },
+      },
+      // Demo of the 'columnFill' grid layout — build-progress photos
+      // stacked top-to-bottom, wrapping to the next column. Native CSS
+      // multi-column, so each item's own height is intrinsic (see
+      // src/components/grids/ColumnFillGrid.jsx).
+      {
+        type: 'grid',
+        layout: 'columnFill',
+        items: [
+          { type: 'photo', src: '/assets/images/projects/stormbreaker/build1.jpg' },
+          { type: 'photo', src: '/assets/images/projects/stormbreaker/build2.jpg' },
+          { type: 'photo', src: '/assets/images/projects/stormbreaker/build3.jpg' },
+          { type: 'photo', src: '/assets/images/projects/stormbreaker/build4.jpg' },
+          { type: 'photo', src: '/assets/images/projects/stormbreaker/build5.jpg' },
+        ],
       },
     ],
   },

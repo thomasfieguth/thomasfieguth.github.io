@@ -22,8 +22,10 @@ import styles from './PhotoProgression.module.css'
  *     maxWidth     string|number  — CSS max-width of the whole component
  *     maxHeight    string|number  — CSS max-height of the photo frame
  *   }
+ *   compact  boolean  — hide step-name labels in the docked slider, keep the
+ *                       track/thumb (default false)
  */
-export default function PhotoProgression({ steps = [], config = {} }) {
+export default function PhotoProgression({ steps = [], config = {}, compact = false }) {
   const {
     waitMs      = 2500,
     fadeMs      = 600,
@@ -114,6 +116,7 @@ export default function PhotoProgression({ steps = [], config = {} }) {
           paused={lightboxStep !== null}
           waitMs={waitMs}
           fadeMs={fadeMs}
+          showLabels={!compact}
         />
       </div>
 

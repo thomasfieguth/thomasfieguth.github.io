@@ -21,6 +21,7 @@ import styles from './ProgressionSlider.module.css'
  *   paused    boolean   — external pause (e.g. canvas drag)
  *   waitMs    number    — ms to hold at each integer stage
  *   fadeMs    number    — ms to animate between consecutive stages
+ *   showLabels boolean  — render the label row above the track (default true)
  */
 export default function AlphaSlider({
   value,
@@ -29,6 +30,7 @@ export default function AlphaSlider({
   paused = false,
   waitMs = 2500,
   fadeMs = 600,
+  showLabels = true,
 }) {
   const count = labels.length
 
@@ -157,7 +159,7 @@ export default function AlphaSlider({
 
   return (
     <div className={styles.container}>
-      {count > 0 && (
+      {showLabels && count > 0 && (
         <div className={styles.labels}>
           {labels.map((lbl, i) => (
             <button

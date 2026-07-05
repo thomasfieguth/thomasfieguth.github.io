@@ -16,6 +16,9 @@ import styles from './ProgressionSlider.module.css'
  *   paused             boolean               — external pause (e.g. canvas drag)
  *   waitMs             number  — ms to hold at each step
  *   fadeMs             number  — ms for the position animation
+ *   showLabels         boolean — render the step-name row above the track (default true).
+ *                                Set false at small rendered sizes (e.g. inside a grid
+ *                                item) where labels would overflow or clutter.
  */
 export default function ProgressionSlider({
   steps,
@@ -25,6 +28,7 @@ export default function ProgressionSlider({
   paused = false,
   waitMs = 2500,
   fadeMs = 600,
+  showLabels = true,
 }) {
   const [sliderPos, setSliderPos]     = useState(0)   // fractional 0..N-1
   const [isInteracting, setIsInteracting] = useState(false)
@@ -97,24 +101,26 @@ export default function ProgressionSlider({
   return (
     <div className={styles.container}>
       {/* Step number labels */}
-      <div className={styles.labels}>
-        {steps.map((step, i) => (
-          <button
-            key={i}
-            className={`${styles.label} ${i === currentIndex ? styles.labelActive : ''}`}
-            onClick={() => {
-              setIsInteracting(true)
-              setSliderPos(i)
-              onSliderPositionRef.current?.(i)
-              onChange(i)
-              seek(i)
-              setTimeout(() => setIsInteracting(false), waitMs)
-            }}
-          >
-            {step.label ?? i + 1}
-          </button>
-        ))}
-      </div>
+      {showLabels && (
+        <div className={styles.labels}>
+          {steps.map((step, i) => (
+            <button
+              key={i}
+              className={`${styles.label} ${i === currentIndex ? styles.labelActive : ''}`}
+              onClick={() => {
+                setIsInteracting(true)
+                setSliderPos(i)
+                onSliderPositionRef.current?.(i)
+                onChange(i)
+                seek(i)
+                setTimeout(() => setIsInteracting(false), waitMs)
+              }}
+            >
+              {step.label ?? i + 1}
+            </button>
+          ))}
+        </div>
+      )}
 
       {/* Track */}
       <div

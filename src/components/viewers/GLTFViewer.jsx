@@ -111,6 +111,8 @@ function projectToScreen(point3d, object, camera, w, h) {
  *   config        { rotationSpeed, initialEuler, waitMs, fadeMs, aspectRatio, maxWidth, maxHeight }
  *
  *   hideControls        boolean  // suppress the docked slider + auto-advance (default false)
+ *   compact             boolean  // hide step-name labels in the docked slider, keep the
+ *                                // track/thumb (default false)
  *   initialStepIndex    number   // seed for progression mode's step (default 0)
  *   initialInternalPos  number   // seed for internal mode's position (default 0)
  *   enableZoom          boolean  // mouse-wheel dolly zoom (default false)
@@ -124,6 +126,7 @@ export default function GLTFViewer({
   annotations = [],
   config = {},
   hideControls = false,
+  compact = false,
   initialStepIndex,
   initialInternalPos,
   enableZoom = false,
@@ -591,6 +594,7 @@ export default function GLTFViewer({
             paused={canvasDragging}
             waitMs={waitMs}
             fadeMs={fadeMs}
+            showLabels={!compact}
           />
         </div>
       )}
@@ -605,6 +609,7 @@ export default function GLTFViewer({
             paused={canvasDragging}
             waitMs={waitMs}
             fadeMs={fadeMs}
+            showLabels={!compact}
           />
         </div>
       )}
@@ -629,6 +634,7 @@ export default function GLTFViewer({
               maxHeight: Math.round(window.innerHeight * 0.85),
             }}
             hideControls
+            compact={false}
             initialStepIndex={stepIndex}
             initialInternalPos={internalPos}
             enableZoom
