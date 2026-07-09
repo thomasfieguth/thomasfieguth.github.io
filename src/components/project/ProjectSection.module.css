@@ -13,6 +13,12 @@
   font-size: var(--text-3xl);
   font-weight: var(--weight-semibold);
   color: var(--color-text-primary);
+  margin-bottom: var(--space-2);
+}
+
+.date {
+  font-size: var(--text-sm);
+  color: var(--color-text-secondary);
   margin-bottom: var(--space-4);
 }
 
@@ -21,7 +27,7 @@
   flex-wrap: wrap;
   gap: var(--space-2);
   list-style: none;
-  margin-bottom: var(--space-4);
+  margin-bottom: var(--space-8);
 }
 
 .skillTag {
@@ -36,15 +42,35 @@
   letter-spacing: 0.05em;
 }
 
+/* Media grid (left) + description (right). Fluid percentage split
+   (--grid-width, set inline per project) so it scales continuously with
+   the section's width, collapsing to a single stacked column once
+   side-by-side gets too cramped to read. */
+.body {
+  display: flex;
+  gap: var(--space-10);
+  align-items: flex-start;
+}
+
+.media {
+  flex: 0 0 auto;
+  width: var(--grid-width, 55%);
+  min-width: 0;
+}
+
 .description {
+  flex: 1 1 auto;
+  min-width: 0;
   color: var(--color-text-secondary);
-  max-width: 800px;
-  margin-bottom: var(--space-8);
   line-height: 1.7;
 }
 
-.mediaStack {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-8);
+@media (max-width: 800px) {
+  .body {
+    flex-direction: column;
+  }
+
+  .media {
+    width: 100%;
+  }
 }

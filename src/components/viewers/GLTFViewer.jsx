@@ -108,7 +108,14 @@ function projectToScreen(point3d, object, camera, w, h) {
  *   steps         { label: string, models: string[] }[]          (progression)
  *   models        { path: string, label: string, opacity: number }[]  (internal)
  *   annotations   { label: string, headPosition: {x,y,z}, textOffset: {x,y} }[]
- *   config        { rotationSpeed, initialEuler, waitMs, fadeMs, aspectRatio, maxWidth, maxHeight }
+ *   config        { rotationSpeed, initialEuler, waitMs, fadeMs, aspectRatio, maxWidth, maxHeight,
+ *                   colorMode, color }
+ *
+ *   config.colorMode  'uniform' | 'texture'  // 'uniform' recolors every mesh with a single
+ *                                            // flat color (config.color); 'texture' keeps the
+ *                                            // GLTF's own materials/textures untouched.
+ *                                            // (default 'uniform')
+ *   config.color      string  // hex color used when colorMode is 'uniform' (default '#C8A96E')
  *
  *   hideControls        boolean  // suppress the docked slider + auto-advance (default false)
  *   compact             boolean  // hide step-name labels in the docked slider, keep the
@@ -140,6 +147,8 @@ export default function GLTFViewer({
     aspectRatio   = '16 / 9',
     maxWidth,
     maxHeight,
+    colorMode     = 'uniform',
+    color         = MODEL_COLOR,
   } = config
 
   // ── Refs ──────────────────────────────────────────────────────────────
@@ -282,20 +291,32 @@ export default function GLTFViewer({
             // rather than by flat-mesh index (one GLTF file → many meshes).
             child.userData.modelIndex  = modelIndex
 
-            // Replace GLTF materials with a Phong material using MODEL_COLOR
-            // so the viewer has a consistent look independent of the file's
-            // embedded textures/colors, and gets the same specular highlights
-            // as the STL viewer.
             const oldMats = Array.isArray(child.material) ? child.material : [child.material]
-            oldMats.forEach(mat => mat.dispose())
-            child.material = new THREE.MeshPhongMaterial({
-              color:       new THREE.Color(MODEL_COLOR),
-              specular:    new THREE.Color(0x666666),
-              shininess:   70,
-              transparent: isHousing || isProgression,
-              depthWrite:  true,
-              side:        THREE.DoubleSide,
-            })
+            const needsTransparency = isHousing || isProgression
+
+            if (colorMode === 'texture') {
+              // Keep the GLTF's own materials/textures; just make sure they
+              // support the fade behaviour progression/internal modes need.
+              oldMats.forEach(mat => {
+                mat.transparent = needsTransparency
+                mat.depthWrite  = true
+                mat.side        = THREE.DoubleSide
+              })
+            } else {
+              // Replace GLTF materials with a Phong material using a flat
+              // color so the viewer has a consistent look independent of the
+              // file's embedded textures/colors, and gets the same specular
+              // highlights as the STL viewer.
+              oldMats.forEach(mat => mat.dispose())
+              child.material = new THREE.MeshPhongMaterial({
+                color:       new THREE.Color(color),
+                specular:    new THREE.Color(0x666666),
+                shininess:   70,
+                transparent: needsTransparency,
+                depthWrite:  true,
+                side:        THREE.DoubleSide,
+              })
+            }
             flatMeshes.push(child)
           })
         })
@@ -630,6 +651,7 @@ export default function GLTFViewer({
               initialEuler,
               waitMs, fadeMs,
               aspectRatio,
+              colorMode, color,
               rotationSpeed: 0,
               maxHeight: Math.round(window.innerHeight * 0.85),
             }}
