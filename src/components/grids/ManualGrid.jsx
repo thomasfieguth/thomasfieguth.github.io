@@ -20,8 +20,9 @@ const DOCK_RESERVE_FULL = 76
  * ManualGrid
  *
  * A hand-placed grid: every item declares its own `row`, `width`, and
- * `height` in projectsData.js rather than having a layout algorithm infer
- * them. Consecutive items sharing the same `row` value are placed
+ * `height` in its data file (see src/data/projects/*.js) rather than
+ * having a layout algorithm infer them. Consecutive items sharing the
+ * same `row` value are placed
  * left-to-right in that row; a new `row` value starts a new row below.
  *
  * `width`/`height` are fractions of this grid's own measured width (e.g.
@@ -34,7 +35,7 @@ const DOCK_RESERVE_FULL = 76
  *
  * Props:
  *   items  { type, row, width, height, ...itemFields }[]  — see
- *          projectsData.js for the full per-type field list; row/width/
+ *          src/data/projects/*.js for the full per-type field list; row/width/
  *          height are read here, everything else is forwarded to GridItem.
  *   gap    number  — px gap between items, both axes (default 16)
  */

@@ -8,7 +8,7 @@ import styles from './GridItem.module.css'
  * GridItem
  *
  * Dispatches one media-item descriptor (the shapes documented in
- * projectsData.js: photo | photoProgression | stlBasic | stlProgression |
+ * src/data/projects/*.js: photo | photoProgression | stlBasic | stlProgression |
  * stlInternal | gltfBasic | gltfProgression | gltfInternal) to the
  * component that renders it. RowFillGrid, ColumnFillGrid, and
  * JustifiedGrid all use this instead of each reimplementing the mapping.
