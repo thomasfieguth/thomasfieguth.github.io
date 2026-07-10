@@ -27,17 +27,6 @@ export const writeups = [
     ],
   },
   {
-    id: 'disk-flight-simulation',
-    title: 'Disk Flight Simulation',
-    date: 'Date TBD',
-    // TODO: write the disk flight simulation description — what physics
-    // model was used, and what was it built to predict or explore?
-    description:
-      'Placeholder — describe the disk flight simulation. What physics model was used, and what was it built to predict or explore?',
-    skills: ['Python', 'Physics Simulation'],
-    media: [], // TODO: add simulation screenshots/recordings once available
-  },
-  {
     id: 'onshape-engrave',
     title: 'OnShape Engrave Feature',
     date: 'Date TBD',

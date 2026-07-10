@@ -3,7 +3,7 @@
  *
  * Each entry renders as:
  *   - A preview card on the Home page (company, role, period, previewImage)
- *   - A full section on the Experience page (all fields)
+ *   - A full section on the Experience page (all fields), via JobSection
  *
  * Fields:
  *   id            string      — URL anchor id, e.g. 'werkr' → /#/experience#werkr
@@ -12,10 +12,12 @@
  *   period        string      — Display date range
  *   location      string      — City, Country
  *   previewImage  string      — Single image for the home page card (/public-relative)
- *   description   string      — 1–3 sentence paragraph for the Experience page
+ *   description   string      — 1–3 sentence overview: what the job/company is and what you did
  *   skills        string[]    — Tags shown below the description
- *   photos        string[]    — Photo grid on the Experience page (add as many as needed)
  *   website       string?     — Optional company URL for a link on the Experience page
+ *   projects      Project[]   — Individual projects done at this job, each rendered by
+ *                               ProjectSection (see src/data/projects/*.js for the shape:
+ *                               id, title, date, skills, description, media, gridWidth)
  */
 const experienceData = [
   {
@@ -33,10 +35,51 @@ const experienceData = [
       'Autonomous Navigation', 'Sensor Fusion',
       'Camera-Based Detection', '3D Visualization',
     ],
-    photos: [
-      '/assets/images/experience/werkr/photo1.jpg',
-      '/assets/images/experience/werkr/photo2.jpg',
-      '/assets/images/experience/werkr/photo3.jpg',
+    projects: [
+      {
+        id: 'werkr-project-1',
+        title: 'Placeholder Project Title',
+        date: 'Date TBD',
+        skills: ['Skill 1', 'Skill 2'],
+        description:
+          'Placeholder — describe this project. What was the goal, what did you build, and what was the outcome?',
+        media: [
+          {
+            type: 'photo',
+            src: '/assets/images/experience/werkr/project1_photo1.jpg',
+            alt: 'Placeholder photo 1',
+            row: 0, width: 0.5, height: 0.4,
+          },
+          {
+            type: 'photo',
+            src: '/assets/images/experience/werkr/project1_photo2.jpg',
+            alt: 'Placeholder photo 2',
+            row: 0, width: 0.5, height: 0.4,
+          },
+        ],
+      },
+      {
+        id: 'werkr-project-2',
+        title: 'Placeholder Project Title',
+        date: 'Date TBD',
+        skills: ['Skill 1', 'Skill 2'],
+        description:
+          'Placeholder — describe this project. What was the goal, what did you build, and what was the outcome?',
+        media: [
+          {
+            type: 'photo',
+            src: '/assets/images/experience/werkr/project2_photo1.jpg',
+            alt: 'Placeholder photo 1',
+            row: 0, width: 0.5, height: 0.4,
+          },
+          {
+            type: 'photo',
+            src: '/assets/images/experience/werkr/project2_photo2.jpg',
+            alt: 'Placeholder photo 2',
+            row: 0, width: 0.5, height: 0.4,
+          },
+        ],
+      },
     ],
   },
   {
@@ -53,9 +96,51 @@ const experienceData = [
       'Hydraulic Analysis', 'Pump Efficiency',
       'Cost Estimation', 'Technical Reporting', 'Site Inspection',
     ],
-    photos: [
-      '/assets/images/experience/gei/photo1.jpg',
-      '/assets/images/experience/gei/photo2.jpg',
+    projects: [
+      {
+        id: 'gei-project-1',
+        title: 'Placeholder Project Title',
+        date: 'Date TBD',
+        skills: ['Skill 1', 'Skill 2'],
+        description:
+          'Placeholder — describe this project. What was the goal, what did you build, and what was the outcome?',
+        media: [
+          {
+            type: 'photo',
+            src: '/assets/images/experience/gei/project1_photo1.jpg',
+            alt: 'Placeholder photo 1',
+            row: 0, width: 0.5, height: 0.4,
+          },
+          {
+            type: 'photo',
+            src: '/assets/images/experience/gei/project1_photo2.jpg',
+            alt: 'Placeholder photo 2',
+            row: 0, width: 0.5, height: 0.4,
+          },
+        ],
+      },
+      {
+        id: 'gei-project-2',
+        title: 'Placeholder Project Title',
+        date: 'Date TBD',
+        skills: ['Skill 1', 'Skill 2'],
+        description:
+          'Placeholder — describe this project. What was the goal, what did you build, and what was the outcome?',
+        media: [
+          {
+            type: 'photo',
+            src: '/assets/images/experience/gei/project2_photo1.jpg',
+            alt: 'Placeholder photo 1',
+            row: 0, width: 0.5, height: 0.4,
+          },
+          {
+            type: 'photo',
+            src: '/assets/images/experience/gei/project2_photo2.jpg',
+            alt: 'Placeholder photo 2',
+            row: 0, width: 0.5, height: 0.4,
+          },
+        ],
+      },
     ],
   },
   {
@@ -73,10 +158,51 @@ const experienceData = [
       'SolidWorks', 'CNC Programming', 'Machining',
       'GPS Integration', 'Dynamometer Design',
     ],
-    photos: [
-      '/assets/images/experience/accelerated/photo1.jpg',
-      '/assets/images/experience/accelerated/photo2.jpg',
-      '/assets/images/experience/accelerated/photo3.jpg',
+    projects: [
+      {
+        id: 'accelerated-project-1',
+        title: 'Placeholder Project Title',
+        date: 'Date TBD',
+        skills: ['Skill 1', 'Skill 2'],
+        description:
+          'Placeholder — describe this project. What was the goal, what did you build, and what was the outcome?',
+        media: [
+          {
+            type: 'photo',
+            src: '/assets/images/experience/accelerated/project1_photo1.jpg',
+            alt: 'Placeholder photo 1',
+            row: 0, width: 0.5, height: 0.4,
+          },
+          {
+            type: 'photo',
+            src: '/assets/images/experience/accelerated/project1_photo2.jpg',
+            alt: 'Placeholder photo 2',
+            row: 0, width: 0.5, height: 0.4,
+          },
+        ],
+      },
+      {
+        id: 'accelerated-project-2',
+        title: 'Placeholder Project Title',
+        date: 'Date TBD',
+        skills: ['Skill 1', 'Skill 2'],
+        description:
+          'Placeholder — describe this project. What was the goal, what did you build, and what was the outcome?',
+        media: [
+          {
+            type: 'photo',
+            src: '/assets/images/experience/accelerated/project2_photo1.jpg',
+            alt: 'Placeholder photo 1',
+            row: 0, width: 0.5, height: 0.4,
+          },
+          {
+            type: 'photo',
+            src: '/assets/images/experience/accelerated/project2_photo2.jpg',
+            alt: 'Placeholder photo 2',
+            row: 0, width: 0.5, height: 0.4,
+          },
+        ],
+      },
     ],
   },
 ]

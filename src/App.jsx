@@ -3,7 +3,6 @@ import Navbar from './components/layout/Navbar.jsx'
 import Footer from './components/layout/Footer.jsx'
 import Home from './pages/Home.jsx'
 import Experience from './pages/Experience.jsx'
-import Tractor from './pages/projects/Tractor.jsx'
 import Capstone from './pages/projects/Capstone.jsx'
 import Woodworking from './pages/projects/Woodworking.jsx'
 import Code from './pages/projects/Code.jsx'
@@ -17,8 +16,7 @@ export default function App() {
         <Routes>
           <Route path="/"                    element={<Home />} />
           <Route path="/experience"          element={<Experience />} />
-          <Route path="/projects"            element={<Navigate to="/projects/tractor" replace />} />
-          <Route path="/projects/tractor"    element={<Tractor />} />
+          <Route path="/projects"            element={<Navigate to="/projects/capstone" replace />} />
           <Route path="/projects/capstone"   element={<Capstone />} />
           <Route path="/projects/woodworking" element={<Woodworking />} />
           <Route path="/projects/code"       element={<Code />} />

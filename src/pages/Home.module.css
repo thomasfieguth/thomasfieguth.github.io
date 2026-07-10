@@ -2,3 +2,42 @@
   padding-top: var(--navbar-height);
   min-height: 100vh;
 }
+
+.hero {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: var(--space-16) var(--space-8) var(--space-12);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.name {
+  font-size: var(--text-5xl);
+  font-weight: var(--weight-semibold);
+  color: var(--color-text-primary);
+}
+
+.tagline {
+  font-size: var(--text-xl);
+  color: var(--color-text-secondary);
+  margin-top: var(--space-4);
+}
+
+.about {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: var(--space-12) var(--space-8);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.aboutHeading {
+  font-size: var(--text-2xl);
+  font-weight: var(--weight-semibold);
+  color: var(--color-text-primary);
+  margin-bottom: var(--space-4);
+}
+
+.aboutBody {
+  max-width: 800px;
+  color: var(--color-text-secondary);
+  line-height: 1.7;
+}

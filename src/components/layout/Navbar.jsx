@@ -8,7 +8,6 @@ const NAV_LINKS = [
 ]
 
 const PROJECT_LINKS = [
-  { to: '/projects/tractor',     label: 'Self-Driving Tractor' },
   { to: '/projects/capstone',    label: 'Capstone' },
   { to: '/projects/woodworking', label: 'Woodworking & CNC' },
   { to: '/projects/code',        label: 'Code' },

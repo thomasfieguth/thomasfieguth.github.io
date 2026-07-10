@@ -20,6 +20,16 @@ export default function Footer() {
           >
             LinkedIn
           </a>
+          {/* TODO: placeholder path — add the real resume PDF to public/assets/
+              and confirm this href once the file exists in the repo. */}
+          <a
+            href="/assets/resume.pdf"
+            target="_blank"
+            rel="noopener noreferrer"
+            className={styles.link}
+          >
+            Resume
+          </a>
           <a
             href="https://github.com/thomasfieguth"
             target="_blank"
