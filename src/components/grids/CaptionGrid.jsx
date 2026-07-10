@@ -1,4 +1,6 @@
+import { useState } from 'react'
 import PhotoTile from '../viewers/PhotoTile.jsx'
+import Lightbox from '../viewers/Lightbox.jsx'
 import styles from './CaptionGrid.module.css'
 
 /**
@@ -24,6 +26,12 @@ import styles from './CaptionGrid.module.css'
  *   }
  */
 export default function CaptionGrid({ items = [] }) {
+  const [lightboxIndex, setLightboxIndex] = useState(null)
+
+  // Left-to-right, top-to-bottom order — the sequence Left/Right arrow
+  // keys step through in the lightbox. Placeholders have no real image.
+  const photoItems = items.filter(item => item.type === 'photo' && !item.placeholder)
+
   if (items.length === 0) return null
 
   return (
@@ -48,12 +56,31 @@ export default function CaptionGrid({ items = [] }) {
                 playsInline
               />
             ) : (
-              <PhotoTile src={item.src} alt={item.alt ?? item.caption} fit="box" />
+              <PhotoTile
+                src={item.src}
+                alt={item.alt ?? item.caption}
+                fit="box"
+                onOpen={() => setLightboxIndex(photoItems.indexOf(item))}
+              />
             )}
           </div>
           <figcaption className={styles.caption}>{item.caption}</figcaption>
         </figure>
       ))}
+
+      {lightboxIndex !== null && (
+        <Lightbox
+          src={photoItems[lightboxIndex].src}
+          alt={photoItems[lightboxIndex].alt ?? photoItems[lightboxIndex].caption}
+          onClose={() => setLightboxIndex(null)}
+          onPrev={photoItems.length > 1
+            ? () => setLightboxIndex(i => (i - 1 + photoItems.length) % photoItems.length)
+            : undefined}
+          onNext={photoItems.length > 1
+            ? () => setLightboxIndex(i => (i + 1) % photoItems.length)
+            : undefined}
+        />
+      )}
     </div>
   )
 }

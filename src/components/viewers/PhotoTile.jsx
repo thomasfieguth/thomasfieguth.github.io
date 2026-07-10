@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import Overlay from './Overlay.jsx'
+import Lightbox from './Lightbox.jsx'
 import styles from './PhotoTile.module.css'
 
 /**
@@ -22,19 +22,25 @@ import styles from './PhotoTile.module.css'
  *                        Used by: ColumnFillGrid.
  *
  * Props:
- *   src   string
- *   alt   string
- *   fit   'box' | 'intrinsicHeight' | 'intrinsicWidth'  (default 'box')
+ *   src     string
+ *   alt     string
+ *   fit     'box' | 'intrinsicHeight' | 'intrinsicWidth'  (default 'box')
+ *   onOpen  (() => void)?  — when provided, called on click instead of
+ *           opening PhotoTile's own lightbox. Lets a parent grid (e.g.
+ *           CaptionGrid, ManualGrid) open a shared lightbox that knows
+ *           about sibling photos, so Left/Right arrow keys can step
+ *           between them.
  */
-export default function PhotoTile({ src, alt = 'Photo', fit = 'box' }) {
+export default function PhotoTile({ src, alt = 'Photo', fit = 'box', onOpen }) {
   const [lightboxOpen, setLightboxOpen] = useState(false)
+  const handleClick = onOpen ?? (() => setLightboxOpen(true))
 
   return (
     <>
       <button
         type="button"
         className={`${styles.thumbButton} ${styles[fit]}`}
-        onClick={() => setLightboxOpen(true)}
+        onClick={handleClick}
       >
         <img
           src={src}
@@ -44,15 +50,8 @@ export default function PhotoTile({ src, alt = 'Photo', fit = 'box' }) {
         />
       </button>
 
-      {lightboxOpen && (
-        <Overlay onClose={() => setLightboxOpen(false)}>
-          <img
-            src={src}
-            alt=""
-            className={styles.lightboxImage}
-            draggable={false}
-          />
-        </Overlay>
+      {!onOpen && lightboxOpen && (
+        <Lightbox src={src} onClose={() => setLightboxOpen(false)} />
       )}
     </>
   )

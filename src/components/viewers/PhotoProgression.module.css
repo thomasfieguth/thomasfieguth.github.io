@@ -37,14 +37,6 @@
   transform: scale(1.03);
 }
 
-/* ─── Lightbox ────────────────────────────────────────────────────────────── */
-.lightboxImage {
-  display: block;
-  max-width: 90vw;
-  max-height: 90vh;
-  object-fit: contain;
-}
-
 .overlay {
   /* Rendered on top of the base image */
   z-index: 1;

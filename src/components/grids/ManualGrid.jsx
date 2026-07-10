@@ -1,5 +1,11 @@
+import { useState } from 'react'
 import useContainerWidth from '../../hooks/useContainerWidth.js'
 import GridItem from './GridItem.jsx'
+import Overlay from '../viewers/Overlay.jsx'
+import STLViewer from '../viewers/STLViewer.jsx'
+import GLTFViewer from '../viewers/GLTFViewer.jsx'
+import viewerStyles from '../viewers/STLViewer.module.css'
+import photoStyles from '../viewers/PhotoTile.module.css'
 import styles from './ManualGrid.module.css'
 
 const COMPACT_THRESHOLD = 220
@@ -15,6 +21,66 @@ const DOCK_TYPES = new Set([
 ])
 const DOCK_RESERVE_COMPACT = 40
 const DOCK_RESERVE_FULL = 76
+
+// 3D-viewer item types, mapped to the component + mode that renders them
+// full-size in the fullscreen overlay.
+const VIEWER_BY_TYPE = {
+  stlBasic:        { Viewer: STLViewer,  mode: 'basic' },
+  stlProgression:  { Viewer: STLViewer,  mode: 'progression' },
+  stlInternal:     { Viewer: STLViewer,  mode: 'internal' },
+  gltfBasic:       { Viewer: GLTFViewer, mode: 'basic' },
+  gltfProgression: { Viewer: GLTFViewer, mode: 'progression' },
+  gltfInternal:    { Viewer: GLTFViewer, mode: 'internal' },
+}
+
+// The single full-size view shown in the fullscreen overlay, for whichever
+// item type is currently open. `snapshot` seeds it at the same step/position
+// the small grid view was at when clicked; it's discarded (so the item
+// reopens at its default position) after navigating away with prev/next.
+function FullscreenContent({ item, snapshot }) {
+  if (item.type === 'photo') {
+    return <img src={item.src} alt={item.alt ?? ''} className={photoStyles.lightboxImage} draggable={false} />
+  }
+
+  if (item.type === 'photoProgression') {
+    const step = item.steps[snapshot?.dominantIndex ?? 0]
+    return <img src={step.image} alt={step.label ?? ''} className={photoStyles.lightboxImage} draggable={false} />
+  }
+
+  const entry = VIEWER_BY_TYPE[item.type]
+  if (!entry) return null
+  const { Viewer, mode } = entry
+  const cfg = item.config ?? {}
+
+  return (
+    <Viewer
+      mode={mode}
+      model={item.model}
+      steps={item.steps}
+      models={item.models}
+      annotations={item.annotations}
+      config={{
+        // maxWidth is deliberately omitted — the fullscreen view fills
+        // available space (maxHeight) rather than inheriting the
+        // thumbnail's own width constraint.
+        initialEuler: cfg.initialEuler,
+        waitMs: cfg.waitMs,
+        fadeMs: cfg.fadeMs,
+        aspectRatio: cfg.aspectRatio,
+        colorMode: cfg.colorMode,
+        color: cfg.color,
+        rotationSpeed: 0,
+        maxHeight: Math.round(window.innerHeight * 0.85),
+      }}
+      hideControls
+      compact={false}
+      initialStepIndex={snapshot?.stepIndex}
+      initialInternalPos={snapshot?.internalPos}
+      enableZoom
+      allowFullscreen={false}
+    />
+  )
+}
 
 /**
  * ManualGrid
@@ -33,6 +99,10 @@ const DOCK_RESERVE_FULL = 76
  * `ratioOverride`, which forces their internal aspect ratio to match the
  * box exactly.
  *
+ * Clicking any item (photo, photo progression, or 3D viewer) opens one
+ * shared fullscreen overlay; Left/Right arrow keys step to the previous/next
+ * item in the grid — of any type — rather than being scoped to just photos.
+ *
  * Props:
  *   items  { type, row, width, height, ...itemFields }[]  — see
  *          src/data/projects/*.js for the full per-type field list; row/width/
@@ -41,6 +111,7 @@ const DOCK_RESERVE_FULL = 76
  */
 export default function ManualGrid({ items = [], gap = 16 }) {
   const [containerRef, containerWidth] = useContainerWidth()
+  const [open, setOpen] = useState(null)   // { index, snapshot } | null
 
   const rows = []
   for (const item of items) {
@@ -48,6 +119,15 @@ export default function ManualGrid({ items = [], gap = 16 }) {
     if (lastRow && lastRow.row === item.row) lastRow.items.push(item)
     else rows.push({ row: item.row, items: [item] })
   }
+
+  const openItem = open ? items[open.index] : null
+
+  const openMedia = (item, snapshot) => {
+    const idx = items.indexOf(item)
+    if (idx !== -1) setOpen({ index: idx, snapshot })
+  }
+  const showPrev = () => setOpen(o => ({ index: (o.index - 1 + items.length) % items.length, snapshot: null }))
+  const showNext = () => setOpen(o => ({ index: (o.index + 1) % items.length, snapshot: null }))
 
   return (
     <div ref={containerRef} className={styles.grid} style={{ gap: `${gap}px` }}>
@@ -81,12 +161,25 @@ export default function ManualGrid({ items = [], gap = 16 }) {
                   style={{ width, height, flex: `0 0 ${width}px` }}
                   ratioOverride={item.type === 'photo' ? undefined : width / mediaHeight}
                   compact={compact}
+                  onOpen={openMedia}
+                  isOpenItem={item === openItem}
                 />
               )
             })}
           </div>
         )
       })}
+
+      {openItem && (
+        <Overlay
+          onClose={() => setOpen(null)}
+          onPrev={items.length > 1 ? showPrev : undefined}
+          onNext={items.length > 1 ? showNext : undefined}
+          contentClassName={VIEWER_BY_TYPE[openItem.type] ? viewerStyles.fullscreenContent : undefined}
+        >
+          <FullscreenContent item={openItem} snapshot={open.snapshot} />
+        </Overlay>
+      )}
     </div>
   )
 }

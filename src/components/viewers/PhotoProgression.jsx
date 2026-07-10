@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import AlphaSlider from './AlphaSlider.jsx'
-import Overlay from './Overlay.jsx'
+import Lightbox from './Lightbox.jsx'
 import styles from './PhotoProgression.module.css'
 
 /**
@@ -24,8 +24,14 @@ import styles from './PhotoProgression.module.css'
  *   }
  *   compact  boolean  — hide step-name labels in the docked slider, keep the
  *                       track/thumb (default false)
+ *   onOpen   (({ dominantIndex }) => void)?  — when provided, called on click with the
+ *            index of whichever step is dominant instead of opening PhotoProgression's
+ *            own lightbox. Lets a parent grid (e.g. ManualGrid) open a shared lightbox
+ *            that can step to sibling grid items with the arrow keys.
+ *   paused   boolean  — forces auto-advance to pause, e.g. while a parent-owned
+ *            fullscreen view seeded from this component is on screen (default false)
  */
-export default function PhotoProgression({ steps = [], config = {}, compact = false }) {
+export default function PhotoProgression({ steps = [], config = {}, compact = false, onOpen, paused = false }) {
   const {
     waitMs      = 2500,
     fadeMs      = 600,
@@ -39,6 +45,7 @@ export default function PhotoProgression({ steps = [], config = {}, compact = fa
   // Measured natural aspect ratio, used when aspectRatio === 'auto'
   const [autoAspect, setAutoAspect] = useState(null)
   // Snapshot of whichever image was dominant when the frame was clicked
+  // (standalone fallback only — used when no `onOpen` is provided)
   const [lightboxStep, setLightboxStep] = useState(null)
 
   const count = steps.length
@@ -67,6 +74,7 @@ export default function PhotoProgression({ steps = [], config = {}, compact = fa
   }
 
   const frameAspectRatio = aspectRatio === 'auto' ? (autoAspect ?? '16 / 9') : aspectRatio
+  const handleOpen = onOpen ? () => onOpen({ dominantIndex }) : () => setLightboxStep(steps[dominantIndex])
 
   return (
     <div className={styles.wrapper} style={{ maxWidth }}>
@@ -74,12 +82,12 @@ export default function PhotoProgression({ steps = [], config = {}, compact = fa
       <div
         className={styles.frame}
         style={{ aspectRatio: frameAspectRatio, maxHeight }}
-        onClick={() => setLightboxStep(steps[dominantIndex])}
+        onClick={handleOpen}
         role="button"
         tabIndex={0}
         aria-label="View larger photo"
         onKeyDown={(e) => {
-          if (e.key === 'Enter' || e.key === ' ') setLightboxStep(steps[dominantIndex])
+          if (e.key === 'Enter' || e.key === ' ') handleOpen()
         }}
       >
 
@@ -113,23 +121,21 @@ export default function PhotoProgression({ steps = [], config = {}, compact = fa
           value={position}
           onChange={setPosition}
           labels={steps.map(s => s.label)}
-          paused={lightboxStep !== null}
+          paused={paused || lightboxStep !== null}
           waitMs={waitMs}
           fadeMs={fadeMs}
           showLabels={!compact}
         />
       </div>
 
-      {/* Lightbox — frozen on whichever photo was showing at click time */}
+      {/* Lightbox — frozen on whichever photo was showing at click time.
+          Standalone fallback only; unreachable when `onOpen` is provided. */}
       {lightboxStep && (
-        <Overlay onClose={() => setLightboxStep(null)}>
-          <img
-            src={lightboxStep.image}
-            alt={lightboxStep.label ?? ''}
-            className={styles.lightboxImage}
-            draggable={false}
-          />
-        </Overlay>
+        <Lightbox
+          src={lightboxStep.image}
+          alt={lightboxStep.label ?? ''}
+          onClose={() => setLightboxStep(null)}
+        />
       )}
     </div>
   )

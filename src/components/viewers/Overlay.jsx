@@ -16,13 +16,17 @@ let openOverlayCount = 0
  *
  * Props:
  *   onClose           () => void
+ *   onPrev            () => void  — optional; wired to the Left arrow key
+ *   onNext            () => void  — optional; wired to the Right arrow key
  *   children          content rendered inside the modal
  *   contentClassName  optional extra class for the content wrapper
  */
-export default function Overlay({ onClose, children, contentClassName }) {
+export default function Overlay({ onClose, onPrev, onNext, children, contentClassName }) {
   useEffect(() => {
     const onKeyDown = (e) => {
       if (e.key === 'Escape') onClose()
+      else if (e.key === 'ArrowLeft' && onPrev) onPrev()
+      else if (e.key === 'ArrowRight' && onNext) onNext()
     }
     document.addEventListener('keydown', onKeyDown)
 
@@ -37,7 +41,7 @@ export default function Overlay({ onClose, children, contentClassName }) {
         document.body.style.overflow = ''
       }
     }
-  }, [onClose])
+  }, [onClose, onPrev, onNext])
 
   return createPortal(
     <div className={styles.backdrop} onClick={onClose}>

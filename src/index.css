@@ -6,8 +6,8 @@
   --color-border:        #2A2A2A;
   --color-text-primary:  #F0F0F0;
   --color-text-secondary:#888888;
-  --color-accent:        #C8A96E;
-  --color-accent-hover:  #D4B97E;
+  --color-accent:        #ec96ff;
+  --color-accent-hover:  #df50ff;
 
   /* Typography */
   --font-base: 'Inter', system-ui, sans-serif;

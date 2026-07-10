@@ -11,11 +11,13 @@ export const writeups = [
     id: 'stormbreaker',
     title: 'Stormbreaker Axe',
     date: 'Date TBD',
-    // TODO: write the Stormbreaker description, covering both the CAD
-    // design iteration and the physical fabrication — what materials, how
-    // was the head shaped, and what was the handle construction?
     description:
-      'Placeholder — describe the Stormbreaker build, covering both CAD design iteration and physical fabrication. What materials? How was the head shaped and designed in CAD? What was the handle construction?',
+      'A working replica of Thor\'s Stormbreaker axe from Marvel, currently in progress. \n\
+      The internal structure is built and heat treated, with sheet metal still to attach.\
+      The main challenge is balancing size against usability: large enough to look accurate to the film model, light enough to actually swing. \
+      The core is a laser-cut, welded X-shaped mild steel frame that absorbs the force of swings and cuts, with the sides made from thin mild steel sheet, TIG-welded to the frame, purely for cosmetic bulk. \
+      Weight is cut further with gaps laser-cut into the main frame. The axe head\'s tip was heat treated to harden it for edge retention, while the rest of the frame was left as mild steel for toughness. \n\
+      End to end, it is 13 inches long, estimated at 10 lbs.',
     skills: ['CAD', 'Woodworking', 'Fabrication', 'Hand Tools', 'Finishing'],
     media: [
       {
@@ -34,9 +36,10 @@ export const writeups = [
         ],
         config: {
           rotationSpeed: 0.4,
-          initialEuler: [0.3, 0, 0],
+          initialEuler: [1.57, 0, 0],
           waitMs: 2500,
           fadeMs: 600,
+          colorMode: 'texture',
         },
         row: 1, width: 0.6, height: 0.45,
       },

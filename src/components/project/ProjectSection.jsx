@@ -15,6 +15,7 @@ const DEFAULT_GRID_WIDTH = 0.55
 export default function ProjectSection({ project }) {
   const hasMedia = project.media?.length > 0
   const gridWidth = project.gridWidth ?? DEFAULT_GRID_WIDTH
+  const paragraphs = project.description?.split('\n').map((p) => p.trim()).filter(Boolean) ?? []
 
   return (
     <section id={project.id} className={styles.section}>
@@ -34,10 +35,14 @@ export default function ProjectSection({ project }) {
           <div className={styles.media} style={{ '--grid-width': `${gridWidth * 100}%` }}>
             <ManualGrid items={project.media} />
           </div>
-          <p className={styles.description}>{project.description}</p>
+          <div className={styles.description}>
+            {paragraphs.map((p, i) => <p key={i}>{p}</p>)}
+          </div>
         </div>
       ) : (
-        <p className={styles.description}>{project.description}</p>
+        <div className={styles.description}>
+          {paragraphs.map((p, i) => <p key={i}>{p}</p>)}
+        </div>
       )}
     </section>
   )

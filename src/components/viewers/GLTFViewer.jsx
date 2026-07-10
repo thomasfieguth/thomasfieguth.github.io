@@ -4,16 +4,18 @@ import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js'
 import useQuaternion from '../../hooks/useQuaternion.js'
 import ProgressionSlider from './ProgressionSlider.jsx'
 import AlphaSlider from './AlphaSlider.jsx'
-import Overlay from './Overlay.jsx'
 import { parseAspectRatio } from '../../utils/aspectRatio.js'
 import styles from './STLViewer.module.css'
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 
 const MODEL_COLOR         = '#C8A96E'
-const AMBIENT_INTENSITY   = 1.2
-const DIR_LIGHT_INTENSITY = 1.8
+const AMBIENT_INTENSITY   = 0.5
+const DIR_LIGHT_INTENSITY = 1.5
 const DIR_LIGHT_POSITION  = [5, 8, 5]
+// Distance at config.zoom === 1. Models are normalized to a ~1-unit bounding
+// radius, so this is the "fits comfortably in frame" default.
+const BASE_CAMERA_DISTANCE = 3.5
 
 // Accumulated pointer travel below this (px) counts as a click, not a drag
 const CLICK_DRAG_THRESHOLD = 6
@@ -109,13 +111,15 @@ function projectToScreen(point3d, object, camera, w, h) {
  *   models        { path: string, label: string, opacity: number }[]  (internal)
  *   annotations   { label: string, headPosition: {x,y,z}, textOffset: {x,y} }[]
  *   config        { rotationSpeed, initialEuler, waitMs, fadeMs, aspectRatio, maxWidth, maxHeight,
- *                   colorMode, color }
+ *                   colorMode, color, zoom }
  *
  *   config.colorMode  'uniform' | 'texture'  // 'uniform' recolors every mesh with a single
  *                                            // flat color (config.color); 'texture' keeps the
  *                                            // GLTF's own materials/textures untouched.
  *                                            // (default 'uniform')
  *   config.color      string  // hex color used when colorMode is 'uniform' (default '#C8A96E')
+ *   config.zoom       number  // initial camera distance multiplier — >1 starts zoomed in
+ *                             // (closer), <1 starts zoomed out (default 1)
  *
  *   hideControls        boolean  // suppress the docked slider + auto-advance (default false)
  *   compact             boolean  // hide step-name labels in the docked slider, keep the
@@ -123,7 +127,12 @@ function projectToScreen(point3d, object, camera, w, h) {
  *   initialStepIndex    number   // seed for progression mode's step (default 0)
  *   initialInternalPos  number   // seed for internal mode's position (default 0)
  *   enableZoom          boolean  // mouse-wheel dolly zoom (default false)
- *   allowFullscreen     boolean  // click-to-expand into a fullscreen viewer (default true)
+ *   allowFullscreen     boolean  // click-to-expand calls `onOpen` (default true)
+ *   onOpen              (({ stepIndex, internalPos }) => void)?  — called on click-to-expand
+ *                        with a snapshot of the current step/position. The caller (e.g.
+ *                        ManualGrid) owns the fullscreen UI so it can offer prev/next
+ *                        navigation across sibling grid items; this component no longer
+ *                        renders its own fullscreen overlay.
  */
 export default function GLTFViewer({
   mode = 'basic',
@@ -138,6 +147,7 @@ export default function GLTFViewer({
   initialInternalPos,
   enableZoom = false,
   allowFullscreen = true,
+  onOpen,
 }) {
   const {
     rotationSpeed = 0.4,
@@ -149,6 +159,7 @@ export default function GLTFViewer({
     maxHeight,
     colorMode     = 'uniform',
     color         = MODEL_COLOR,
+    zoom          = 1,
   } = config
 
   // ── Refs ──────────────────────────────────────────────────────────────
@@ -174,7 +185,6 @@ export default function GLTFViewer({
   const [internalPos, setInternalPos]       = useState(initialInternalPos ?? 0)
   const [canvasDragging, setCanvasDragging] = useState(false)
   const [dimensions, setDimensions]         = useState({ w: 0, h: 0 })
-  const [fullscreen, setFullscreen]         = useState(false)
 
   // ── Quaternion ────────────────────────────────────────────────────────
   const { quaternionRef, applyAutoRotation, applyPointerDelta } =
@@ -209,7 +219,7 @@ export default function GLTFViewer({
 
     // Camera
     const camera = new THREE.PerspectiveCamera(45, 1, 0.01, 100)
-    camera.position.set(0, 0, 3.5)
+    camera.position.set(0, 0, BASE_CAMERA_DISTANCE / zoom)
     camera.lookAt(0, 0, 0)
     cameraRef.current = camera
 
@@ -227,7 +237,7 @@ export default function GLTFViewer({
     const dir = new THREE.DirectionalLight(0xffffff, DIR_LIGHT_INTENSITY)
     dir.position.set(...DIR_LIGHT_POSITION)
     scene.add(dir)
-    const fill = new THREE.DirectionalLight(0xffffff, 0.4)
+    const fill = new THREE.DirectionalLight(0xffffff, 0.15)
     fill.position.set(-3, -4, -3)
     scene.add(fill)
 
@@ -554,9 +564,9 @@ export default function GLTFViewer({
     isDraggingRef.current = false
     setCanvasDragging(false)
     if (wasDragging && allowFullscreen && !loading && !error && dragDistanceRef.current < CLICK_DRAG_THRESHOLD) {
-      setFullscreen(true)
+      onOpen?.({ stepIndex, internalPos })
     }
-  }, [allowFullscreen, loading, error])
+  }, [allowFullscreen, loading, error, onOpen, stepIndex, internalPos])
 
   // ── Progression step handler ──────────────────────────────────────────
   const handleStepChange = useCallback((idx) => { setStepIndex(idx) }, [])
@@ -567,7 +577,6 @@ export default function GLTFViewer({
     : null
 
   return (
-    <>
     <div className={styles.wrapper} ref={containerRef} style={{ maxWidth }}>
       {/* WebGL canvas */}
       <canvas
@@ -634,36 +643,6 @@ export default function GLTFViewer({
           />
         </div>
       )}
-      </div>
-
-      {/* Fullscreen — reopens the same model(s), frozen at the current
-          step/position, with auto-rotate off and zoom on instead of the
-          docked slider. */}
-      {fullscreen && allowFullscreen && (
-        <Overlay onClose={() => setFullscreen(false)} contentClassName={styles.fullscreenContent}>
-          <GLTFViewer
-            mode={mode}
-            model={model}
-            steps={steps}
-            models={models}
-            annotations={annotations}
-            config={{
-              initialEuler,
-              waitMs, fadeMs,
-              aspectRatio,
-              colorMode, color,
-              rotationSpeed: 0,
-              maxHeight: Math.round(window.innerHeight * 0.85),
-            }}
-            hideControls
-            compact={false}
-            initialStepIndex={stepIndex}
-            initialInternalPos={internalPos}
-            enableZoom
-            allowFullscreen={false}
-          />
-        </Overlay>
-      )}
-    </>
+    </div>
   )
 }
