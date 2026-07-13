@@ -9,42 +9,45 @@
  *   title  string  — Card heading
  *   blurb  string  — Placeholder body text, to be replaced with real copy
  *   to     string  — react-router path the whole card links to
+ *   image  string  — optional public-relative path to the card's image
+ *                     (e.g. '/assets/images/home/tractor.jpg'). When
+ *                     omitted, the card falls back to a placeholder box.
  */
 const featuredProjects = [
   {
     id: 'tractor',
     title: 'Self-Driving Tractor',
     blurb: 'Todo fill with write up',
-    // TODO: this now points at the top of the Experience page rather than
-    // the Werkr section specifically. The site uses HashRouter (URLs like
-    // /#/experience), so a nested anchor (/#/experience#werkr) doesn't work
-    // without extra scroll-to-id logic — confirmed with Thomas to link
-    // plainly to /experience for now and revisit if a deep link is wanted.
     to: '/experience',
+    image: '/assets/images/experience/werkr/tractor.png',
   },
   {
     id: 'capstone',
     title: 'Capstone',
-    blurb: 'Todo fill with write up',
+    blurb: 'Interactive training system to teach woodcarving using depth-sensing and live projection directly onto the stock material',
     to: '/projects/capstone',
+    image: '/assets/images/projects/capstone/explode_render.svg',
   },
   {
     id: 'woodworking',
-    title: 'Woodworking & CNC',
-    blurb: 'Todo fill with write up',
+    title: 'Wooden Globe',
+    blurb: 'Spinning globe made from 2 different types of wood, 60 triangles, and 1 CNC.',
     to: '/projects/woodworking',
+    image: '/assets/images/projects/woodworking/globe.jpg',
   },
   {
     id: 'code',
-    title: 'Code',
-    blurb: 'Todo fill with write up',
+    title: 'Catan Optimizer',
+    blurb: 'Optimization problem where the goal is to maximize the number of unique tile configurations for a catan board with rivers',
     to: '/projects/code',
+    image: '/assets/images/projects/code/catan_solution.png',
   },
   {
     id: 'other',
-    title: 'Other Projects',
-    blurb: 'Todo fill with write up',
+    title: 'Stormbreaker',
+    blurb: 'Replica of Thor\'s Stormbreaker axe from Marvel',
     to: '/projects/other',
+    image: '/assets/images/projects/other/stormbreaker_heat_treating.jpg',
   },
 ]
 

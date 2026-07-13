@@ -29,10 +29,8 @@ export const writeups = [
       {
         type: 'gltfInternal',
         models: [
-          { path: '/assets/models/stormbreaker/cosmetics.gltf', label: 'Cosmetics', opacity: 0.1 },
-          { path: '/assets/models/stormbreaker/shell.gltf', label: 'Shell', opacity: 0.1 },
-          { path: '/assets/models/stormbreaker/internals.gltf', label: 'Internals', opacity: 0.1 },
-          { path: '/assets/models/stormbreaker/skeleton.gltf', label: 'Skeleton', opacity: 1.0 },
+          { path: '/assets/models/stormbreaker/Stormbreaker_outside.gltf', label: 'Cosmetics', opacity: 0.1 },
+          { path: '/assets/models/stormbreaker/Stormbreaker_internal.gltf', label: 'Skeleton', opacity: 1.0 },
         ],
         config: {
           rotationSpeed: 0.4,
@@ -56,10 +54,8 @@ export const writeups = [
 export const gridItems = [
   {
     type: 'photo',
-    caption: 'Welded Birds',
-    placeholder: true,
-    // TODO: add welded birds photo — file does not exist in the repo yet
-    note: 'image file needed',
+    caption: 'Welded Cutlery Birds',
+    src: '/assets/images/projects/other/welded_birds.jpg',
   },
   {
     type: 'photo',

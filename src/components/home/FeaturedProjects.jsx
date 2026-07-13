@@ -9,12 +9,20 @@ export default function FeaturedProjects() {
       <div className={styles.grid}>
         {featuredProjects.map((project) => (
           <Link key={project.id} to={project.to} className={styles.card}>
-            <div className={styles.placeholder}>
-              <span className={styles.placeholderLabel}>Placeholder Image</span>
-            </div>
+            {project.image ? (
+              <img
+                src={project.image}
+                alt={project.title}
+                className={styles.image}
+              />
+            ) : (
+              <div className={styles.placeholder}>
+                <span className={styles.placeholderLabel}>Placeholder Image</span>
+              </div>
+            )}
             <h3 className={styles.title}>{project.title}</h3>
             <p className={styles.blurb}>{project.blurb}</p>
-            <span className={styles.cta}>View project →</span>
+            {/* <span className={styles.cta}>View project →</span> */}
           </Link>
         ))}
       </div>

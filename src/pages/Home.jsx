@@ -1,13 +1,11 @@
+import Hero from '../components/Hero.jsx'
 import FeaturedProjects from '../components/home/FeaturedProjects.jsx'
 import styles from './Home.module.css'
 
 export default function Home() {
   return (
     <div className={styles.page}>
-      <section className={styles.hero}>
-        <h1 className={styles.name}>Thomas Fieguth</h1>
-        <p className={styles.tagline}>Todo fill with write up</p>
-      </section>
+      <Hero title="Thomas Fieguth" image="placeholder" />
 
       <section className={styles.about}>
         <h2 className={styles.aboutHeading}>About Me</h2>
