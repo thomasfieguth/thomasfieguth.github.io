@@ -10,7 +10,7 @@ export const writeups = [
   {
     id: 'globe',
     title: 'CNC Wood Globe',
-    date: 'Date TBD',
+    date: 'Dec 2022 - Apr 2023',
     description:
       'An 8-inch wooden globe made from walnut and maple. \n\
       I started with a map projection of the Earth onto a dodecahedron, ensuring that there was enough space for a 1/8" bit to cut around the shapes. \
@@ -42,7 +42,7 @@ export const writeups = [
   {
     id: 'topography',
     title: 'CNC Topography Map',
-    date: 'Date TBD',
+    date: 'Mar 2026 - present',
     description:
       'A 5 by 2.75 foot wall-mounted relief map of my family\'s farm, currently in progress.\n\
       Each wood species corresponds to a land-use type: \

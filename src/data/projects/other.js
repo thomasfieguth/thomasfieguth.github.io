@@ -10,7 +10,7 @@ export const writeups = [
   {
     id: 'stormbreaker',
     title: 'Stormbreaker Axe',
-    date: 'Date TBD',
+    date: 'Oct 2025 - present',
     description:
       'A working replica of Thor\'s Stormbreaker axe from Marvel, currently in progress. \n\
       The internal structure is built and heat treated, with sheet metal still to attach.\
@@ -77,4 +77,10 @@ export const gridItems = [
     caption: 'Tool Organization CNCing',
     src: '/assets/images/projects/other/tool_storage.jpg'
   },
+  {
+    type: 'video', 
+    caption: 'Rotating Gingerbread', 
+    src: '/assets/videos/other/gingerbread.MOV', 
+    maximumCutoffRatio: 0.2
+  }
 ]

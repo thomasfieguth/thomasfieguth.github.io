@@ -3,6 +3,14 @@ import styles from './ProjectSection.module.css'
 
 const DEFAULT_GRID_WIDTH = 0.55
 
+// Below the stacked-layout breakpoint (see .media in ProjectSection.module.css),
+// the grid normally goes to 100% of the column width. For a lone image that
+// reads as oversized, so cap it to a fraction of the *viewport* width instead —
+// expressed in vw (not px) so the cap scales continuously with window size
+// rather than sitting at one fixed size. Only single-image grids get this;
+// multi-image grids already split their row across items and don't blow up.
+const SINGLE_IMAGE_STACKED_MAX_WIDTH_VW = 0.6
+
 /**
  * ProjectSection
  *
@@ -15,6 +23,7 @@ const DEFAULT_GRID_WIDTH = 0.55
 export default function ProjectSection({ project }) {
   const hasMedia = project.media?.length > 0
   const gridWidth = project.gridWidth ?? DEFAULT_GRID_WIDTH
+  const isSingleImage = project.media?.length === 1
   const paragraphs = project.description?.split('\n').map((p) => p.trim()).filter(Boolean) ?? []
 
   return (
@@ -32,7 +41,13 @@ export default function ProjectSection({ project }) {
 
       {hasMedia ? (
         <div className={styles.body}>
-          <div className={styles.media} style={{ '--grid-width': `${gridWidth * 100}%` }}>
+          <div
+            className={styles.media}
+            style={{
+              '--grid-width': `${gridWidth * 100}%`,
+              ...(isSingleImage && { '--stacked-max-width': `${SINGLE_IMAGE_STACKED_MAX_WIDTH_VW * 100}vw` }),
+            }}
+          >
             <ManualGrid items={project.media} />
           </div>
           <div className={styles.description}>

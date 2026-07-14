@@ -38,8 +38,7 @@ const experienceData = [
     projects: [
       {
         id: 'werkr-project-1',
-        title: 'Placeholder Project Title',
-        date: 'Date TBD',
+        title: 'Optimizing Position Estimation',
         skills: ['Skill 1', 'Skill 2'],
         description:
           'Placeholder — describe this project. What was the goal, what did you build, and what was the outcome?',
@@ -50,18 +49,11 @@ const experienceData = [
             alt: 'Placeholder photo 1',
             row: 0, width: 0.5, height: 0.4,
           },
-          {
-            type: 'photo',
-            src: '/assets/images/experience/werkr/project1_photo2.jpg',
-            alt: 'Placeholder photo 2',
-            row: 0, width: 0.5, height: 0.4,
-          },
         ],
       },
       {
         id: 'werkr-project-2',
         title: 'Placeholder Project Title',
-        date: 'Date TBD',
         skills: ['Skill 1', 'Skill 2'],
         description:
           'Placeholder — describe this project. What was the goal, what did you build, and what was the outcome?',
@@ -99,8 +91,7 @@ const experienceData = [
     projects: [
       {
         id: 'gei-project-1',
-        title: 'Placeholder Project Title',
-        date: 'Date TBD',
+        title: 'Pump Efficiency Calculation',
         skills: ['Skill 1', 'Skill 2'],
         description:
           'Placeholder — describe this project. What was the goal, what did you build, and what was the outcome?',
@@ -121,8 +112,7 @@ const experienceData = [
       },
       {
         id: 'gei-project-2',
-        title: 'Placeholder Project Title',
-        date: 'Date TBD',
+        title: 'Water Treatment Plant Cost Estimation',
         skills: ['Skill 1', 'Skill 2'],
         description:
           'Placeholder — describe this project. What was the goal, what did you build, and what was the outcome?',
@@ -184,7 +174,6 @@ const experienceData = [
       {
         id: 'accelerated-project-2',
         title: 'Placeholder Project Title',
-        date: 'Date TBD',
         skills: ['Skill 1', 'Skill 2'],
         description:
           'Placeholder — describe this project. What was the goal, what did you build, and what was the outcome?',

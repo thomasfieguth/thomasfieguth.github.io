@@ -6,7 +6,7 @@ import styles from './Experience.module.css'
 export default function Experience() {
   return (
     <div className={styles.page}>
-      <Hero title="Experience" image="placeholder" />
+      <Hero title="Experience" image="assets/images/hero/experience.JPG" />
 
       {/* <header className={styles.header}>
         <h1 className={styles.title}>Experience</h1>

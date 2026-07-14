@@ -11,7 +11,7 @@ const capstoneData = [
   {
     id: 'capstone-cad',
     title: 'Project Description',
-    // date: '',
+    date: 'Sept 2025 - Apr 2026',
     description:
       'Woodcarving Dexterity is a capstone project I built with a team of four to lower the barrier to entry for beginner woodcarvers. \
       Learning woodcarving demands strong spatial reasoning and depth judgment that most beginners lack, \
@@ -119,25 +119,47 @@ const capstoneData = [
       which were not included in the CAD file ICP used for comparison. \
       Significant effort also went into optimizing the algorithm itself to reliably find the correct origin every time.',
     skills: ['Depth Sensing', 'Point Cloud Processing', 'ICP', 'C++'],
+    gridWidth: 0.2, 
     media: [
       {
         type: 'photo',
         src: '/assets/images/projects/capstone/icp.png',
         alt: 'ICP result',
-        row: 0, width: 0.5, height: 0.5,
+        row: 0, width: 1.0, height: 1.0,
       },
     ],
   },
   {
     id: 'capstone-ui',
     title: 'UI Development',
-    date: 'Date TBD',
-    // TODO: write the UI development section — add screenshots/recordings
-    // once available.
     description:
-      'Placeholder — describe the UI development. What does the interface let the user do?',
+      'The user interface was designed to guide users through a clear, low-effort action at each stage, \
+      minimizing cognitive load. Users begin by uploading a CAD file, \
+      are walked through an onboarding sequence explaining cutting stages and recommended tools, \
+      and then reach a home screen where they can manually or automatically update the projected colour map. \
+      As they carve, the system provides success, warning, or error feedback depending on cut accuracy.\n\
+      A key design decision was making the colour map fully customizable. \
+      During user interviews, we found no consensus on what an ideal colour map should look like, \
+      with preferences varying significantly from person to person. To account for this, \
+      the interface lets users adjust the colour map\'s palette and discretization, \
+      ensuring the depth cues remain clear and distinguishable regardless of individual preference, \
+      including for colourblind users.',
     skills: ['UI Design', 'C++'],
-    media: [], // TODO: add UI screenshots or screen recordings once available
+    gridWidth: 0.3, 
+    media: [
+      {
+        type: 'photo',
+        src: '/assets/images/projects/capstone/ui_main.png',
+        alt: 'ICP result',
+        row: 0, width: 1.0,
+      },
+      {
+        type: 'photo',
+        src: '/assets/images/projects/capstone/ui_settings.png',
+        alt: 'ICP result',
+        row: 1, width: 1.0,
+      },
+    ],
   },
 ]
 
@@ -156,6 +178,11 @@ export const gridItems = [
     type: 'photo',
     caption: 'Top Holder Stress Analysis',
     src: '/assets/images/projects/capstone/top_holder_stress.png',
+  },
+  {
+    type: 'photo',
+    caption: 'Poster',
+    src: '/assets/images/projects/capstone/poster.png',
   },
 ]
 

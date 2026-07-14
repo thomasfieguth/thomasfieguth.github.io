@@ -76,5 +76,9 @@
 
   .media {
     width: 100%;
+    /* Only single-image grids set --stacked-max-width (see ProjectSection.jsx);
+       multi-image grids fall back to "none" and stay unconstrained. */
+    max-width: var(--stacked-max-width, none);
+    margin: 0 auto;
   }
 }
