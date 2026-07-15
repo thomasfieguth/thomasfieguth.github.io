@@ -7,7 +7,7 @@ import styles from './Woodworking.module.css'
 export default function Woodworking() {
   return (
     <div className={styles.page}>
-      <Hero title="Woodworking & CNC" image='/assets/images/hero/woodworking.jpg' />
+      <Hero title="Woodworking & CNC" shortTitle="Woodworking" image='/assets/images/hero/woodworking.jpg' />
 
       {/* <header className={styles.header}>
         <h1 className={styles.title}>Woodworking & CNC</h1>

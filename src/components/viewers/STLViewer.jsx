@@ -2,6 +2,7 @@ import { useEffect, useRef, useState, useCallback } from 'react'
 import * as THREE from 'three'
 import { STLLoader } from 'three/examples/jsm/loaders/STLLoader.js'
 import useQuaternion from '../../hooks/useQuaternion.js'
+import usePinchZoom from '../../hooks/usePinchZoom.js'
 import ProgressionSlider from './ProgressionSlider.jsx'
 import AlphaSlider from './AlphaSlider.jsx'
 import { parseAspectRatio } from '../../utils/aspectRatio.js'
@@ -134,7 +135,8 @@ function projectToScreen(point3d, mesh, camera, canvasWidth, canvasHeight) {
  *                                // an item's rendered size drops below a legibility threshold.
  *   initialStepIndex    number   // seed for progression mode's step (default 0)
  *   initialInternalPos  number   // seed for internal mode's position (default 0)
- *   enableZoom          boolean  // mouse-wheel dolly zoom (default false)
+ *   enableZoom          boolean  // mouse-wheel dolly zoom, plus two-finger
+ *                                // pinch zoom on touch devices (default false)
  *   allowFullscreen     boolean  // click-to-expand calls `onOpen` (default true)
  *   onOpen              (({ stepIndex, internalPos }) => void)?  — called on click-to-expand
  *                        with a snapshot of the current step/position. The caller (e.g.
@@ -387,6 +389,12 @@ export default function STLViewer({
     return () => canvas.removeEventListener('wheel', onWheel)
   }, [enableZoom])
 
+  // ── Two-finger pinch zoom (touch equivalent of the wheel zoom above,
+  //    same fullscreen-only gating) ───────────────────────────────────────
+  const isPinchingRef = usePinchZoom({
+    canvasRef, cameraRef, enabled: enableZoom, zoomMin: ZOOM_MIN, zoomMax: ZOOM_MAX,
+  })
+
   // ── Step visibility ───────────────────────────────────────────────────
   function applyStepVisibility(meshes, idx) {
     if (mode === 'basic' || mode === 'internal') {
@@ -571,6 +579,13 @@ export default function STLViewer({
 
   const onPointerMove = useCallback((e) => {
     if (!isDraggingRef.current) return
+    // A second touch means the user has moved from rotate to pinch-zoom
+    // (see usePinchZoom) — keep tracking position so rotation doesn't jump
+    // once the pinch ends, but don't apply it as a rotation delta.
+    if (isPinchingRef.current) {
+      lastPointerRef.current = { x: e.clientX, y: e.clientY }
+      return
+    }
     const dx = e.clientX - lastPointerRef.current.x
     const dy = e.clientY - lastPointerRef.current.y
     lastPointerRef.current = { x: e.clientX, y: e.clientY }

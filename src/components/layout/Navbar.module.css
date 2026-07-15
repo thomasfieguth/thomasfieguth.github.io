@@ -77,6 +77,23 @@
   position: relative;
 }
 
+.hamburger {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  width: 40px;
+  height: 40px;
+}
+
+.hamburgerLine {
+  width: 22px;
+  height: 2px;
+  background-color: var(--color-text-primary);
+  border-radius: 1px;
+}
+
 .submenu {
   position: absolute;
   top: calc(100% + var(--space-3));

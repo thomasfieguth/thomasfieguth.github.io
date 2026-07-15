@@ -11,4 +11,26 @@
   text-align: center;
   text-shadow: 0 2px 12px rgba(0, 0, 0, 0.7), 0 1px 4px rgba(0, 0, 0, 0.9);
   pointer-events: none;
+  white-space: nowrap;
+}
+
+/* Below the mobile breakpoint, swap the full title for the shorter one
+   (when HeroTitle is given a `shortText`) instead of letting the full
+   title wrap. */
+.short {
+  display: none;
+}
+
+@media (max-width: 800px) {
+  .title {
+    white-space: normal;
+  }
+
+  .full {
+    display: none;
+  }
+
+  .short {
+    display: inline;
+  }
 }

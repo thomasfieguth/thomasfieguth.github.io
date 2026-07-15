@@ -20,8 +20,11 @@ let openOverlayCount = 0
  *   onNext            () => void  — optional; wired to the Right arrow key
  *   children          content rendered inside the modal
  *   contentClassName  optional extra class for the content wrapper
+ *   swipeHandlers      { onTouchStart, onTouchEnd }?  — from useSwipeNav;
+ *                      spread onto the content wrapper so mobile callers
+ *                      can swipe-navigate instead of using arrow keys
  */
-export default function Overlay({ onClose, onPrev, onNext, children, contentClassName }) {
+export default function Overlay({ onClose, onPrev, onNext, children, contentClassName, swipeHandlers }) {
   useEffect(() => {
     const onKeyDown = (e) => {
       if (e.key === 'Escape') onClose()
@@ -56,6 +59,7 @@ export default function Overlay({ onClose, onPrev, onNext, children, contentClas
       <div
         className={`${styles.content} ${contentClassName ?? ''}`}
         onClick={(e) => e.stopPropagation()}
+        {...swipeHandlers}
       >
         {children}
       </div>

@@ -12,12 +12,14 @@ import styles from './Hero.module.css'
  * same viewer used everywhere else on the site.
  *
  * Props:
- *   title  string   required
- *   image  string?  image src; omitted or 'placeholder' renders a
- *                    placeholder box instead and disables click-to-expand
- *   alt    string?
+ *   title       string   required
+ *   image       string?  image src; omitted or 'placeholder' renders a
+ *                         placeholder box instead and disables click-to-expand
+ *   alt         string?
+ *   shortTitle  string?  shorter title shown below the mobile breakpoint
+ *                         instead of `title` — see HeroTitle
  */
-export default function Hero({ title, image, alt = '' }) {
+export default function Hero({ title, image, alt = '', shortTitle }) {
   const [lightboxOpen, setLightboxOpen] = useState(false)
   const hasImage = Boolean(image) && image !== 'placeholder'
 
@@ -45,7 +47,7 @@ export default function Hero({ title, image, alt = '' }) {
           </div>
         )}
         <div className={styles.overlayGradient} />
-        <HeroTitle>{title}</HeroTitle>
+        <HeroTitle shortText={shortTitle}>{title}</HeroTitle>
       </div>
 
       {hasImage && lightboxOpen && (

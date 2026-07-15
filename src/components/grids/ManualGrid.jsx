@@ -1,5 +1,7 @@
 import { useState } from 'react'
 import useContainerWidth from '../../hooks/useContainerWidth.js'
+import useIsMobile from '../../hooks/useIsMobile.js'
+import useSwipeNav from '../../hooks/useSwipeNav.js'
 import GridItem from './GridItem.jsx'
 import Overlay from '../viewers/Overlay.jsx'
 import STLViewer from '../viewers/STLViewer.jsx'
@@ -112,6 +114,7 @@ function FullscreenContent({ item, snapshot }) {
 export default function ManualGrid({ items = [], gap = 16 }) {
   const [containerRef, containerWidth] = useContainerWidth()
   const [open, setOpen] = useState(null)   // { index, snapshot } | null
+  const isMobile = useIsMobile()
 
   const rows = []
   for (const item of items) {
@@ -121,6 +124,7 @@ export default function ManualGrid({ items = [], gap = 16 }) {
   }
 
   const openItem = open ? items[open.index] : null
+  const openItemIsViewer = openItem ? Boolean(VIEWER_BY_TYPE[openItem.type]) : false
 
   const openMedia = (item, snapshot) => {
     const idx = items.indexOf(item)
@@ -128,6 +132,16 @@ export default function ManualGrid({ items = [], gap = 16 }) {
   }
   const showPrev = () => setOpen(o => ({ index: (o.index - 1 + items.length) % items.length, snapshot: null }))
   const showNext = () => setOpen(o => ({ index: (o.index + 1) % items.length, snapshot: null }))
+
+  // Mobile fullscreen navigation is either swipe (photos/progressions) or
+  // visible prev/next buttons (3D viewers — the whole enlarged area is
+  // already claimed by rotate/pinch touch gestures, so a swipe would be
+  // misread as one of those instead of "go to next item").
+  const swipeHandlers = useSwipeNav({
+    enabled: isMobile && !openItemIsViewer && items.length > 1,
+    onSwipeLeft: showNext,
+    onSwipeRight: showPrev,
+  })
 
   return (
     <div ref={containerRef} className={styles.grid} style={{ gap: `${gap}px` }}>
@@ -175,9 +189,16 @@ export default function ManualGrid({ items = [], gap = 16 }) {
           onClose={() => setOpen(null)}
           onPrev={items.length > 1 ? showPrev : undefined}
           onNext={items.length > 1 ? showNext : undefined}
-          contentClassName={VIEWER_BY_TYPE[openItem.type] ? viewerStyles.fullscreenContent : undefined}
+          contentClassName={openItemIsViewer ? viewerStyles.fullscreenContent : undefined}
+          swipeHandlers={swipeHandlers}
         >
           <FullscreenContent item={openItem} snapshot={open.snapshot} />
+          {isMobile && openItemIsViewer && items.length > 1 && (
+            <div className={styles.viewerNav}>
+              <button type="button" className={styles.viewerNavButton} onClick={showPrev} aria-label="Previous">‹</button>
+              <button type="button" className={styles.viewerNavButton} onClick={showNext} aria-label="Next">›</button>
+            </div>
+          )}
         </Overlay>
       )}
     </div>

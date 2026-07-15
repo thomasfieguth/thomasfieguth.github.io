@@ -5,7 +5,7 @@ import styles from './Home.module.css'
 export default function Home() {
   return (
     <div className={styles.page}>
-      <Hero title="Thomas Fieguth" image="placeholder" />
+      <Hero title="Thomas Fieguth" shortTitle="Thomas" image="placeholder" />
 
       <section className={styles.about}>
         <h2 className={styles.aboutHeading}>About Me</h2>
