@@ -51,7 +51,7 @@ export const writeups = [
 export const gridItems = [
   {
     type: 'iframe',
-    caption: 'Prompt Engineering',
+    caption: 'Prompt Engineering: Website',
     src: 'https://thomasfieguth.github.io/',
     thumb: '/assets/images/projects/code/website.png',
   },

@@ -37,6 +37,20 @@ import styles from './CaptionGrid.module.css'
  *                                   // further. 1 = always crop to fill.
  *   }
  */
+// A self-embedding iframe (e.g. this site's own "Prompt Engineering" grid
+// item) would otherwise load the exact same URL already present in its own
+// ancestor chain at every recursion depth — browsers silently refuse to
+// load a frame whose URL matches an ancestor's, as a guard against runaway
+// self-embedding. Tagging each level with an incrementing `d` query param
+// keeps every ancestor's URL distinct so that guard never triggers; it's
+// inert otherwise since this app's router only reads the URL's hash.
+function withRecursionDepth(src) {
+  const url = new URL(src, window.location.href)
+  const depth = Number(new URLSearchParams(window.location.search).get('d')) || 0
+  url.searchParams.set('d', depth + 1)
+  return url.toString()
+}
+
 export default function CaptionGrid({ items = [] }) {
   const [lightboxIndex, setLightboxIndex] = useState(null)
 
@@ -74,7 +88,9 @@ export default function CaptionGrid({ items = [] }) {
 
       {lightboxIndex !== null && (
         <Lightbox
-          src={viewableItems[lightboxIndex].src}
+          src={viewableItems[lightboxIndex].type === 'iframe'
+            ? withRecursionDepth(viewableItems[lightboxIndex].src)
+            : viewableItems[lightboxIndex].src}
           alt={viewableItems[lightboxIndex].alt ?? viewableItems[lightboxIndex].caption}
           type={viewableItems[lightboxIndex].type}
           onClose={() => setLightboxIndex(null)}
