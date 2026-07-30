@@ -16,9 +16,15 @@ import styles from './CaptionGrid.module.css'
  *
  * CaptionGridItem shape:
  *   {
- *     type: 'photo' | 'video',
+ *     type: 'photo' | 'video' | 'iframe',
  *     caption: string,
- *     src?: string,        // required unless placeholder
+ *     src?: string,        // required unless placeholder. For 'iframe',
+ *                           // this is the live URL — only ever loaded once
+ *                           // the Lightbox opens, never in the grid tile.
+ *     thumb?: string,       // static image shown in the grid tile instead
+ *                           // of `src`. Required for 'iframe' (which has
+ *                           // no image of its own to show at rest);
+ *                           // optional for photo/video.
  *     alt?: string,
  *     placeholder?: boolean,     // true if the source file doesn't exist yet
  *     note?: string,             // shown on placeholder tiles, e.g. what file is needed
@@ -55,7 +61,7 @@ export default function CaptionGrid({ items = [] }) {
             ) : (
               <MediaTile
                 type={item.type}
-                src={item.src}
+                src={item.thumb ?? item.src}
                 alt={item.alt ?? item.caption}
                 maximumCutoffRatio={item.maximumCutoffRatio ?? 1}
                 onClick={() => setLightboxIndex(viewableItems.indexOf(item))}

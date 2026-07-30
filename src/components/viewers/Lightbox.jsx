@@ -15,7 +15,7 @@ import styles from './PhotoTile.module.css'
  * Props:
  *   src      string
  *   alt      string?
- *   type     'photo' | 'video'  (default 'photo')
+ *   type     'photo' | 'video' | 'iframe'  (default 'photo')
  *   onClose  () => void
  *   onPrev   (() => void)?
  *   onNext   (() => void)?
@@ -40,6 +40,8 @@ export default function Lightbox({ src, alt = '', type = 'photo', onClose, onPre
           muted
           playsInline
         />
+      ) : type === 'iframe' ? (
+        <iframe src={src} className={styles.lightboxIframe} title={alt} />
       ) : (
         <img
           src={src}

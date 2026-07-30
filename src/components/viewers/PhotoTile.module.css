@@ -63,3 +63,17 @@
   max-height: calc(100vh - var(--lightbox-pad-top) - var(--lightbox-pad-bottom));
   object-fit: contain;
 }
+
+/* Same bounds as .lightboxImage, but an iframe has no intrinsic size for
+   object-fit to work with — aspect-ratio (from the 800x600 source) stands
+   in for it instead. Unlike an img, though, an iframe can't shrink-to-fit
+   from max-width/max-height alone (with width/height both auto, browsers
+   fall back to a fixed default object size instead of solving against the
+   caps), so width is computed explicitly: the smaller of the width cap
+   itself and the width implied by the height cap at this ratio. */
+.lightboxIframe {
+  display: block;
+  width: min(90vw, calc((100vh - var(--lightbox-pad-top) - var(--lightbox-pad-bottom)) * 4 / 3));
+  aspect-ratio: 4 / 3;
+  border: none;
+}
