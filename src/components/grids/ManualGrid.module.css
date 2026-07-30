@@ -8,30 +8,10 @@
   display: flex;
 }
 
-/* Mobile-only prev/next controls for the enlarged 3D viewer — positioned
-   below the viewer (and its slider dock, if any) so they never overlap
-   the pinch/rotate gesture area on the canvas above them. */
-.viewerNav {
-  display: flex;
-  justify-content: center;
-  gap: var(--space-4);
-  margin-top: var(--space-4);
-}
-
-.viewerNavButton {
-  width: 44px;
-  height: 44px;
-  border: 1px solid var(--color-border);
-  border-radius: 50%;
-  background-color: var(--color-surface);
-  color: var(--color-text-primary);
-  font-size: 22px;
-  line-height: 1;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.viewerNavButton:hover {
-  background-color: var(--color-bg);
+/* A row-spanning item's group — everything inside is positioned with an
+   explicit pixel left/top (see layoutRowGroup in ManualGrid.jsx), so this
+   just needs to be the positioning root; height comes from an inline style
+   since absolutely-positioned children don't contribute to it themselves. */
+.rowGroup {
+  position: relative;
 }

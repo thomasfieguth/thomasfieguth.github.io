@@ -53,6 +53,25 @@
   --radius-sm:  4px;
   --radius-md:  8px;
   --radius-lg:  12px;
+
+  /* Lightbox chrome insets — vertical space the Overlay lightbox always
+     reserves at the top (for the close button) and bottom (for the
+     mobile-only prev/next arrows), so a tall image or 3D viewer is sized
+     to never render underneath either. Shared via custom property (rather
+     than each component guessing its own vh percentage) so Overlay's own
+     padding and each media type's own max-height calc — PhotoTile.module.css,
+     ManualGrid.jsx's GLTFViewer config — all agree on the same numbers. */
+  --lightbox-pad-top:    calc(var(--space-6) + 40px + var(--space-4)); /* close button: 24 + 40 + 16 gap */
+  --lightbox-pad-bottom: var(--space-8);
+}
+
+/* Below this width, Overlay swaps its arrow-key hint for visible mobile
+   prev/next buttons pinned to the bottom of the screen — reserve room for
+   those instead. Matches MOBILE_BREAKPOINT in src/hooks/useIsMobile.js. */
+@media (max-width: 800px) {
+  :root {
+    --lightbox-pad-bottom: calc(var(--space-6) + 44px + var(--space-4)); /* nav button: 24 + 44 + 16 gap */
+  }
 }
 
 /* ─── Reset ─────────────────────────────────────────────────────────────── */

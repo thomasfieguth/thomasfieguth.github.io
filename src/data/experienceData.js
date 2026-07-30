@@ -120,19 +120,36 @@ const experienceData = [
         title: 'Water Treatment Plant Cost Estimation',
         skills: ['Skill 1', 'Skill 2'],
         description:
-          'Placeholder — describe this project. What was the goal, what did you build, and what was the outcome?',
+          'This project involved creating a parametric cost-estimation model to \
+          estimate water and wastewater treatment plants based on as few input variables \
+          as possible. This would allow the customers to instantly get a very rough estimate \
+          of what a new plant would cost without the need for detailed assessments. \
+          The model only took in the plant\'s total flow rate and the existence of individual process components. \n\
+          Two methods were combined to get a final estimate. A flowrate-based method, \
+          which fit a cost-to-flowrate curve based on historical data from comparable plants worldwide. \
+          A building block method, which fit a cost-to-flowrate curve for each individual process and combined \
+          them to get a final result. \n\
+          The data shows the results of the model, showing the output results for both methods \
+          individually and the individual cost estimates per process.',
+        gridWidth: 0.55, 
         media: [
           {
             type: 'photo',
-            src: '/assets/images/experience/gei/project2_photo1.jpg',
-            alt: 'Placeholder photo 1',
-            row: 0, width: 0.5, height: 0.4,
+            src: '/assets/images/experience/gei/WTP_cost_breakdown.jpg',
+            alt: 'Water Treatment Plant Cost Breakdown',
+            rows: [0, 1], width: 0.4, height: 0.7,
           },
           {
             type: 'photo',
-            src: '/assets/images/experience/gei/project2_photo2.jpg',
-            alt: 'Placeholder photo 2',
-            row: 0, width: 0.5, height: 0.4,
+            src: '/assets/images/experience/gei/WTP_flowrate.jpg',
+            alt: 'Water Treatment Plant Cost as a Function of Flowrate',
+            row: 0, width: 0.6, height: 0.34,
+          },
+          {
+            type: 'photo',
+            src: '/assets/images/experience/gei/WTP_building_block.jpg',
+            alt: 'Water Treatment Plant Cost as a Function of Flowrate and Components',
+            row: 1, width: 0.6, height: 0.34,
           },
         ],
       },

@@ -58,6 +58,8 @@
 .lightboxImage {
   display: block;
   max-width: 90vw;
-  max-height: 90vh;
+  /* Leaves room for Overlay's close button (always) and mobile nav arrows
+     (below 800px) — see --lightbox-pad-top/--lightbox-pad-bottom in index.css. */
+  max-height: calc(100vh - var(--lightbox-pad-top) - var(--lightbox-pad-bottom));
   object-fit: contain;
 }

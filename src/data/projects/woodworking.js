@@ -113,4 +113,9 @@ export const gridItems = [
     caption: 'Sphere Light',
     src: '/assets/images/projects/woodworking/sphere_light.png',
   },
+  {
+    type: 'photo', 
+    caption: 'CNC Hike Topography', 
+    src: '/assets/images/projects/woodworking/cnc_topography.jpg', 
+  }
 ]

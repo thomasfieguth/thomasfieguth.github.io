@@ -685,6 +685,12 @@ export default function GLTFViewer({
         </div>
       )}
 
+      {/* Rotate hint — only in the fullscreen (click-to-expand) view, where
+          allowFullscreen is false; fades out on its own after a few seconds. */}
+      {!allowFullscreen && !loading && !error && (
+        <span className={styles.dragHint}>Drag to Rotate</span>
+      )}
+
       {/* Progression slider */}
       {mode === 'progression' && progressionStepsForSlider && !loading && !hideControls && (
         <div className={styles.sliderDock}>
