@@ -1,17 +1,32 @@
-import STLViewer from '../viewers/STLViewer.jsx'
-import GLTFViewer from '../viewers/GLTFViewer.jsx'
+import { lazy, Suspense } from 'react'
 import PhotoProgression from '../viewers/PhotoProgression.jsx'
 import PhotoTile from '../viewers/PhotoTile.jsx'
+import viewerStyles from '../viewers/Viewer3D.module.css'
 import styles from './GridItem.module.css'
+
+// Code-split from whatever page imports GridItem — three.js (and the rest
+// of GLTFViewer) then only ever downloads for pages that actually render a
+// gltf* item (Woodworking, Other), not for every page that merely shares
+// ProjectSection/ManualGrid with them (Capstone, Code).
+const GLTFViewer = lazy(() => import('../viewers/GLTFViewer.jsx'))
+
+function ViewerFallback() {
+  return (
+    <div className={viewerStyles.loadingOverlay}>
+      <div className={viewerStyles.spinner} />
+      <span className={viewerStyles.loadingText}>Loading viewer…</span>
+    </div>
+  )
+}
 
 /**
  * GridItem
  *
  * Dispatches one media-item descriptor (the shapes documented in
- * src/data/projects/*.js: photo | photoProgression | stlBasic | stlProgression |
- * stlInternal | gltfBasic | gltfProgression | gltfInternal) to the
- * component that renders it. RowFillGrid, ColumnFillGrid, and
- * JustifiedGrid all use this instead of each reimplementing the mapping.
+ * src/data/projects/*.js: photo | photoProgression | gltfBasic |
+ * gltfProgression | gltfInternal) to the component that renders it.
+ * RowFillGrid, ColumnFillGrid, and JustifiedGrid all use this instead of
+ * each reimplementing the mapping.
  *
  * GridItem has no sizing logic of its own — the calling grid computes
  * how big this item should be (that differs per layout) and hands down
@@ -78,36 +93,30 @@ function renderItem(item, config, compact, photoFit, onOpen, isOpenItem) {
         />
       )
 
-    case 'stlBasic':
-      return <STLViewer mode="basic" model={item.model} config={config} compact={compact} onOpen={openHandler} />
-    case 'stlProgression':
-      return <STLViewer mode="progression" steps={item.steps} config={config} compact={compact} onOpen={openHandler} />
-    case 'stlInternal':
-      return (
-        <STLViewer
-          mode="internal"
-          models={item.models}
-          annotations={item.annotations}
-          config={config}
-          compact={compact}
-          onOpen={openHandler}
-        />
-      )
-
     case 'gltfBasic':
-      return <GLTFViewer mode="basic" model={item.model} config={config} compact={compact} onOpen={openHandler} />
+      return (
+        <Suspense fallback={<ViewerFallback />}>
+          <GLTFViewer mode="basic" model={item.model} config={config} compact={compact} onOpen={openHandler} />
+        </Suspense>
+      )
     case 'gltfProgression':
-      return <GLTFViewer mode="progression" steps={item.steps} config={config} compact={compact} onOpen={openHandler} />
+      return (
+        <Suspense fallback={<ViewerFallback />}>
+          <GLTFViewer mode="progression" steps={item.steps} config={config} compact={compact} onOpen={openHandler} />
+        </Suspense>
+      )
     case 'gltfInternal':
       return (
-        <GLTFViewer
-          mode="internal"
-          models={item.models}
-          annotations={item.annotations}
-          config={config}
-          compact={compact}
-          onOpen={openHandler}
-        />
+        <Suspense fallback={<ViewerFallback />}>
+          <GLTFViewer
+            mode="internal"
+            models={item.models}
+            annotations={item.annotations}
+            config={config}
+            compact={compact}
+            onOpen={openHandler}
+          />
+        </Suspense>
       )
 
     default:

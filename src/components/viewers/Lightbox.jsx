@@ -46,6 +46,7 @@ export default function Lightbox({ src, alt = '', type = 'photo', onClose, onPre
           alt={alt}
           className={styles.lightboxImage}
           draggable={false}
+          loading="lazy"
         />
       )}
     </Overlay>

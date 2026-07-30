@@ -47,6 +47,7 @@ export default function PhotoTile({ src, alt = 'Photo', fit = 'box', onOpen }) {
           alt={alt}
           className={styles.thumb}
           draggable={false}
+          loading="lazy"
         />
       </button>
 

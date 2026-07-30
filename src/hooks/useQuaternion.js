@@ -4,7 +4,7 @@ import * as THREE from 'three'
 /**
  * useQuaternion
  *
- * Manages the rotation state of the STL viewer as a quaternion.
+ * Manages the rotation state of the 3D viewer as a quaternion.
  * Exposes helpers for:
  *   - initialising from euler angles (user config)
  *   - applying auto-rotation around the world Y axis

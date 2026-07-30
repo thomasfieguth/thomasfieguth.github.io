@@ -1,14 +1,16 @@
-import { useState } from 'react'
+import { useState, lazy, Suspense } from 'react'
 import useContainerWidth from '../../hooks/useContainerWidth.js'
 import useIsMobile from '../../hooks/useIsMobile.js'
 import useSwipeNav from '../../hooks/useSwipeNav.js'
 import GridItem from './GridItem.jsx'
 import Overlay from '../viewers/Overlay.jsx'
-import STLViewer from '../viewers/STLViewer.jsx'
-import GLTFViewer from '../viewers/GLTFViewer.jsx'
-import viewerStyles from '../viewers/STLViewer.module.css'
+import viewerStyles from '../viewers/Viewer3D.module.css'
 import photoStyles from '../viewers/PhotoTile.module.css'
 import styles from './ManualGrid.module.css'
+
+// Code-split, same as GridItem's own GLTFViewer import — keeps three.js out
+// of pages (Capstone, Code) that never open a gltf* item's fullscreen view.
+const GLTFViewer = lazy(() => import('../viewers/GLTFViewer.jsx'))
 
 const COMPACT_THRESHOLD = 220
 
@@ -19,7 +21,7 @@ const COMPACT_THRESHOLD = 220
 // (labels shown vs. compact-hidden) and only fit the media area to the
 // remainder, so the component's true total height still lands on `height`.
 const DOCK_TYPES = new Set([
-  'photoProgression', 'stlProgression', 'stlInternal', 'gltfProgression', 'gltfInternal',
+  'photoProgression', 'gltfProgression', 'gltfInternal',
 ])
 const DOCK_RESERVE_COMPACT = 40
 const DOCK_RESERVE_FULL = 76
@@ -27,9 +29,6 @@ const DOCK_RESERVE_FULL = 76
 // 3D-viewer item types, mapped to the component + mode that renders them
 // full-size in the fullscreen overlay.
 const VIEWER_BY_TYPE = {
-  stlBasic:        { Viewer: STLViewer,  mode: 'basic' },
-  stlProgression:  { Viewer: STLViewer,  mode: 'progression' },
-  stlInternal:     { Viewer: STLViewer,  mode: 'internal' },
   gltfBasic:       { Viewer: GLTFViewer, mode: 'basic' },
   gltfProgression: { Viewer: GLTFViewer, mode: 'progression' },
   gltfInternal:    { Viewer: GLTFViewer, mode: 'internal' },
@@ -55,32 +54,34 @@ function FullscreenContent({ item, snapshot }) {
   const cfg = item.config ?? {}
 
   return (
-    <Viewer
-      mode={mode}
-      model={item.model}
-      steps={item.steps}
-      models={item.models}
-      annotations={item.annotations}
-      config={{
-        // maxWidth is deliberately omitted — the fullscreen view fills
-        // available space (maxHeight) rather than inheriting the
-        // thumbnail's own width constraint.
-        initialEuler: cfg.initialEuler,
-        waitMs: cfg.waitMs,
-        fadeMs: cfg.fadeMs,
-        aspectRatio: cfg.aspectRatio,
-        colorMode: cfg.colorMode,
-        color: cfg.color,
-        rotationSpeed: 0,
-        maxHeight: Math.round(window.innerHeight * 0.85),
-      }}
-      hideControls
-      compact={false}
-      initialStepIndex={snapshot?.stepIndex}
-      initialInternalPos={snapshot?.internalPos}
-      enableZoom
-      allowFullscreen={false}
-    />
+    <Suspense fallback={<div className={viewerStyles.loadingOverlay}><div className={viewerStyles.spinner} /></div>}>
+      <Viewer
+        mode={mode}
+        model={item.model}
+        steps={item.steps}
+        models={item.models}
+        annotations={item.annotations}
+        config={{
+          // maxWidth is deliberately omitted — the fullscreen view fills
+          // available space (maxHeight) rather than inheriting the
+          // thumbnail's own width constraint.
+          initialEuler: cfg.initialEuler,
+          waitMs: cfg.waitMs,
+          fadeMs: cfg.fadeMs,
+          aspectRatio: cfg.aspectRatio,
+          colorMode: cfg.colorMode,
+          color: cfg.color,
+          rotationSpeed: 0,
+          maxHeight: Math.round(window.innerHeight * 0.85),
+        }}
+        hideControls
+        compact={false}
+        initialStepIndex={snapshot?.stepIndex}
+        initialInternalPos={snapshot?.internalPos}
+        enableZoom
+        allowFullscreen={false}
+      />
+    </Suspense>
   )
 }
 

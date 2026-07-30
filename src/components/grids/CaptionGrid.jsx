@@ -155,6 +155,7 @@ function MediaTile({ type, src, alt, maximumCutoffRatio, onClick }) {
           src={src}
           alt={alt}
           draggable={false}
+          loading="lazy"
           onLoad={handleLoad}
         />
       )}

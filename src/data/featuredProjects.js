@@ -17,7 +17,7 @@ const featuredProjects = [
   {
     id: 'tractor',
     title: 'Self-Driving Tractor',
-    blurb: 'Todo fill with write up',
+    blurb: 'Autonomous cost-efficient tractor designed specifically for small market garden farmers',
     to: '/experience',
     image: '/assets/images/experience/werkr/tractor.png',
   },

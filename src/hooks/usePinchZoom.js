@@ -5,7 +5,7 @@ import * as THREE from 'three'
  * usePinchZoom
  *
  * Two-finger pinch-to-zoom for a Three.js canvas — the touch equivalent of
- * the mouse-wheel dolly zoom STLViewer/GLTFViewer already wire up behind
+ * the mouse-wheel dolly zoom GLTFViewer already wires up behind
  * `enableZoom`. Listens on the canvas directly (independent of the
  * caller's own single-pointer drag-to-rotate handlers) and dollies the
  * camera along z as the distance between two touches changes.

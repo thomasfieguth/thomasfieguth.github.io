@@ -1,12 +1,14 @@
 import { useEffect, useRef, useState, useCallback } from 'react'
 import * as THREE from 'three'
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js'
+import { DRACOLoader } from 'three/examples/jsm/loaders/DRACOLoader.js'
+import { KTX2Loader } from 'three/examples/jsm/loaders/KTX2Loader.js'
 import useQuaternion from '../../hooks/useQuaternion.js'
 import usePinchZoom from '../../hooks/usePinchZoom.js'
 import ProgressionSlider from './ProgressionSlider.jsx'
 import AlphaSlider from './AlphaSlider.jsx'
 import { parseAspectRatio } from '../../utils/aspectRatio.js'
-import styles from './STLViewer.module.css'
+import styles from './Viewer3D.module.css'
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 
@@ -17,6 +19,15 @@ const DIR_LIGHT_POSITION  = [5, 8, 5]
 // Distance at config.zoom === 1. Models are normalized to a ~1-unit bounding
 // radius, so this is the "fits comfortably in frame" default.
 const BASE_CAMERA_DISTANCE = 3.5
+
+// Decoder/transcoder assets vendored locally under /public/vendor (copied
+// from three's own examples/jsm/libs) rather than loaded from a CDN, so
+// model loading doesn't depend on a third party's uptime or on a decoder
+// version that might drift from the exact three release this app is
+// pinned to. Both are only fetched lazily by their loader the first time a
+// GLTF actually uses Draco/KTX2 compression — harmless no-ops until then.
+const DRACO_DECODER_PATH = `${import.meta.env.BASE_URL}vendor/draco/`
+const KTX2_TRANSCODER_PATH = `${import.meta.env.BASE_URL}vendor/basis/`
 
 // Accumulated pointer travel below this (px) counts as a click, not a drag
 const CLICK_DRAG_THRESHOLD = 6
@@ -40,7 +51,7 @@ function setMeshMat(mesh, opacity, depthWrite) {
 
 /**
  * Per-frame crossfade for progression mode.
- * Identical semantics to the STL version; uses setMeshMat for multi-material support.
+ * Uses setMeshMat for multi-material support.
  */
 function applyCrossfade(meshes, position, steps) {
   const count = steps.length
@@ -103,8 +114,7 @@ function projectToScreen(point3d, object, camera, w, h) {
 /**
  * GLTFViewer
  *
- * Props: identical interface to STLViewer — same modes, same config, same
- * annotation API. Accepts .gltf / .glb files and preserves their PBR materials.
+ * Accepts .gltf / .glb files and preserves their PBR materials.
  *
  *   mode          'basic' | 'progression' | 'internal'
  *   model         string                                          (basic)
@@ -181,6 +191,7 @@ export default function GLTFViewer({
   const dragDistanceRef = useRef(0)    // accumulated pointer travel — click vs. drag
 
   // ── State ─────────────────────────────────────────────────────────────
+  const [inView, setInView]                 = useState(false)
   const [loading, setLoading]               = useState(true)
   const [error, setError]                   = useState(null)
   const [stepIndex, setStepIndex]           = useState(initialStepIndex ?? 0)
@@ -209,8 +220,36 @@ export default function GLTFViewer({
     return []
   })()
 
+  // ── Lazy init ─────────────────────────────────────────────────────────
+  // Defer the WebGL context / GLTFLoader until the viewer scrolls near the
+  // viewport — a project page can stack several of these, and none of
+  // them should spin up a renderer + decode a model before the user ever
+  // sees it. `rootMargin` starts the load a bit early so it's likely done
+  // by the time the box is actually on screen.
+  useEffect(() => {
+    const container = containerRef.current
+    if (!container) return
+    if (typeof IntersectionObserver === 'undefined') {
+      setInView(true)   // no IO support — fall back to loading immediately
+      return
+    }
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries.some(entry => entry.isIntersecting)) {
+          setInView(true)
+          observer.disconnect()
+        }
+      },
+      { rootMargin: '200px' }
+    )
+    observer.observe(container)
+    return () => observer.disconnect()
+  }, [])
+
   // ── Three.js setup ────────────────────────────────────────────────────
   useEffect(() => {
+    if (!inView) return   // stay in the loading state until scrolled near view
     const container = containerRef.current
     if (!container) return
 
@@ -248,8 +287,24 @@ export default function GLTFViewer({
     scene.add(group)
     meshGroupRef.current = group
 
+    // DRACO — transparently decodes Draco-compressed mesh geometry when a
+    // GLTF's KHR_draco_mesh_compression extension is present; every other
+    // file just skips it, so today's uncompressed models are unaffected.
+    const dracoLoader = new DRACOLoader()
+    dracoLoader.setDecoderPath(DRACO_DECODER_PATH)
+
+    // KTX2 — same idea for Basis Universal/KTX2 compressed textures.
+    // detectSupport queries the renderer's GPU format support up front;
+    // the loader only engages per-texture when a file actually contains a
+    // KHR_texture_basisu image, so plain PNG/JPG textures load unchanged.
+    const ktx2Loader = new KTX2Loader()
+    ktx2Loader.setTranscoderPath(KTX2_TRANSCODER_PATH)
+    ktx2Loader.detectSupport(renderer)
+
     // Load GLTFs — resolve with raw gltf objects; normalise after all are loaded
     const loader = new GLTFLoader()
+    loader.setDRACOLoader(dracoLoader)
+    loader.setKTX2Loader(ktx2Loader)
     const loadPromises = modelList.map(({ path, opacity }, modelIndex) =>
       new Promise((resolve, reject) => {
         loader.load(
@@ -284,7 +339,7 @@ export default function GLTFViewer({
 
         loaded.forEach(({ gltf, path, opacity, modelIndex }) => {
           // Wrapper group applies the shared normalisation transform so the
-          // geometry data itself is never mutated (unlike STLViewer).
+          // geometry data itself is never mutated.
           const wrapper = new THREE.Group()
           wrapper.position.set(-sharedCenter.x, -sharedCenter.y, -sharedCenter.z)
           wrapper.scale.setScalar(scale)
@@ -317,8 +372,7 @@ export default function GLTFViewer({
             } else {
               // Replace GLTF materials with a Phong material using a flat
               // color so the viewer has a consistent look independent of the
-              // file's embedded textures/colors, and gets the same specular
-              // highlights as the STL viewer.
+              // file's embedded textures/colors.
               oldMats.forEach(mat => mat.dispose())
               child.material = new THREE.MeshPhongMaterial({
                 color:       new THREE.Color(color),
@@ -368,6 +422,8 @@ export default function GLTFViewer({
       ro.disconnect()
       cancelAnimationFrame(rafRef.current)
       renderer.dispose()
+      dracoLoader.dispose()   // terminates its decoder worker pool
+      ktx2Loader.dispose()    // terminates its transcoder worker pool
       gltfScenesRef.current.forEach(s => {
         s.traverse(child => {
           if (!child.isMesh) return
@@ -378,7 +434,7 @@ export default function GLTFViewer({
       })
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])   // run once on mount
+  }, [inView])   // run once, once scrolled into view
 
   // ── Mouse-wheel dolly zoom (fullscreen viewer only) ───────────────────
   useEffect(() => {

@@ -52,7 +52,6 @@
 .description {
   color: var(--color-text-secondary);
   line-height: 1.7;
-  max-width: 800px;
   margin-bottom: var(--space-6);
 }
 

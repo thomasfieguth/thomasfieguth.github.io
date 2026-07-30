@@ -6,7 +6,7 @@ import styles from './ProgressionSlider.module.css'
  * ProgressionSlider
  *
  * A slider that auto-advances through a list of steps.
- * Used inside STLViewer (progression mode) and by PhotoProgression.
+ * Used inside GLTFViewer (progression mode) and by PhotoProgression.
  *
  * Props:
  *   steps              { label: string }[]   — step definitions

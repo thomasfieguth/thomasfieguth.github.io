@@ -99,6 +99,7 @@ export default function PhotoProgression({ steps = [], config = {}, compact = fa
           className={styles.photo}
           style={{ opacity: 1 }}
           draggable={false}
+          loading="lazy"
           onLoad={handleImageLoad}
         />
 
@@ -111,6 +112,7 @@ export default function PhotoProgression({ steps = [], config = {}, compact = fa
             className={`${styles.photo} ${styles.overlay}`}
             style={{ opacity: alpha }}
             draggable={false}
+            loading="lazy"
           />
         )}
       </div>

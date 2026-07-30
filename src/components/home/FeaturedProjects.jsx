@@ -14,6 +14,7 @@ export default function FeaturedProjects() {
                 src={project.image}
                 alt={project.title}
                 className={styles.image}
+                loading="lazy"
               />
             ) : (
               <div className={styles.placeholder}>

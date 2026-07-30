@@ -3,7 +3,14 @@
   width: 100%;
   /* max-width set inline from props; centers the box when narrower than its parent */
   margin: 0 auto;
-  /* Height is driven by the canvas, sized by ResizeObserver per config.aspectRatio */
+  /* Fills the grid cell's own reserved height (set inline by ManualGrid)
+     immediately, so the lazy-loaded viewer doesn't collapse to the
+     canvas's default intrinsic height and jank open once it scrolls into
+     view. Once the ResizeObserver takes over post-load this is a no-op —
+     its computed height matches anyway. In contexts with no definite
+     parent height (e.g. the fullscreen overlay), the percentage simply
+     resolves to auto per spec, same as before. */
+  height: 100%;
   background-color: var(--color-surface);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-lg);
@@ -16,7 +23,10 @@
 .canvas {
   display: block;
   width: 100%;
-  /* Height set programmatically by the ResizeObserver in the component */
+  /* Height set programmatically by the ResizeObserver in the component;
+     flex-grow fills .wrapper's height before that first runs. */
+  flex: 1 1 auto;
+  min-height: 0;
   touch-action: none;  /* prevent scroll while dragging on mobile */
 }
 
