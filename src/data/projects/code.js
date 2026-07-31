@@ -37,14 +37,40 @@ export const writeups = [
     id: 'onshape-engrave',
     title: 'OnShape Engrave Feature',
     date: 'May 2025',
-    // TODO: write the engrave feature description — it takes a shape with
-    // two planar faces and produces the geometry as if an engraving tool
-    // cut it out, solving the self-intersecting spline problem that
-    // prevents this from being done with standard OnShape features.
     description:
-      'Placeholder — describe the engrave feature. Takes a shape with two planar faces and produces the geometry as if an engraving tool cut it out. Solves the self-intersecting spline problem that prevents this from being done with standard OnShape features.',
-    skills: ['OnShape FeatureScript', 'CAD', 'Computational Geometry'],
-    media: [], // TODO: add engrave feature screenshots/recordings once available
+      'Onshape is an in-browser CAD system which has a language called Featurescript. \
+      Featurescript allows you to make custom tools to optimize your workflow or make parts that \
+      would be very difficult or impossible with the default CAD tools. \
+      I have used this tool extensively in many of my projects. \n\
+      This tool creates the profile that a V-bit would produce using an engrave toolpath on a CNC. \
+      This is useful for cutting out pockets that a larger bit would have missed. \
+      The window on the left shows the stages of the feature. Initially, it rounds the corners, \
+      then it adds a chamfer to straight lines and circles, and then it adds a chamfer to spline segments. \n \
+      The last step is the most difficult because the spline has a variable corner radius, \
+      and if the corner goes from having a larger radius to a smaller radius than the chamfer radius, \
+      then this results in a self-intersecting spline, resulting in a failure. I had to create several \
+      workarounds to ensure that the spline never self-intersects. ',
+    skills: ['OnShape FeatureScript', 'Computational Geometry'],
+    gridWidth: 0.35, 
+    media: [
+      {
+        type: 'gltfProgression',
+        steps: [
+          { label: '1', models: ['/assets/models/code/Engrave0.gltf'] },
+          { label: '2', models: ['/assets/models/code/Engrave1.gltf'] },
+          { label: '3', models: ['/assets/models/code/Engrave3.gltf'] },
+          { label: '4', models: ['/assets/models/code/Engrave4.gltf'] },
+        ],
+        config: {
+          rotationSpeed: 0.3,
+          initialEuler: [-1, 0, 0],
+          waitMs: 1000,
+          fadeMs: 600,
+          colorMode: 'texture',
+        },
+        row: 1, width: 1, height: 0.8,
+      },
+    ],
   },
 ]
 
@@ -57,18 +83,23 @@ export const gridItems = [
   },
   {
     type: 'video',
-    caption: 'Inverse Kinematics Simulation',
-    placeholder: true,
-    // TODO: add inverse kinematics simulation video — file does not exist in the repo yet
-    note: 'video file needed',
+    caption: 'Inverse Kinematics Simulation From Scratch',
+    src: '/assets/videos/code/inv_kin_2.mp4',
   },
-  {
-    type: 'photo',
-    caption: 'Random Height Generator',
-    placeholder: true,
-    // TODO: add random height generator image — OnShape FeatureScript
-    // feature that generates a pattern of shapes at randomised heights
-    // with configurable parameters, used for decorative CNC work.
-    note: 'image file needed',
-  },
+  // {
+  //   type: 'photo',
+  //   caption: 'Random Height Generator',
+  //   placeholder: true,
+  //   // TODO: add random height generator image — OnShape FeatureScript
+  //   // feature that generates a pattern of shapes at randomised heights
+  //   // with configurable parameters, used for decorative CNC work.
+  //   note: 'image file needed',
+  // },
+  { type: 'text', caption: 'Disk Golf Speed Calculator From Video' },
+  { type: 'text', caption: '3D Connect Four' },
+  { type: 'text', caption: 'Square Tiling Optimizer' },
+  { type: 'text', caption: 'Sudoku Solver' },
+  { type: 'text', caption: 'Minesweeper Solver (via Screenshot)' },
+  { type: 'text', caption: '2048 Solver' },
+  { type: 'text', caption: 'Tragically Hip Heardle' },
 ]

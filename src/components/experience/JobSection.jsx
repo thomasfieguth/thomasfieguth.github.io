@@ -25,13 +25,6 @@ export default function JobSection({ job }) {
           </h2>
           <p className={styles.role}>{job.role}</p>
         </div>
-        <div className={styles.meta}>
-          {job.period && <span>{job.period}</span>}
-          {job.location && <span>{job.location}</span>}
-        </div>
-
-        {job.description && <p className={styles.description}>{job.description}</p>}
-
         {job.skills?.length > 0 && (
           <ul className={styles.skills}>
             {job.skills.map((skill) => (
@@ -39,6 +32,13 @@ export default function JobSection({ job }) {
             ))}
           </ul>
         )}
+
+        <div className={styles.meta}>
+          {job.period && <span>{job.period}</span>}
+          {job.location && <span>{job.location}</span>}
+        </div>
+
+        {job.description && <p className={styles.description}>{job.description}</p>}
       </header>
 
       {job.projects?.length > 0 && (

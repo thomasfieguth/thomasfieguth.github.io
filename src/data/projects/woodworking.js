@@ -17,7 +17,7 @@ export const writeups = [
       Cutting the pentagons directly on the lathe would have meant removing too much material, so I subdivided each one into 5 triangles (60 total). Each triangle was cut as a separate land piece and water piece, then glued together. \n\
       Using a table saw jig, I cut precise bevel angles needed to join the 5 triangles into a pentagon, then glued the pentagons into 2 hemispheres. The hemispheres meet at the equator with a gap, held only by dowel pins, \
       leaving the inside hollow enough to mount a motor that spins the globe with no external mechanism visible.',
-    skills: ['CNC Milling', 'CAD', 'Toolpath Generation', 'Woodworking'],
+    skills: ['CNC', 'CAD', 'Woodworking'],
     media: [
       {
         type: 'photo',
@@ -49,7 +49,7 @@ export const writeups = [
       black walnut (forest), cherry (trees), birdseye maple (fields), padauk (garden), sapele (wildflowers), purpleheart (rivers and creeks), ebony (buildings), yellow poplar (grass), and white oak (floodplain). \n\
       I used high-resolution elevation data with a custom Onshape feature I wrote that takes an STL file and a board thickness, then generates contour-shaped pieces sized to minimize wasted wood while staying self-supporting. \
       The piece is hollow underneath to save weight and material. Layers are just under an inch thick with a maximum height of 5 inches, giving at most 6 layers, though not directly stacked, and species of differing thickness don\'t align to the same heights. I am currently cutting the layers; they are not glued together yet.',
-    skills: ['CNC Milling', 'CAD', 'Woodworking', 'Data Processing', 'Python'],
+    skills: ['CNC', 'CAD', 'Woodworking', 'Featurescript'],
     media: [
       {
         type: 'gltfProgression',

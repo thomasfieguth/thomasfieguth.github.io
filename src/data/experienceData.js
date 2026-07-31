@@ -37,13 +37,11 @@ const experienceData = [
     skills: [
       'C++', 'ROS2', 'Qt', 'Python',
       'Autonomous Navigation', 'Sensor Fusion',
-      'Camera-Based Detection', '3D Visualization',
     ],
     projects: [
       {
         id: 'werkr-project-1',
         title: 'Optimizing Position Estimation',
-        skills: ['Skill 1', 'Skill 2'],
         gridWidth: 0.55, 
         description:
           'This progression documents the tuning of the Extended Kalman Filter (EKF) responsible for state estimation on our self-driving tractor. \
@@ -67,7 +65,7 @@ const experienceData = [
             waitMs: 2500,
             fadeMs: 600,
             aspectRatio: '16 / 9', 
-            row: 0, width: 1.0, height: 1.0,
+            row: 0, width: 1.0, height: 0.934,
           },
         ],
       },
@@ -88,14 +86,13 @@ const experienceData = [
       building a capacity-based cost estimation model for water and wastewater treatment plants, \
       and conducting site inspections with formal client reporting.',
     skills: [
-      'Hydraulic Analysis', 'Pump Efficiency',
-      'Cost Estimation', 'Technical Reporting', 'Site Inspection',
+      'Hydraulic Analysis', 'Data Analysis',
+      'Professional Report Writing',
     ],
     projects: [
       {
         id: 'gei-project-1',
         title: 'Pump Efficiency Calculation',
-        skills: ['Skill 1', 'Skill 2'],
         gridWidth: 0.45, 
         description:
           'This project involved creating detailed calculations and a report on the efficiency of the pumps and the pipes \
@@ -118,7 +115,6 @@ const experienceData = [
       {
         id: 'gei-project-2',
         title: 'Water Treatment Plant Cost Estimation',
-        skills: ['Skill 1', 'Skill 2'],
         description:
           'This project involved creating a parametric cost-estimation model to \
           estimate water and wastewater treatment plants based on as few input variables \
@@ -164,53 +160,57 @@ const experienceData = [
     previewImage: '/assets/images/experience/accelerated/preview.jpg',
     website: 'https://www.acceleratedsystems.com',
     description:
-      'Placeholder — describe your work at ASI here. What did you build for the lawnmower platform? What did machining motor casings involve?',
+      'Accelerated Systems Inc. is a Waterloo, Ontario-based designer and manufacturer of integrated electric vehicle \
+      drive systems, including electric motors, motor controllers, battery systems, and custom hardware used in e-bikes, \
+      motorcycles, golf cars, and other electric utility vehicles. The company also offers engineering services spanning \
+      custom product design, motor and controller design, and AI/machine learning system architecture.',
     skills: [
-      'Kotlin', 'Android', 'ROS2', 'C++',
+      'Kotlin', 'ROS2', 'C++',
       'SolidWorks', 'CNC Programming', 'Machining',
-      'GPS Integration', 'Dynamometer Design',
+      'Manufacturing', 
     ],
     projects: [
       {
         id: 'accelerated-project-1',
-        title: 'Placeholder Project Title',
-        date: 'Date TBD',
-        skills: ['Skill 1', 'Skill 2'],
+        title: 'Machining and Manufacturing',
         description:
-          'Placeholder — describe this project. What was the goal, what did you build, and what was the outcome?',
+          'I worked on a range of machining and manufacturing tasks supporting motor development and testing. \
+          I welded custom fixtures used to secure motors during test runs, and designed and built a watertight \
+          jacket to house a waterproof motor. To seal the motor\'s electrical connections, I machined a mold for \
+          producing the waterproof grommets. I also designed and machined an air cooling system integrated into the \
+          motor casing to manage heat during operation, and assembled gearboxes as part of the motor production line. \
+          Together, these projects gave me hands-on experience with fixture design, sealing and waterproofing methods, \
+          thermal management, and mechanical assembly in a manufacturing setting.',
         media: [
           {
             type: 'photo',
-            src: '/assets/images/experience/accelerated/project1_photo1.jpg',
-            alt: 'Placeholder photo 1',
-            row: 0, width: 0.5, height: 0.4,
+            src: '/assets/images/experience/asi/welding.jpg',
+            alt: 'Welding',
+            row: 0, width: 0.5, height: 0.5,
           },
           {
             type: 'photo',
-            src: '/assets/images/experience/accelerated/project1_photo2.jpg',
-            alt: 'Placeholder photo 2',
-            row: 0, width: 0.5, height: 0.4,
-          },
-        ],
-      },
-      {
-        id: 'accelerated-project-2',
-        title: 'Placeholder Project Title',
-        skills: ['Skill 1', 'Skill 2'],
-        description:
-          'Placeholder — describe this project. What was the goal, what did you build, and what was the outcome?',
-        media: [
-          {
-            type: 'photo',
-            src: '/assets/images/experience/accelerated/project2_photo1.jpg',
-            alt: 'Placeholder photo 1',
-            row: 0, width: 0.5, height: 0.4,
+            src: '/assets/images/experience/asi/lathe.jpg',
+            alt: 'Machining',
+            row: 0, width: 0.5, height: 0.5,
           },
           {
             type: 'photo',
-            src: '/assets/images/experience/accelerated/project2_photo2.jpg',
-            alt: 'Placeholder photo 2',
-            row: 0, width: 0.5, height: 0.4,
+            src: '/assets/images/experience/asi/CNC_example1.jpg',
+            alt: 'CNC Result',
+            row: 1, width: 0.333, height: 0.3,
+          },
+          {
+            type: 'photo',
+            src: '/assets/images/experience/asi/CNC_example2.jpg',
+            alt: 'CNC Result',
+            row: 1, width: 0.334, height: 0.3,
+          },
+          {
+            type: 'photo',
+            src: '/assets/images/experience/asi/CNC_example3.jpg',
+            alt: 'CNC Result',
+            row: 1, width: 0.333, height: 0.3,
           },
         ],
       },

@@ -18,7 +18,7 @@ export const writeups = [
       The core is a laser-cut, welded X-shaped mild steel frame that absorbs the force of swings and cuts, with the sides made from thin mild steel sheet, TIG-welded to the frame, purely for cosmetic bulk. \
       Weight is cut further with gaps laser-cut into the main frame. The axe head\'s tip was heat treated to harden it for edge retention, while the rest of the frame was left as mild steel for toughness. \n\
       End to end, it is 13 inches long, estimated at 10 lbs.',
-    skills: ['CAD', 'Woodworking', 'Fabrication', 'Hand Tools', 'Finishing'],
+    skills: ['CAD', 'Metalworking', 'Welding'],
     media: [
       {
         type: 'photo',
@@ -61,16 +61,6 @@ export const gridItems = [
     type: 'photo',
     caption: 'Custom Lego Sets',
     src: '/assets/images/projects/other/lego.jpg',
-  },
-  {
-    type: 'photo',
-    caption: 'Motor Endplate CNCing',
-    src: '/assets/images/projects/other/CNC_example1.jpg'
-  },
-  {
-    type: 'photo',
-    caption: 'Motor Endplate CNCing',
-    src: '/assets/images/projects/other/CNC_example2.jpg'
   },
   {
     type: 'photo',

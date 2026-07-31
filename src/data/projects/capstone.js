@@ -23,7 +23,6 @@ const capstoneData = [
       adjustable height and origin position, and hand detection to automatically trigger a new scan once the user\'s hand moves out of the way. \
       An itterative closest point algorithm (ICP) was used to initialize the coordinate system. \n\
       Through itterative design and repeated user testing the project reached its final stage where it won the "N.S. Rovertson Foundation Capstone Design Award" in the program of Systems Design Engineering',
-    // skills: [],
     media: [
       {
         type: 'photo',
@@ -53,7 +52,7 @@ const capstoneData = [
       and far enough to project into cuts the user had already made. The final iteration also minimized the distance \
       between the camera\'s and projector\'s optical origins to reduce projection error, and was designed with maintainability in mind, \
       keeping all bolts accessible for easy replacement and repair.',
-    skills: ['CNC', 'Fabrication'],
+    skills: ['CAD', 'Itterative Design', 'CNC', 'Fabrication'],
     media: [
       {
         type: 'photo',
@@ -108,7 +107,6 @@ const capstoneData = [
   {
     id: 'capstone-icp',
     title: 'ICP Zeroing',
-    date: 'Date TBD',
     description:
       'We used an iterative closest point (ICP) algorithm to detect the "L" corner piece and establish the system\'s origin. \
       A simpler approach using pre-defined retro-reflectors was considered, \
@@ -118,7 +116,7 @@ const capstoneData = [
       We had to segment out background points even when the base was not coplanar with the camera, and segment out the bolts, \
       which were not included in the CAD file ICP used for comparison. \
       Significant effort also went into optimizing the algorithm itself to reliably find the correct origin every time.',
-    skills: ['Depth Sensing', 'Point Cloud Processing', 'ICP', 'C++'],
+    skills: ['Depth Sensing', 'Point Cloud Processing', 'ICP', 'Python', 'Troubleshooting'],
     gridWidth: 0.2, 
     media: [
       {
@@ -144,7 +142,7 @@ const capstoneData = [
       the interface lets users adjust the colour map\'s palette and discretization, \
       ensuring the depth cues remain clear and distinguishable regardless of individual preference, \
       including for colourblind users.',
-    skills: ['UI Design', 'C++'],
+    skills: ['Qt', 'Python'],
     gridWidth: 0.3, 
     media: [
       {

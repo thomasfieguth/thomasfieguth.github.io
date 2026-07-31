@@ -16,9 +16,9 @@ import styles from './CaptionGrid.module.css'
  *
  * CaptionGridItem shape:
  *   {
- *     type: 'photo' | 'video' | 'iframe',
+ *     type: 'photo' | 'video' | 'iframe' | 'text',
  *     caption: string,
- *     src?: string,        // required unless placeholder. For 'iframe',
+ *     src?: string,        // required unless placeholder or 'text'. For 'iframe',
  *                           // this is the live URL — only ever loaded once
  *                           // the Lightbox opens, never in the grid tile.
  *     thumb?: string,       // static image shown in the grid tile instead
@@ -36,6 +36,11 @@ import styles from './CaptionGrid.module.css'
  *                                   // black background instead of cropping
  *                                   // further. 1 = always crop to fill.
  *   }
+ *
+ * A 'text' item has no media of its own — e.g. a coding project with no
+ * screenshot or demo worth showing. It renders as a plain captioned card,
+ * same size as every other tile, but isn't clickable and is excluded from
+ * the lightbox sequence.
  */
 // A self-embedding iframe (e.g. this site's own "Prompt Engineering" grid
 // item) would otherwise load the exact same URL already present in its own
@@ -55,8 +60,9 @@ export default function CaptionGrid({ items = [] }) {
   const [lightboxIndex, setLightboxIndex] = useState(null)
 
   // Left-to-right, top-to-bottom order — the sequence Left/Right arrow
-  // keys step through in the lightbox. Placeholders have no real source.
-  const viewableItems = items.filter(item => !item.placeholder)
+  // keys step through in the lightbox. Placeholders and text-only items
+  // have no real source.
+  const viewableItems = items.filter(item => !item.placeholder && item.type !== 'text')
 
   if (items.length === 0) return null
 
@@ -65,7 +71,11 @@ export default function CaptionGrid({ items = [] }) {
       {items.map((item, i) => (
         <figure key={i} className={styles.item}>
           <div className={styles.media}>
-            {item.placeholder ? (
+            {item.type === 'text' ? (
+              <div className={styles.textTile}>
+                <span className={styles.textTileLabel}>{item.caption}</span>
+              </div>
+            ) : item.placeholder ? (
               <div className={styles.placeholder}>
                 <span className={styles.placeholderLabel}>
                   {item.type === 'video' ? 'Video needed' : 'Image needed'}
@@ -82,7 +92,9 @@ export default function CaptionGrid({ items = [] }) {
               />
             )}
           </div>
-          <figcaption className={styles.caption}>{item.caption}</figcaption>
+          {item.type !== 'text' && (
+            <figcaption className={styles.caption}>{item.caption}</figcaption>
+          )}
         </figure>
       ))}
 

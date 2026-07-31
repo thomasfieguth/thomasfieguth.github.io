@@ -9,7 +9,7 @@
 .header {
   max-width: 1200px;
   margin: 0 auto;
-  padding: var(--space-12) var(--space-8) var(--space-8);
+  padding: var(--space-12) var(--space-8) var(--space-4);
 }
 
 .heading {
@@ -52,7 +52,7 @@
 .description {
   color: var(--color-text-secondary);
   line-height: 1.7;
-  margin-bottom: var(--space-6);
+  margin-bottom: 0;
 }
 
 .skills {
@@ -60,6 +60,7 @@
   flex-wrap: wrap;
   gap: var(--space-2);
   list-style: none;
+  margin-bottom: var(--space-3);
 }
 
 .skillTag {

@@ -173,6 +173,9 @@ export default function GoLHero({ title }) {
         />
 
         {!isExpanded && <HeroTitle>{title}</HeroTitle>}
+        {!isExpanded && (
+          <span className={styles.hint}>Hover mouse to start game of life</span>
+        )}
       </div>
 
       {isExpanded && (
