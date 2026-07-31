@@ -13,7 +13,11 @@
  *   location      string      — City, Country
  *   previewImage  string      — Single image for the home page card (/public-relative)
  *   description   string      — 1–3 sentence overview: what the job/company is and what you did
- *   skills        string[]    — Tags shown below the description
+ *   skills        (string|{text, easterEgg})[]
+ *                             — Tags shown below the description. Plain strings render as
+ *                               normal; an object with `easterEgg: true` renders the same
+ *                               tag text but wires up the hidden tractor easter egg on click
+ *                               (see JobSection.jsx / TractorEasterEggContext)
  *   website       string?     — Optional company URL for a link on the Experience page
  *   projects      Project[]   — Individual projects done at this job, each rendered by
  *                               ProjectSection (see src/data/projects/*.js for the shape:
@@ -36,7 +40,7 @@ const experienceData = [
       autonomous alternative that reduces fuel costs and labour requirements while increasing yield and precision, making small-scale farming more sustainable and profitable.',
     skills: [
       'C++', 'ROS2', 'Qt', 'Python',
-      'Autonomous Navigation', 'Sensor Fusion',
+      { text: 'Autonomous Navigation', easterEgg: true }, 'Sensor Fusion',
     ],
     projects: [
       {
