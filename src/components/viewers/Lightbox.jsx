@@ -16,11 +16,16 @@ import styles from './PhotoTile.module.css'
  *   src      string
  *   alt      string?
  *   type     'photo' | 'video' | 'iframe'  (default 'photo')
- *   onClose  () => void
- *   onPrev   (() => void)?
- *   onNext   (() => void)?
+ *   onClose       () => void
+ *   onPrev        (() => void)?
+ *   onNext        (() => void)?
+ *   onImageClick  ((src: string) => void)?  — called with the currently
+ *                 displayed src when the enlarged <img> itself is clicked
+ *                 (photo type only, not video/iframe). Generic hook with no
+ *                 built-in behavior of its own — e.g. CaptionGrid forwards
+ *                 this so a caller can react to clicks on one specific image.
  */
-export default function Lightbox({ src, alt = '', type = 'photo', onClose, onPrev, onNext }) {
+export default function Lightbox({ src, alt = '', type = 'photo', onClose, onPrev, onNext, onImageClick }) {
   const isMobile = useIsMobile()
   const swipeHandlers = useSwipeNav({
     enabled: isMobile,
@@ -41,7 +46,12 @@ export default function Lightbox({ src, alt = '', type = 'photo', onClose, onPre
           playsInline
         />
       ) : type === 'iframe' ? (
-        <iframe src={src} className={styles.lightboxIframe} title={alt} />
+        <iframe
+          src={src}
+          className={styles.lightboxIframe}
+          title={alt}
+          allow="autoplay; encrypted-media; fullscreen"
+        />
       ) : (
         <img
           src={src}
@@ -49,6 +59,7 @@ export default function Lightbox({ src, alt = '', type = 'photo', onClose, onPre
           className={styles.lightboxImage}
           draggable={false}
           loading="lazy"
+          onClick={onImageClick ? () => onImageClick(src) : undefined}
         />
       )}
     </Overlay>

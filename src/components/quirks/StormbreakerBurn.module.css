@@ -1,0 +1,34 @@
+/* Hidden quirk: selecting "heat" in the Stormbreaker writeup burns its
+   thumbnails (see StormbreakerBurn.jsx). These classes are only ever added
+   via classList from that component, never through a className prop. */
+
+/* Contains the video's blending to this tile. Safe because .thumbButton
+   (PhotoTile.module.css) paints an opaque background — an isolated group
+   over a transparent backdrop would ignore multiply and show the raw video. */
+.tileBurning {
+  isolation: isolate;
+}
+
+/* The burn overlay. multiply is what gives an alpha-less video transparency:
+   white paper multiplies to the photo unchanged, the burnt hole to black.
+   object-fit: fill stretches the 16:9 clip to whatever ratio the tile is —
+   there are no straight lines in smoke or fire to reveal the distortion. */
+.burnVideo {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: fill;
+  pointer-events: none;
+  mix-blend-mode: multiply;
+  opacity: 1;
+  transition-property: opacity;
+  transition-timing-function: ease-out;
+  z-index: 2;
+}
+
+/* transition-duration is set inline from FADE_MS in StormbreakerBurn.jsx so
+   the fade and the removal timeout can't drift apart. */
+.fadingBack {
+  opacity: 0;
+}

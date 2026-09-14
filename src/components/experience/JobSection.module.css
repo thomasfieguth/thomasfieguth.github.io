@@ -74,3 +74,18 @@
   text-transform: uppercase;
   letter-spacing: 0.05em;
 }
+
+/* Real <button> for the one interactive skill tag (quirk trigger),
+   reset to render pixel-identical to the plain-text .skillTag <li>s
+   around it — `all: unset` strips the UA button chrome (padding, border,
+   background, appearance), then everything else is pulled back from the
+   parent <li> via `inherit` so it can't visually drift from its siblings. */
+.skillButton {
+  all: unset;
+  display: inline;
+  font: inherit;
+  color: inherit;
+  text-transform: inherit;
+  letter-spacing: inherit;
+  cursor: inherit;
+}

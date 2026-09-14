@@ -1,5 +1,6 @@
-import { useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import Lightbox from '../viewers/Lightbox.jsx'
+import { selfEmbedSrc } from '../quirks/recursiveSite.js'
 import styles from './CaptionGrid.module.css'
 
 /**
@@ -12,7 +13,12 @@ import styles from './CaptionGrid.module.css'
  * fixed aspect ratio — the right fit for a wall of logo/thumbnail images.
  *
  * Props:
- *   items  CaptionGridItem[]
+ *   items          CaptionGridItem[]
+ *   onImageClick   ((src: string) => void)?  — forwarded to the Lightbox's
+ *                  `onImageClick` (see Lightbox.jsx); no built-in behavior
+ *   onImageChange  ((src: string | null) => void)?  — called whenever the
+ *                  src shown in the lightbox changes: on open, on Prev/Next
+ *                  navigation to a different item, and on close (with null)
  *
  * CaptionGridItem shape:
  *   {
@@ -42,27 +48,18 @@ import styles from './CaptionGrid.module.css'
  * same size as every other tile, but isn't clickable and is excluded from
  * the lightbox sequence.
  */
-// A self-embedding iframe (e.g. this site's own "Prompt Engineering" grid
-// item) would otherwise load the exact same URL already present in its own
-// ancestor chain at every recursion depth — browsers silently refuse to
-// load a frame whose URL matches an ancestor's, as a guard against runaway
-// self-embedding. Tagging each level with an incrementing `d` query param
-// keeps every ancestor's URL distinct so that guard never triggers; it's
-// inert otherwise since this app's router only reads the URL's hash.
-function withRecursionDepth(src) {
-  const url = new URL(src, window.location.href)
-  const depth = Number(new URLSearchParams(window.location.search).get('d')) || 0
-  url.searchParams.set('d', depth + 1)
-  return url.toString()
-}
-
-export default function CaptionGrid({ items = [] }) {
+export default function CaptionGrid({ items = [], onImageClick, onImageChange }) {
   const [lightboxIndex, setLightboxIndex] = useState(null)
 
   // Left-to-right, top-to-bottom order — the sequence Left/Right arrow
   // keys step through in the lightbox. Placeholders and text-only items
   // have no real source.
   const viewableItems = items.filter(item => !item.placeholder && item.type !== 'text')
+  const currentSrc = lightboxIndex !== null ? viewableItems[lightboxIndex].src : null
+
+  useEffect(() => {
+    onImageChange?.(currentSrc)
+  }, [currentSrc, onImageChange])
 
   if (items.length === 0) return null
 
@@ -101,7 +98,7 @@ export default function CaptionGrid({ items = [] }) {
       {lightboxIndex !== null && (
         <Lightbox
           src={viewableItems[lightboxIndex].type === 'iframe'
-            ? withRecursionDepth(viewableItems[lightboxIndex].src)
+            ? selfEmbedSrc(viewableItems[lightboxIndex].src)
             : viewableItems[lightboxIndex].src}
           alt={viewableItems[lightboxIndex].alt ?? viewableItems[lightboxIndex].caption}
           type={viewableItems[lightboxIndex].type}
@@ -112,6 +109,7 @@ export default function CaptionGrid({ items = [] }) {
           onNext={viewableItems.length > 1
             ? () => setLightboxIndex(i => (i + 1) % viewableItems.length)
             : undefined}
+          onImageClick={onImageClick}
         />
       )}
     </div>

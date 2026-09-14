@@ -1,5 +1,5 @@
 import ProjectSection from '../project/ProjectSection.jsx'
-import { useTractorEasterEgg } from '../../context/TractorEasterEggContext.jsx'
+import { useTractorQuirk } from '../../context/TractorQuirkContext.jsx'
 import styles from './JobSection.module.css'
 
 /**
@@ -11,7 +11,7 @@ import styles from './JobSection.module.css'
  * media-grid-left / description-right layout.
  */
 export default function JobSection({ job }) {
-  const { activate } = useTractorEasterEgg()
+  const { activate } = useTractorQuirk()
 
   return (
     <section id={job.id} className={styles.section}>
@@ -31,16 +31,22 @@ export default function JobSection({ job }) {
         {job.skills?.length > 0 && (
           <ul className={styles.skills}>
             {job.skills.map((skill) => {
-              const isEasterEgg = typeof skill === 'object' && skill.easterEgg
+              const isQuirk = typeof skill === 'object' && skill.quirk
               const text = typeof skill === 'object' ? skill.text : skill
 
               return (
-                <li
-                  key={text}
-                  className={styles.skillTag}
-                  onClick={isEasterEgg ? (e) => activate(e.clientX, e.clientY) : undefined}
-                >
-                  {text}
+                <li key={text} className={styles.skillTag}>
+                  {isQuirk ? (
+                    <button
+                      type="button"
+                      className={styles.skillButton}
+                      onClick={(e) => activate(e.clientX, e.clientY)}
+                    >
+                      {text}
+                    </button>
+                  ) : (
+                    text
+                  )}
                 </li>
               )
             })}

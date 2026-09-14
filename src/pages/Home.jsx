@@ -15,6 +15,8 @@ export default function Home() {
       </section>
 
       <FeaturedProjects />
+
+      <p className={styles.quirkHint}>There are 4 quirks hidden in this website, can you find them all?</p>
     </div>
   )
 }

@@ -2,8 +2,8 @@ import { Suspense, lazy } from 'react'
 import { HashRouter, Routes, Route, Navigate } from 'react-router-dom'
 import Navbar from './components/layout/Navbar.jsx'
 import Footer from './components/layout/Footer.jsx'
-import TractorOverlay from './components/easter-eggs/TractorOverlay.jsx'
-import { TractorEasterEggProvider } from './context/TractorEasterEggContext.jsx'
+import TractorOverlay from './components/quirks/TractorOverlay.jsx'
+import { TractorQuirkProvider } from './context/TractorQuirkContext.jsx'
 import Home from './pages/Home.jsx'
 
 // Every other route is code-split into its own chunk — a visitor on "/"
@@ -20,7 +20,7 @@ const NotFound    = lazy(() => import('./pages/NotFound.jsx'))
 
 export default function App() {
   return (
-    <TractorEasterEggProvider>
+    <TractorQuirkProvider>
       <HashRouter>
         <Navbar />
         <main>
@@ -40,6 +40,6 @@ export default function App() {
         <Footer />
         <TractorOverlay />
       </HashRouter>
-    </TractorEasterEggProvider>
+    </TractorQuirkProvider>
   )
 }

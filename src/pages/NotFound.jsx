@@ -10,9 +10,8 @@ export default function NotFound() {
         <Link to="/" className={styles.homeButton}>Return Home</Link>
       </div>
 
-      {/* I will add in an image later */}
       <div className={styles.placeholderWrap}>
-        <div className={styles.placeholder} />
+        <img src="/assets/images/404_calm.jpg" alt="" className={styles.placeholder} />
       </div>
     </div>
   )

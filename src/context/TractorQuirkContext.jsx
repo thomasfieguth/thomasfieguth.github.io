@@ -1,17 +1,17 @@
 import { createContext, useCallback, useContext, useRef, useState } from 'react'
 
-const TractorEasterEggContext = createContext(null)
+const TractorQuirkContext = createContext(null)
 
 /**
- * TractorEasterEggProvider
+ * TractorQuirkProvider
  *
- * Shared on/off state for the hidden pointer-following tractor easter egg
+ * Shared on/off state for the hidden pointer-following tractor quirk
  * (triggered from the "Autonomous Navigation" skill tag on the Experience
  * page, rendered by TractorOverlay). The seed position is kept in a ref
  * rather than state — it's only ever read once, on activation, so it
  * doesn't need to cause a render itself.
  */
-export function TractorEasterEggProvider({ children }) {
+export function TractorQuirkProvider({ children }) {
   const [active, setActive] = useState(false)
   const seedRef = useRef({ x: 0, y: 0 })
 
@@ -25,16 +25,16 @@ export function TractorEasterEggProvider({ children }) {
   }, [])
 
   return (
-    <TractorEasterEggContext.Provider value={{ active, activate, deactivate, seed: seedRef }}>
+    <TractorQuirkContext.Provider value={{ active, activate, deactivate, seed: seedRef }}>
       {children}
-    </TractorEasterEggContext.Provider>
+    </TractorQuirkContext.Provider>
   )
 }
 
-export function useTractorEasterEgg() {
-  const ctx = useContext(TractorEasterEggContext)
+export function useTractorQuirk() {
+  const ctx = useContext(TractorQuirkContext)
   if (!ctx) {
-    throw new Error('useTractorEasterEgg must be used within a TractorEasterEggProvider')
+    throw new Error('useTractorQuirk must be used within a TractorQuirkProvider')
   }
   return ctx
 }
