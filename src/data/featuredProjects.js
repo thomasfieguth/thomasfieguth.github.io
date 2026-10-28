@@ -1,25 +1,30 @@
 /**
  * featuredProjects.js
  *
- * The 5 cards in the Home page's Featured Projects section. Each links to
- * either a Projects sub-page or (for the tractor) the Experience page.
+ * The slides in the Home page's Featured Projects carousel, shown in array
+ * order. Each links to either a Projects sub-page or (for the tractor) the
+ * Experience page.
  *
  * Fields:
  *   id     string  — React key
- *   title  string  — Card heading
- *   blurb  string  — Placeholder body text, to be replaced with real copy
- *   to     string  — react-router path the whole card links to
- *   image  string  — optional public-relative path to the card's image
+ *   title  string  — Slide heading
+ *   blurb  string  — Short description under the title
+ *   to     string  — react-router path the whole slide links to
+ *   image  string  — optional public-relative path to the slide's image
  *                     (e.g. '/assets/images/home/tractor.jpg'). When
- *                     omitted, the card falls back to a placeholder box.
+ *                     omitted, the slide falls back to a placeholder box.
+ *   maximumCutoffRatio, xMove, yMove
+ *          number  — optional crop adjustments for the image within its
+ *                     4:3 box, e.g. yMove: 0.1 shifts it down by 10% of the
+ *                     box's height (see MediaFrame.jsx)
  */
 const featuredProjects = [
   {
     id: 'tractor',
     title: 'Self-Driving Tractor',
     blurb: 'Autonomous cost-efficient tractor designed specifically for small market garden farmers',
-    to: '/experience',
-    image: '/assets/images/experience/werkr/tractor.png',
+    to: '/experience/werkr',
+    image: '/assets/images/experience/werkr/werkr_tractor.jpg',
   },
   {
     id: 'capstone',
@@ -38,9 +43,9 @@ const featuredProjects = [
   {
     id: 'code',
     title: 'Catan Optimizer',
-    blurb: 'Optimization problem where the goal is to maximize the number of unique tile configurations for a catan board with rivers',
+    blurb: 'Maximizing unique board configurations with tiles with rivers. Additionally doing terrain generation',
     to: '/projects/code',
-    image: '/assets/images/projects/code/catan_solution.png',
+    image: '/assets/images/projects/code/mountains_riverless_v17.png',
   },
   {
     id: 'other',

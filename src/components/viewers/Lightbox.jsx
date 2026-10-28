@@ -35,33 +35,53 @@ export default function Lightbox({ src, alt = '', type = 'photo', onClose, onPre
 
   return (
     <Overlay onClose={onClose} onPrev={onPrev} onNext={onNext} swipeHandlers={swipeHandlers}>
-      {type === 'video' ? (
-        <video
-          src={src}
-          className={styles.lightboxImage}
-          controls
-          autoPlay
-          loop
-          muted
-          playsInline
-        />
-      ) : type === 'iframe' ? (
-        <iframe
-          src={src}
-          className={styles.lightboxIframe}
-          title={alt}
-          allow="autoplay; encrypted-media; fullscreen"
-        />
-      ) : (
-        <img
-          src={src}
-          alt={alt}
-          className={styles.lightboxImage}
-          draggable={false}
-          loading="lazy"
-          onClick={onImageClick ? () => onImageClick(src) : undefined}
-        />
-      )}
+      <LightboxMedia src={src} alt={alt} type={type} onImageClick={onImageClick} />
     </Overlay>
+  )
+}
+
+/**
+ * LightboxMedia
+ *
+ * Just the enlarged media element itself, sized to fit inside an Overlay
+ * — Lightbox's content, exported separately for callers that manage their
+ * own Overlay (ManualGrid, whose fullscreen view also has to host 3D
+ * viewers). Props are the same as Lightbox's.
+ */
+export function LightboxMedia({ src, alt = '', type = 'photo', onImageClick }) {
+  if (type === 'video') {
+    return (
+      <video
+        src={src}
+        className={styles.lightboxImage}
+        controls
+        autoPlay
+        loop
+        muted
+        playsInline
+      />
+    )
+  }
+
+  if (type === 'iframe') {
+    return (
+      <iframe
+        src={src}
+        className={styles.lightboxIframe}
+        title={alt}
+        allow="autoplay; encrypted-media; fullscreen"
+      />
+    )
+  }
+
+  return (
+    <img
+      src={src}
+      alt={alt}
+      className={styles.lightboxImage}
+      draggable={false}
+      loading="lazy"
+      onClick={onImageClick ? () => onImageClick(src) : undefined}
+    />
   )
 }

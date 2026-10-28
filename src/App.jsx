@@ -27,7 +27,7 @@ export default function App() {
           <Suspense fallback={null}>
             <Routes>
               <Route path="/"                    element={<Home />} />
-              <Route path="/experience"          element={<Experience />} />
+              <Route path="/experience/:jobId?"  element={<Experience />} />
               <Route path="/projects"            element={<Navigate to="/projects/capstone" replace />} />
               <Route path="/projects/capstone"   element={<Capstone />} />
               <Route path="/projects/woodworking" element={<Woodworking />} />

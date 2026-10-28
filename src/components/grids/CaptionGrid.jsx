@@ -1,5 +1,8 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect } from 'react'
 import Lightbox from '../viewers/Lightbox.jsx'
+import MediaFrame from '../viewers/MediaFrame.jsx'
+import Placeholder from '../viewers/Placeholder.jsx'
+import useLightboxSequence from '../../hooks/useLightboxSequence.js'
 import { selfEmbedSrc } from '../quirks/recursiveSite.js'
 import styles from './CaptionGrid.module.css'
 
@@ -7,9 +10,8 @@ import styles from './CaptionGrid.module.css'
  * CaptionGrid
  *
  * A grid of small thumbnails that fills left-to-right, top-to-bottom
- * (CSS grid auto-fill), each with a caption underneath. Unlike
- * RowFillGrid/ColumnFillGrid/JustifiedGrid (which preserve each item's own
- * aspect ratio for "magazine" style layouts), every cell here is the same
+ * (CSS grid auto-fill), each with a caption underneath. Unlike ManualGrid
+ * (where every item declares its own size), every cell here is the same
  * fixed aspect ratio — the right fit for a wall of logo/thumbnail images.
  *
  * Props:
@@ -41,7 +43,14 @@ import styles from './CaptionGrid.module.css'
  *                                   // is shrunk to fit and letterboxed on a
  *                                   // black background instead of cropping
  *                                   // further. 1 = always crop to fill.
+ *     xMove?: number,       // default 0. Shifts the media right (negative =
+ *     yMove?: number,       // left) / down (negative = up) by this fraction
+ *                           // of the tile's width / height, e.g. 0.1 = 10%.
+ *                           // The media zooms in just enough that the shift
+ *                           // never exposes an edge on a side it fills.
  *   }
+ *
+ * (maximumCutoffRatio/xMove/yMove are applied by MediaFrame — see there.)
  *
  * A 'text' item has no media of its own — e.g. a coding project with no
  * screenshot or demo worth showing. It renders as a plain captioned card,
@@ -49,13 +58,13 @@ import styles from './CaptionGrid.module.css'
  * the lightbox sequence.
  */
 export default function CaptionGrid({ items = [], onImageClick, onImageChange }) {
-  const [lightboxIndex, setLightboxIndex] = useState(null)
-
   // Left-to-right, top-to-bottom order — the sequence Left/Right arrow
   // keys step through in the lightbox. Placeholders and text-only items
   // have no real source.
   const viewableItems = items.filter(item => !item.placeholder && item.type !== 'text')
-  const currentSrc = lightboxIndex !== null ? viewableItems[lightboxIndex].src : null
+  const lightbox = useLightboxSequence(viewableItems)
+  const openItem = lightbox.openItem
+  const currentSrc = openItem?.src ?? null
 
   useEffect(() => {
     onImageChange?.(currentSrc)
@@ -73,20 +82,28 @@ export default function CaptionGrid({ items = [], onImageClick, onImageChange })
                 <span className={styles.textTileLabel}>{item.caption}</span>
               </div>
             ) : item.placeholder ? (
-              <div className={styles.placeholder}>
-                <span className={styles.placeholderLabel}>
-                  {item.type === 'video' ? 'Video needed' : 'Image needed'}
-                </span>
-                {item.note && <span className={styles.placeholderNote}>{item.note}</span>}
-              </div>
-            ) : (
-              <MediaTile
-                type={item.type}
-                src={item.thumb ?? item.src}
-                alt={item.alt ?? item.caption}
-                maximumCutoffRatio={item.maximumCutoffRatio ?? 1}
-                onClick={() => setLightboxIndex(viewableItems.indexOf(item))}
+              <Placeholder
+                label={item.type === 'video' ? 'Video needed' : 'Image needed'}
+                note={item.note}
               />
+            ) : (
+              <button
+                type="button"
+                className={styles.mediaButton}
+                onClick={() => lightbox.open(item)}
+              >
+                {/* A `thumb` is always a still image, whatever the item's
+                    own type — and an iframe's tile is always its thumb. */}
+                <MediaFrame
+                  type={item.type === 'video' && !item.thumb ? 'video' : 'photo'}
+                  src={item.thumb ?? item.src}
+                  alt={item.alt ?? item.caption}
+                  maximumCutoffRatio={item.maximumCutoffRatio}
+                  xMove={item.xMove}
+                  yMove={item.yMove}
+                  zoomOnHover
+                />
+              </button>
             )}
           </div>
           {item.type !== 'text' && (
@@ -95,102 +112,17 @@ export default function CaptionGrid({ items = [], onImageClick, onImageChange })
         </figure>
       ))}
 
-      {lightboxIndex !== null && (
+      {openItem && (
         <Lightbox
-          src={viewableItems[lightboxIndex].type === 'iframe'
-            ? selfEmbedSrc(viewableItems[lightboxIndex].src)
-            : viewableItems[lightboxIndex].src}
-          alt={viewableItems[lightboxIndex].alt ?? viewableItems[lightboxIndex].caption}
-          type={viewableItems[lightboxIndex].type}
-          onClose={() => setLightboxIndex(null)}
-          onPrev={viewableItems.length > 1
-            ? () => setLightboxIndex(i => (i - 1 + viewableItems.length) % viewableItems.length)
-            : undefined}
-          onNext={viewableItems.length > 1
-            ? () => setLightboxIndex(i => (i + 1) % viewableItems.length)
-            : undefined}
+          src={openItem.type === 'iframe' ? selfEmbedSrc(openItem.src) : openItem.src}
+          alt={openItem.alt ?? openItem.caption}
+          type={openItem.type}
+          onClose={lightbox.close}
+          onPrev={lightbox.prev}
+          onNext={lightbox.next}
           onImageClick={onImageClick}
         />
       )}
     </div>
-  )
-}
-
-/**
- * MediaTile
- *
- * A single grid cell's image or video, filling its box via object-fit:
- * cover by default. If `maximumCutoffRatio` is set below 1, the natural
- * media ratio is compared against the box's own ratio once the media
- * loads; when a plain cover crop would cut off more than that fraction of
- * the constrained dimension, the media is instead scaled down to cut off
- * exactly that much and letterboxed/pillarboxed (black background) for
- * the remainder — applied via inline width/height so it works the same
- * for <img> and <video> (poster frame and active playback alike).
- */
-function MediaTile({ type, src, alt, maximumCutoffRatio, onClick }) {
-  const boxRef = useRef(null)
-  const [clampedSize, setClampedSize] = useState(null)
-
-  const handleLoad = (e) => {
-    if (maximumCutoffRatio >= 1) return
-
-    const mediaEl = e.target
-    const naturalRatio = type === 'video'
-      ? mediaEl.videoWidth / mediaEl.videoHeight
-      : mediaEl.naturalWidth / mediaEl.naturalHeight
-    const box = boxRef.current?.getBoundingClientRect()
-    if (!box?.width || !box?.height || !naturalRatio) return
-
-    const boxRatio = box.width / box.height
-    // Fraction of the constrained dimension a plain cover-crop would cut off.
-    const fraction = 1 - Math.min(boxRatio, naturalRatio) / Math.max(boxRatio, naturalRatio)
-    if (fraction <= maximumCutoffRatio) return
-
-    // Scale down from "cover" toward "contain" until exactly
-    // maximumCutoffRatio of the constrained dimension is cut off.
-    const cappedScale = 1 / (1 - maximumCutoffRatio)
-    const widthPct = boxRatio > naturalRatio
-      ? (naturalRatio / boxRatio) * cappedScale
-      : cappedScale
-    const heightPct = boxRatio > naturalRatio
-      ? cappedScale
-      : (boxRatio / naturalRatio) * cappedScale
-
-    setClampedSize({ width: `${widthPct * 100}%`, height: `${heightPct * 100}%` })
-  }
-
-  const mediaStyle = clampedSize ? { ...clampedSize, objectFit: 'contain' } : undefined
-
-  return (
-    <button
-      type="button"
-      ref={boxRef}
-      className={`${styles.mediaButton} ${clampedSize ? styles.letterboxed : ''}`}
-      onClick={onClick}
-    >
-      {type === 'video' ? (
-        <video
-          className={styles.video}
-          style={mediaStyle}
-          src={src}
-          autoPlay
-          muted
-          loop
-          playsInline
-          onLoadedMetadata={handleLoad}
-        />
-      ) : (
-        <img
-          className={styles.thumb}
-          style={mediaStyle}
-          src={src}
-          alt={alt}
-          draggable={false}
-          loading="lazy"
-          onLoad={handleLoad}
-        />
-      )}
-    </button>
   )
 }

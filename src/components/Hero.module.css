@@ -6,33 +6,28 @@
   background-color: var(--color-border);
 }
 
+/* Half the height of the default 16:3 banner. The min-height keeps the
+   overlaid title from overflowing the banner on narrow screens. */
+.compact {
+  aspect-ratio: 32 / 3;
+  min-height: 96px;
+}
+
 .clickable {
   cursor: zoom-in;
 }
 
-.image {
+/* Fills the banner for whichever of MediaFrame / .blank / Placeholder is
+   shown. */
+.media {
   position: absolute;
   inset: 0;
+}
+
+.blank {
   width: 100%;
   height: 100%;
-  object-fit: cover;
-}
-
-.placeholder {
-  position: absolute;
-  inset: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background-color: var(--color-border);
-}
-
-.placeholderLabel {
-  font-size: var(--text-lg);
-  font-weight: var(--weight-medium);
-  color: var(--color-text-secondary);
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
+  background-color: #000;
 }
 
 .overlayGradient {

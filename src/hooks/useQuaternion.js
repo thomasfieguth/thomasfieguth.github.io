@@ -30,18 +30,31 @@ export default function useQuaternion(initialEuler = [0, 0, 0]) {
   /**
    * applyAutoRotation
    * Called each animation frame when the user is not dragging.
-   * Rotates around the world Y axis by (speed * deltaTime) radians.
+   * Rotates by (speed * deltaTime) radians — around the world Y axis by
+   * default, or around `rotateAround` if given. `rotateAround` is in the
+   * model's own local frame, so it spins about that model axis no matter
+   * how the user has dragged the view.
    *
-   * @param {number} deltaTime  - seconds since last frame
-   * @param {number} speed      - radians per second
+   * @param {number} deltaTime     - seconds since last frame
+   * @param {number} speed         - radians per second
+   * @param {number[]} [rotateAround] - optional [x, y, z] model-local axis
    */
-  const applyAutoRotation = useCallback((deltaTime, speed) => {
+  const applyAutoRotation = useCallback((deltaTime, speed, rotateAround) => {
     const angle = speed * deltaTime
+    if (rotateAround) {
+      const localRotation = new THREE.Quaternion().setFromAxisAngle(
+        new THREE.Vector3(...rotateAround).normalize(),
+        angle
+      )
+      // Post-multiply: rotate in the model's local space
+      quaternionRef.current.multiply(localRotation)
+      return
+    }
     const yRotation = new THREE.Quaternion().setFromAxisAngle(
       new THREE.Vector3(0, 1, 0),
       angle
     )
-    // Post-multiply: rotate in world space
+    // Pre-multiply: rotate in world space
     quaternionRef.current.premultiply(yRotation)
   }, [])
 

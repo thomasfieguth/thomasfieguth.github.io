@@ -82,6 +82,7 @@ export const gridItems = [
     type: 'photo',
     caption: 'F1 Logo',
     src: '/assets/images/projects/woodworking/f1.jpg',
+    maximumCutoffRatio: 0.2
   },
   {
     type: 'photo',
@@ -95,7 +96,7 @@ export const gridItems = [
   },
   {
     type: 'photo',
-    caption: 'Project Ploughshares Logo',
+    caption: 'Project Ploughshares Logo (Commission)',
     src: '/assets/images/projects/woodworking/ploughshares.png',
   },
   {
@@ -112,10 +113,16 @@ export const gridItems = [
     type: 'photo',
     caption: 'Sphere Light',
     src: '/assets/images/projects/woodworking/sphere_light.png',
+    maximumCutoffRatio: 0.2
   },
   {
     type: 'photo', 
     caption: 'CNC Hike Topography', 
     src: '/assets/images/projects/woodworking/cnc_topography.jpg', 
+  },
+  {
+    type: 'photo', 
+    caption: 'Workshop Sign (Commission)', 
+    src: '/assets/images/projects/woodworking/workshop_sign.jpg'
   }
 ]

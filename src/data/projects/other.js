@@ -12,19 +12,24 @@ export const writeups = [
     title: 'Stormbreaker Axe',
     date: 'Oct 2025 - present',
     description:
-      'A working replica of Thor\'s Stormbreaker axe from Marvel, currently in progress. \n\
-      The internal structure is built and heat treated, with sheet metal still to attach.\
-      The main challenge is balancing size against usability: large enough to look accurate to the film model, light enough to actually swing. \
-      The core is a laser-cut, welded X-shaped mild steel frame that absorbs the force of swings and cuts, with the sides made from thin mild steel sheet, TIG-welded to the frame, purely for cosmetic bulk. \
-      Weight is cut further with gaps laser-cut into the main frame. The axe head\'s tip was heat treated to harden it for edge retention, while the rest of the frame was left as mild steel for toughness. \n\
-      End to end, it is 13 inches long, estimated at 10 lbs.',
+      'My brother and I are working on building a replica of Thor\'s Stormbreaker axe from Marvel. \n\
+      The main challenge of this project was to balance movie accuracy and usability: \
+      It needs to be large enough to look like the movie prop, light enough to hold, \
+      and strong enough to absorb the impact of regular axe use. \n\
+      My solution to that problem was to design an internal structure to bear the impact. \
+      This structure was a cross shape made from 1/4" steel with holes cut out in non load-bearing places \
+      to save weight. The outer shell is made from thin sheet metal to save weight. \
+      Since the axe tip was made from the same mild steel as the rest of the internal structure, \
+      it would be soft and loose its sharpness quickly. \
+      Therefore we heat treated the tip to increase its hardness. \n\
+      Overall the axe is 13 inches long and roughly 10 lbs',
     skills: ['CAD', 'Metalworking', 'Welding'],
     media: [
       {
         type: 'photo',
         src: '/assets/images/projects/other/stormbreaker_heat_treating.jpg',
         alt: 'Heat treating the axe head in a forge',
-        row: 0, width: 1.0, height: 0.3,
+        x: 0, y: 0, width: 0.7, height: 0.25,
       },
       {
         type: 'gltfInternal',
@@ -38,15 +43,22 @@ export const writeups = [
           waitMs: 2500,
           fadeMs: 600,
           colorMode: 'texture',
+          zoom: 2.0
         },
-        row: 1, width: 0.6, height: 0.45,
+        x: 0, y: 0.25, width: 0.7, height: 0.45,
       },
       {
         type: 'photo',
         src: '/assets/images/projects/other/stormbreaker_internals.jpg',
         alt: 'Riveted steel skeleton inside the handle',
-        row: 1, width: 0.4, height: 0.45,
+        x: 0.7, y: 0, width: 0.3, height: 0.35,
       },
+      {
+        type: 'photo', 
+        src: '/assets/images/projects/other/stormbreaker_outer.jpg', 
+        alt: 'outer sheet metal added onto the skeleton', 
+        x: 0.7, y: 0.35, width: 0.3, height: 0.35
+      }
     ],
   },
 ]
@@ -56,11 +68,13 @@ export const gridItems = [
     type: 'photo',
     caption: 'Welded Cutlery Birds',
     src: '/assets/images/projects/other/welded_birds.jpg',
+    maximumCutoffRatio: 0.1
   },
   {
     type: 'photo',
     caption: 'Custom Lego Sets',
     src: '/assets/images/projects/other/lego.jpg',
+    maximumCutoffRatio: 0.0
   },
   {
     type: 'photo',
@@ -69,8 +83,25 @@ export const gridItems = [
   },
   {
     type: 'video', 
-    caption: 'Rotating Gingerbread', 
+    caption: 'Gingerbread (Rotating Christmas Pyramid) - 2025', 
     src: '/assets/videos/other/gingerbread.MOV', 
     maximumCutoffRatio: 0.2
+  },
+  {
+    type: 'photo', 
+    caption: 'Gingerbread (Eiffel Tower) - 2024', 
+    src: '/assets/images/projects/other/gingerbread_eiffel.jpg', 
+    maximumCutoffRatio: 0.2
+  },
+  {
+    type: 'photo', 
+    caption: 'Gingerbread (Airport) - 2023', 
+    src: '/assets/images/projects/other/gingerbread_airport.jpg'
+  }, 
+  {
+    type: 'photo', 
+    caption: 'Gingerbread (Dr Suess style Tree House) - 2022', 
+    src: '/assets/images/projects/other/gingerbread_suess.jpg', 
+    yMove: 0.2
   }
 ]

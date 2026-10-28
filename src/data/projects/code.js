@@ -10,27 +10,66 @@ export const writeups = [
   {
     id: 'catan-tiles',
     title: 'Catan River Tile Optimizer',
-    date: 'April 2026',
+    date: 'April 2026 - Present',
     description:
-      'I designed a custom Catan tile set where rivers run continuously across tile edges, \
-      either terminating at the board\'s outer boundary or connecting to a matching river on an adjacent tile. \
-      Given several river types (sources, straight segments, and splits) and a minimum of nine river tiles, \
+      'I am in the process of creating a custom catan board where rivers run continuously across tile edges, \
+      either terminating at the board\'s outer boundary or connecting to a river edge on an adjacent tile. \
+      Given several river types (sources, Sinks, Flows, Splits, and Riverless) and a minimum of nine river tiles, \
       I needed to find the tile set maximizing the number of valid configurations, \
-      while also ensuring no pair of tiles was disproportionately likely to end up adjacent.\n\
-      I solved this using a Monte Carlo simulation that placed tiles at random positions and rotations, \
-      paired with a depth-first search to resolve rotation conflicts and validate river connections. \
-      To keep runtime manageable, I added early stopping once a configuration\'s success rate fell below a viable threshold, \
-      avoiding wasted computation on unpromising tile sets.\n\
-      The next planned step, not yet implemented, is a terrain generator producing tile terrain that stays consistent with the river network and flush at tile edges.',
-    skills: ['Python', 'Combinatorics', 'Optimization', 'Visualization'],
-    gridWidth: 0.35, 
+      while also ensuring no pair of tiles was disproportionately likely to end up adjacent. \
+      I solved this using a Monte Carlo simulation paired with a depth-first search to resolve rotation conflicts. \n\
+      I initially wanted to find real world topography data and place it into the tiles, \
+      however that makes the edge connection difficult, therefore I opted for building a terrain generation tool. \
+      This tool ensures that the terrain approaches the edge tangently, gets cut down where rivers are, \
+      and attempts to recreate realistic looking terrain. There is still work to be done to improve the errosion \
+      calculation on the mountain terrain type to make the mountains look more realistic.',     
+    skills: ['Python', 'Combinatorics', 'Optimization', 'Visualization', 'Terrain Generation'],
+    gridWidth: 0.45, 
     media: [
       {
-        type: 'photo',
-        src: '/assets/images/projects/code/catan_solution.png',
-        alt: 'Optimized river layout across the hex board',
-        row: 0, width: 1.0,
+        type: 'photoProgression',
+        steps: [
+          { image: '/assets/images/projects/code/board1.svg' },
+          { image: '/assets/images/projects/code/board2.svg' },
+          { image: '/assets/images/projects/code/board3.svg' },
+          { image: '/assets/images/projects/code/board4.svg' },
+          { image: '/assets/images/projects/code/board5.svg' },
+        ],
+        config: { hideSlider: true },
+        x: 0, y: 0, width: 0.3, height: 0.3
       },
+      {
+        type: 'photo',
+        src: '/assets/images/projects/code/tile_with_building.jpg',
+        alt: 'Tile with building',
+        x: 0, y: 0.3, width: 0.3, height: 0.3
+      },
+      {
+        type: 'gltfProgression',
+        steps: [
+          { label: 'Riverless', models: ['/assets/models/code/mountains_riverless.gltf'] },
+          { label: 'Source', models: ['/assets/models/code/mountains_source0_source.gltf'] },
+          { label: 'Sink', models: ['/assets/models/code/mountains_source0_sink.gltf'] },
+          { label: 'Flow', models: ['/assets/models/code/mountains_flow01.gltf'] },
+          { label: 'Fork', models: ['/assets/models/code/mountains_fork013.gltf'] },
+        ],
+        config: {
+          rotationSpeed: 0.3,
+          rotateAround: [0, 1, 0],
+          initialEuler: [0.85, 0, 0],
+          waitMs: 2000,
+          fadeMs: 600,
+          colorMode: 'texture',
+          zoom: 2
+        },
+        x: 0.3, y: 0, width: 0.7, height: 0.6,
+      },
+      {
+        type: 'photo',
+        src: '/assets/images/projects/code/catan_heightmaps.png',
+        alt: 'Height map of every terrain type for every river tile type',
+        x: 0, y: 0.6, width: 1.0, height: 0.22, yMove: 0.5
+      }
     ],
   },
   {
@@ -63,10 +102,12 @@ export const writeups = [
         ],
         config: {
           rotationSpeed: 0.3,
-          initialEuler: [-1, 0, 0],
+          rotateAround: [0, 0, 1],
+          initialEuler: [-1.2, 0, 0],
           waitMs: 1000,
           fadeMs: 600,
           colorMode: 'texture',
+          zoom: 1.5
         },
         row: 1, width: 1, height: 0.8,
       },

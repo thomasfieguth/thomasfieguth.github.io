@@ -121,9 +121,12 @@ function projectToScreen(point3d, object, camera, w, h) {
  *   steps         { label: string, models: string[] }[]          (progression)
  *   models        { path: string, label: string, opacity: number }[]  (internal)
  *   annotations   { label: string, headPosition: {x,y,z}, textOffset: {x,y} }[]
- *   config        { rotationSpeed, initialEuler, waitMs, fadeMs, aspectRatio, maxWidth, maxHeight,
- *                   colorMode, color, zoom }
+ *   config        { rotationSpeed, rotateAround, initialEuler, waitMs, fadeMs, aspectRatio, maxWidth,
+ *                   maxHeight, colorMode, color, zoom }
  *
+ *   config.rotateAround  [x, y, z]  // auto-rotation axis in the model's own frame, so it spins
+ *                                   // about that axis regardless of how the view is dragged.
+ *                                   // Omitted → rotate around the world Y axis (default)
  *   config.colorMode  'uniform' | 'texture'  // 'uniform' recolors every mesh with a single
  *                                            // flat color (config.color); 'texture' keeps the
  *                                            // GLTF's own materials/textures untouched.
@@ -163,6 +166,7 @@ export default function GLTFViewer({
 }) {
   const {
     rotationSpeed = 0.4,
+    rotateAround,
     initialEuler  = [0, 0, 0],
     waitMs        = 2500,
     fadeMs        = 600,
@@ -339,9 +343,12 @@ export default function GLTFViewer({
 
         loaded.forEach(({ gltf, path, opacity, modelIndex }) => {
           // Wrapper group applies the shared normalisation transform so the
-          // geometry data itself is never mutated.
+          // geometry data itself is never mutated. Position is applied after
+          // scale (p' = position + scale·p), so the offset must be scaled
+          // too or the model's center lands at center·(scale − 1) instead
+          // of the origin the group rotates around.
           const wrapper = new THREE.Group()
-          wrapper.position.set(-sharedCenter.x, -sharedCenter.y, -sharedCenter.z)
+          wrapper.position.copy(sharedCenter).multiplyScalar(-scale)
           wrapper.scale.setScalar(scale)
           wrapper.add(gltf.scene)
           group.add(wrapper)
@@ -585,7 +592,7 @@ export default function GLTFViewer({
       const delta = clockRef.current.getDelta()
 
       if (!isDraggingRef.current) {
-        applyAutoRotation(delta, rotationSpeed)
+        applyAutoRotation(delta, rotationSpeed, rotateAround)
       }
 
       if (meshGroupRef.current) {
@@ -600,7 +607,7 @@ export default function GLTFViewer({
     loop()
 
     return () => cancelAnimationFrame(rafRef.current)
-  }, [loading, rotationSpeed, applyAutoRotation, quaternionRef, drawAnnotations])
+  }, [loading, rotationSpeed, rotateAround, applyAutoRotation, quaternionRef, drawAnnotations])
 
   // ── Pointer handlers ──────────────────────────────────────────────────
   const onPointerDown = useCallback((e) => {

@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import AlphaSlider from './AlphaSlider.jsx'
 import Lightbox from './Lightbox.jsx'
+import MediaFrame from './MediaFrame.jsx'
 import styles from './PhotoProgression.module.css'
 
 /**
@@ -21,7 +22,11 @@ import styles from './PhotoProgression.module.css'
  *                            aspect ratio                                (default 'auto')
  *     maxWidth     string|number  — CSS max-width of the whole component
  *     maxHeight    string|number  — CSS max-height of the photo frame
+ *     hideSlider   boolean — hide the docked slider; auto-advance still runs (default false)
  *   }
+ *   maximumCutoffRatio, xMove, yMove  number?  — crop adjustments, passed
+ *            straight through to MediaFrame for every step (see there). By
+ *            default each photo is cropped to fill the frame.
  *   compact  boolean  — hide step-name labels in the docked slider, keep the
  *                       track/thumb (default false)
  *   onOpen   (({ dominantIndex }) => void)?  — when provided, called on click with the
@@ -31,13 +36,23 @@ import styles from './PhotoProgression.module.css'
  *   paused   boolean  — forces auto-advance to pause, e.g. while a parent-owned
  *            fullscreen view seeded from this component is on screen (default false)
  */
-export default function PhotoProgression({ steps = [], config = {}, compact = false, onOpen, paused = false }) {
+export default function PhotoProgression({
+  steps = [],
+  config = {},
+  maximumCutoffRatio,
+  xMove,
+  yMove,
+  compact = false,
+  onOpen,
+  paused = false,
+}) {
   const {
     waitMs      = 2500,
     fadeMs      = 600,
     aspectRatio = 'auto',
     maxWidth,
     maxHeight,
+    hideSlider  = false,
   } = config
 
   // Fractional position 0..N-1, driven by AlphaSlider
@@ -92,33 +107,33 @@ export default function PhotoProgression({ steps = [], config = {}, compact = fa
       >
 
         {/* Base image — always rendered */}
-        <img
-          key={imageA}
-          src={imageA}
-          alt={steps[indexA]?.label ?? ''}
-          className={styles.photo}
-          style={{ opacity: 1 }}
-          draggable={false}
-          loading="lazy"
-          onLoad={handleImageLoad}
-        />
+        <div key={imageA} className={styles.layer}>
+          <MediaFrame
+            src={imageA}
+            alt={steps[indexA]?.label ?? ''}
+            maximumCutoffRatio={maximumCutoffRatio}
+            xMove={xMove}
+            yMove={yMove}
+            onLoad={handleImageLoad}
+          />
+        </div>
 
         {/* Overlay image — fades in as alpha increases */}
         {indexB !== indexA && (
-          <img
-            key={imageB}
-            src={imageB}
-            alt={steps[indexB]?.label ?? ''}
-            className={`${styles.photo} ${styles.overlay}`}
-            style={{ opacity: alpha }}
-            draggable={false}
-            loading="lazy"
-          />
+          <div key={imageB} className={`${styles.layer} ${styles.overlay}`} style={{ opacity: alpha }}>
+            <MediaFrame
+              src={imageB}
+              alt={steps[indexB]?.label ?? ''}
+              maximumCutoffRatio={maximumCutoffRatio}
+              xMove={xMove}
+              yMove={yMove}
+            />
+          </div>
         )}
       </div>
 
-      {/* Slider */}
-      <div className={styles.sliderDock}>
+      {/* Slider — kept mounted when hidden, since it drives the auto-advance */}
+      <div className={`${styles.sliderDock} ${hideSlider ? styles.hidden : ''}`}>
         <AlphaSlider
           value={position}
           onChange={setPosition}

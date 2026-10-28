@@ -65,8 +65,16 @@
   line-height: 1.7;
 }
 
-.description p + p {
+.description p + p,
+.description ul + p {
   margin-top: var(--space-4);
+}
+
+/* Lists sit tight under the paragraph that introduces them (no
+   paragraph gap above), but keep the normal gap before what follows. */
+.description ul {
+  list-style: disc;
+  padding-left: var(--space-6);
 }
 
 @media (max-width: 800px) {

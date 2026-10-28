@@ -11,7 +11,9 @@
 /* A row-spanning item's group — everything inside is positioned with an
    explicit pixel left/top (see layoutRowGroup in ManualGrid.jsx), so this
    just needs to be the positioning root; height comes from an inline style
-   since absolutely-positioned children don't contribute to it themselves. */
-.rowGroup {
+   since absolutely-positioned children don't contribute to it themselves.
+   .canvas is the same thing for a whole free-placement grid (layoutFree). */
+.rowGroup,
+.canvas {
   position: relative;
 }

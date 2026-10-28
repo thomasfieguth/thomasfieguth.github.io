@@ -11,6 +11,24 @@ const DEFAULT_GRID_WIDTH = 0.55
 // multi-image grids already split their row across items and don't blow up.
 const SINGLE_IMAGE_STACKED_MAX_WIDTH_VW = 0.6
 
+// Splits a description on newlines into blocks. Plain lines become
+// paragraphs; runs of consecutive lines starting with "- " are grouped into
+// a single bulleted list.
+function parseDescription(text) {
+  const blocks = []
+  for (const line of text.split('\n').map((l) => l.trim()).filter(Boolean)) {
+    if (line.startsWith('- ')) {
+      const prev = blocks[blocks.length - 1]
+      const item = line.slice(2)
+      if (prev?.type === 'list') prev.items.push(item)
+      else blocks.push({ type: 'list', items: [item] })
+    } else {
+      blocks.push({ type: 'paragraph', text: line })
+    }
+  }
+  return blocks
+}
+
 /**
  * ProjectSection
  *
@@ -24,7 +42,16 @@ export default function ProjectSection({ project }) {
   const hasMedia = project.media?.length > 0
   const gridWidth = project.gridWidth ?? DEFAULT_GRID_WIDTH
   const isSingleImage = project.media?.length === 1
-  const paragraphs = project.description?.split('\n').map((p) => p.trim()).filter(Boolean) ?? []
+  const blocks = project.description ? parseDescription(project.description) : []
+  const description = blocks.map((block, i) =>
+    block.type === 'list' ? (
+      <ul key={i}>
+        {block.items.map((item, j) => <li key={j}>{item}</li>)}
+      </ul>
+    ) : (
+      <p key={i}>{block.text}</p>
+    )
+  )
 
   return (
     <section id={project.id} className={styles.section}>
@@ -50,14 +77,10 @@ export default function ProjectSection({ project }) {
           >
             <ManualGrid items={project.media} />
           </div>
-          <div className={styles.description}>
-            {paragraphs.map((p, i) => <p key={i}>{p}</p>)}
-          </div>
+          <div className={styles.description}>{description}</div>
         </div>
       ) : (
-        <div className={styles.description}>
-          {paragraphs.map((p, i) => <p key={i}>{p}</p>)}
-        </div>
+        <div className={styles.description}>{description}</div>
       )}
     </section>
   )

@@ -1,37 +1,29 @@
 import { useState } from 'react'
 import Lightbox from './Lightbox.jsx'
+import MediaFrame from './MediaFrame.jsx'
 import styles from './PhotoTile.module.css'
 
 /**
  * PhotoTile
  *
- * A single photo: hover zooms it slightly to signal it's clickable,
- * clicking opens a lightbox with the full-size image. Shared by
- * PhotoGrid and the row-fill/column-fill/justified grid layouts, which
- * each size it differently — `fit` controls how it fills its parent box:
- *
- *   'box'             — 100% width AND height of the parent (which
- *                        already knows the exact box size/ratio),
- *                        cropped via object-fit: cover.
- *                        Used by: PhotoGrid, JustifiedGrid.
- *   'intrinsicHeight' — 100% height (parent sets an explicit px height),
- *                        width follows the image's own natural ratio.
- *                        Used by: RowFillGrid.
- *   'intrinsicWidth'  — 100% width, height follows the image's own
- *                        natural ratio.
- *                        Used by: ColumnFillGrid.
+ * A single photo filling 100% width AND height of its parent (which
+ * already knows the exact box size/ratio), cropped via MediaFrame: hover
+ * zooms it slightly to signal it's clickable, clicking opens a lightbox
+ * with the full-size image. Used by GridItem for ManualGrid's photos.
  *
  * Props:
  *   src     string
  *   alt     string
- *   fit     'box' | 'intrinsicHeight' | 'intrinsicWidth'  (default 'box')
+ *   type    'photo' | 'video'  (default 'photo') — a video autoplays muted
+ *           and looped in the tile, same as MediaFrame
+ *   maximumCutoffRatio, xMove, yMove  number?  — crop adjustments, passed
+ *           straight through to MediaFrame (see there)
  *   onOpen  (() => void)?  — when provided, called on click instead of
  *           opening PhotoTile's own lightbox. Lets a parent grid (e.g.
- *           CaptionGrid, ManualGrid) open a shared lightbox that knows
- *           about sibling photos, so Left/Right arrow keys can step
- *           between them.
+ *           ManualGrid) open a shared lightbox that knows about sibling
+ *           photos, so Left/Right arrow keys can step between them.
  */
-export default function PhotoTile({ src, alt = 'Photo', fit = 'box', onOpen }) {
+export default function PhotoTile({ src, alt = 'Photo', type = 'photo', maximumCutoffRatio, xMove, yMove, onOpen }) {
   const [lightboxOpen, setLightboxOpen] = useState(false)
   const handleClick = onOpen ?? (() => setLightboxOpen(true))
 
@@ -39,20 +31,22 @@ export default function PhotoTile({ src, alt = 'Photo', fit = 'box', onOpen }) {
     <>
       <button
         type="button"
-        className={`${styles.thumbButton} ${styles[fit]}`}
+        className={styles.thumbButton}
         onClick={handleClick}
       >
-        <img
+        <MediaFrame
+          type={type}
           src={src}
           alt={alt}
-          className={styles.thumb}
-          draggable={false}
-          loading="lazy"
+          maximumCutoffRatio={maximumCutoffRatio}
+          xMove={xMove}
+          yMove={yMove}
+          zoomOnHover
         />
       </button>
 
       {!onOpen && lightboxOpen && (
-        <Lightbox src={src} onClose={() => setLightboxOpen(false)} />
+        <Lightbox src={src} alt={alt} type={type} onClose={() => setLightboxOpen(false)} />
       )}
     </>
   )

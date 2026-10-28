@@ -1,18 +1,18 @@
 /**
  * experienceData.js
  *
- * Each entry renders as:
- *   - A preview card on the Home page (company, role, period, previewImage)
- *   - A full section on the Experience page (all fields), via JobSection
+ * Each entry renders as its own Experience page (hero +
+ * JobSection), in array order; the first entry is where /experience lands.
  *
  * Fields:
- *   id            string      — URL anchor id, e.g. 'werkr' → /#/experience#werkr
- *   company       string      — Company name
+ *   id            string      — Route id, e.g. 'werkr' → /#/experience/werkr
+ *   tabLabel      string      — Short name for the mobile hero title
+ *   company       string      — Company name (hero title)
+ *   heroImage     string?     — Hero banner image; omit for a plain black banner
  *   role          string      — Role title or progression summary
  *   period        string      — Display date range
  *   location      string      — City, Country
- *   previewImage  string      — Single image for the home page card (/public-relative)
- *   description   string      — 1–3 sentence overview: what the job/company is and what you did
+ *   description   string      — Summary of the job, shown below the skills; '\n' starts a new paragraph
  *   skills        (string|{text, quirk})[]
  *                             — Tags shown below the description. Plain strings render as
  *                               normal; an object with `quirk: true` renders the same
@@ -22,22 +22,29 @@
  *   projects      Project[]   — Individual projects done at this job, each rendered by
  *                               ProjectSection (see src/data/projects/*.js for the shape:
  *                               id, title, date, skills, description, media, gridWidth)
+ *   gallery       CaptionGridItem[]?
+ *                             — Captioned thumbnails under the projects, same as the
+ *                               project pages' grids: { type, caption, src, ... }
+ *                               (see CaptionGrid.jsx for the full shape). Clicking a
+ *                               thumbnail opens it in the Lightbox.
  */
 const experienceData = [
   {
     id: 'werkr',
+    tabLabel: 'Werkr',
     company: 'Werkr Tractors',
+    heroImage: 'assets/images/hero/werkr.JPG',
     role: 'Software Engineer Co-op & Full-time',
     period: '2022 – Present',
     location: 'Waterloo, Ontario, Canada',
     website: 'https://werkrtractors.com',
     description:
-      'Werkr Tractors is a privately owned Canadian company developing a fully electric, autonomous tractor for small-scale precision agriculture. \
-      The tractor can be driven manually or run autonomously, following GPS-defined paths to plant, weed, and manage rows with high positional accuracy. \
-      It is designed to be modular, supporting a range of implements including seeders, weeders, mower decks, and flame weeders, and is powered by swappable \
-      LFP battery packs with an optional gas-powered range extender for continuous operation. The company is also developing camera-based, \
-      AI-driven row-following to complement GPS guidance for more precise navigation between crop rows. The overall goal is to replace diesel tractors with an electric, \
-      autonomous alternative that reduces fuel costs and labour requirements while increasing yield and precision, making small-scale farming more sustainable and profitable.',
+      'I joined Werkr Tractors as a software engineering co-op and stayed on full-time, working on the software for a fully electric, \
+      autonomous tractor built for small-scale precision agriculture. Most of my work is on the tractor\'s high-precision guidance: \
+      writing the C++ ROS2 nodes that let it follow GPS-defined rows with high positional accuracy, in open fields and under tree cover alike. \n\
+      Supporting that, I tuned the Extended Kalman Filter that fuses GPS, heading, and other sensor data into the position estimate the guidance \
+      relies on, building Python tooling to analyze logged rosbag data offline so issues can be traced to the exact moment they occur. \
+      I also develop the onboard Qt operator interface used to drive, monitor, and switch the tractor between manual and autonomous operation.',
     skills: [
       'C++', 'ROS2', 'Qt', 'Python',
       { text: 'Autonomous Navigation', quirk: true }, 'Sensor Fusion',
@@ -45,17 +52,37 @@ const experienceData = [
     projects: [
       {
         id: 'werkr-project-1',
+        title: 'Tractor Guidance',
+        description:
+          'The guidance system turns a mission planned in the operator interface (GPS-defined rows, headland turns, and implement events) \
+          into steering and speed commands. I designed it as a set of C++ ROS2 lifecycle nodes: a mission manager that owns the state machine \
+          and tracks progress, a trajectory planner that builds a short, speed-profiled trajectory ahead of the tractor, and a path tracker that \
+          follows it with a modified Stanley controller, using curvature feedforward to compensate for steering lag. \n\
+          Obstacles are mapped into a Nav2 costmap with custom layers. When one blocks the path, the tractor detours around it with Nav2\'s \
+          Smac Hybrid planner, staying within the allowed deviation from the row, or stops if no detour exists, with Nav2\'s collision monitor \
+          as an independent safety backstop. All core logic lives in ROS-independent, unit-tested classes and is tested in simulation.',
+        media: [
+          {
+            type: 'video',
+            src: '/assets/videos/werkr/werkr_guidance_video.mp4',
+            row: 0, width: 1.0, height: 0.5625,
+          },
+        ],
+      },
+      {
+        id: 'werkr-project-2',
         title: 'Optimizing Position Estimation',
         gridWidth: 0.55, 
         description:
-          'This progression documents the tuning of the Extended Kalman Filter (EKF) responsible for state estimation on our self-driving tractor. \
-          Since the tractor must hold a straight line within a small error margin, in open fields and under tree cover where GPS quality varies, \
-          the reliability of the EKF output is critical. To debug and tune the filter, \
-          I wrote a Python tool that parses logged rosbag data offline and plots covariance and heading error over time, \
-          letting me pinpoint exactly when and how the estimate diverged. Using this tool, I identified and corrected several issues: \
-          the GPS was overreporting its confidence, so I manually rescaled its covariance to a more realistic value; the filter was over-trusting differential GPS heading, \
-          causing a zig-zagging output, which I corrected by adjusting the relative weighting; and the yaw estimate was too volatile during RTK float-to-fixed transitions, \
-          which I damped accordingly. Each fix is reflected in the plots as a visible reduction in error against the time axis.',
+          'This progression shows how I tuned the Extended Kalman Filter (EKF) that estimates the tractor\'s position and heading. \
+          The tractor has to hold a straight line within a small error margin, in open fields and under tree cover where GPS quality varies, \
+          so the guidance can only be as good as the estimate it is given. \n\
+          To find where the filter was going wrong, I wrote a Python tool that parses logged rosbag data offline and plots covariance and \
+          heading error over time, showing exactly when and how the estimate diverged. With it, I found and fixed three issues: \n\
+          - The GPS was overreporting its confidence, so I rescaled its covariance to a realistic value\n\
+          - The filter over-trusted the differential GPS heading, which made the output zig-zag, so I adjusted the relative weighting\n\
+          - The yaw estimate was too volatile during RTK float-to-fixed transitions, so I damped it\n\
+          Each fix shows up in the plots as a visible drop in error over time.',
         media: [
           {
             type: 'photoProgression', 
@@ -73,25 +100,60 @@ const experienceData = [
           },
         ],
       },
+      {
+        id: 'werkr-project-3',
+        title: 'Onboard Operator Interface',
+        gridWidth: 0.4, 
+        description:
+          'The image on the left is the second iteration of the user interface. \
+          The interface is built in Qt and connected to ROS2. \
+          This gui has two main components: It allows the user to generate missions with different path types \
+          and it gives users feedback about the state of the tractor and the state of the mission. \n\
+          Currently there are 5 supported mission types:\
+          - AB Line (straight line from A to B)\
+          - AB Multi Line (set of straight lines connected optimally)\
+          - Repeated Line (drives lines parallel to an initial line)\
+          - Area Fill (cover every part of an area such as for mowing)\
+          - Driving Path (drive a path that was recorded manually)\n\
+          For each line type, the path generator calculates the most optimum route to drive the rows in, \
+          plans the route to avoid any conflicts the a pre-defined boundary, plans implement moves, \
+          and calculates a path modified from a dubins or reeds-shepp path to smooth out steering inputs and \
+          approach gear changes at straight steering so that steering does not need to happen at a stand still.',
+        media: [
+          {
+            type: 'photo', 
+            src: '/assets/images/experience/werkr/werkr_gui.png', 
+            alt: 'image of the graphical user interface for the tractor', 
+            row: 0, 
+          }
+        ],
+      },
+    ],
+    gallery: [
+      { type: 'photo', caption: 'Tractor V1', src: '/assets/images/experience/werkr/tractor_v1.png' },
+      { type: 'photo', caption: 'New Tractor', src: '/assets/images/experience/werkr/werkr_tractor.jpg' },
+      { type: 'photo', caption: 'Autonomous Seeding', src: '/assets/images/experience/werkr/werkr_seeder.jpg'}, 
+      { type: 'photo', caption: 'EKF Tuning Plot', src: '/assets/images/experience/werkr/full_5.svg' },
     ],
   },
   {
     id: 'gei',
+    tabLabel: 'GEI',
     company: 'GEI Consultants',
     role: 'Project Designer Co-op',
     period: 'May – Aug 2023',
     location: 'Kitchener, Ontario, Canada',
-    previewImage: '/assets/images/experience/gei/preview.jpg',
     website: 'https://www.geiconsultants.com',
     description:
-      'GEI Consultants is an engineering and environmental consulting firm providing geotechnical, \
-      environmental, water resources, and ecological engineering services for infrastructure and industrial projects. \
-      During my co-op, I worked in the water resources group, analyzing pump efficiency and friction losses in piping systems, \
-      building a capacity-based cost estimation model for water and wastewater treatment plants, \
-      and conducting site inspections with formal client reporting.',
+      'As a project designer co-op in GEI\'s water resources group, I supported engineering work on water and wastewater infrastructure. \
+      I analyzed pump efficiency and friction losses at wastewater pumping stations to determine whether the pumps or the piping \
+      were limiting performance, and built a parametric cost-estimation model that gives clients a rough price for a new treatment \
+      plant from only its flow rate and process components. \n\
+      I also took part in site inspections and turned the findings into formal client reports.',
     skills: [
       'Hydraulic Analysis', 'Data Analysis',
-      'Professional Report Writing',
+      'Professional Report Writing', 'Cost Estimation', 
+      'Site Inspection'
     ],
     projects: [
       {
@@ -137,37 +199,39 @@ const experienceData = [
             type: 'photo',
             src: '/assets/images/experience/gei/WTP_cost_breakdown.jpg',
             alt: 'Water Treatment Plant Cost Breakdown',
-            rows: [0, 1], width: 0.4, height: 0.7,
+            x: 0, y: 0, width: 0.4, height: 0.7,
           },
           {
             type: 'photo',
             src: '/assets/images/experience/gei/WTP_flowrate.jpg',
             alt: 'Water Treatment Plant Cost as a Function of Flowrate',
-            row: 0, width: 0.6, height: 0.34,
+            x: 0.4, y: 0, width: 0.6, height: 0.34,
           },
           {
             type: 'photo',
             src: '/assets/images/experience/gei/WTP_building_block.jpg',
             alt: 'Water Treatment Plant Cost as a Function of Flowrate and Components',
-            row: 1, width: 0.6, height: 0.34,
+            x: 0.4, y: 0.34, width: 0.6, height: 0.34,
           },
         ],
       },
     ],
   },
   {
-    id: 'accelerated',
+    id: 'asi',
+    tabLabel: 'ASI',
     company: 'Accelerated Systems Inc.',
+    heroImage: 'assets/images/hero/asi.jpg',
     role: 'Mechanical / Software Engineer Co-op',
     period: 'Jan – Dec 2022',
     location: 'Waterloo, Ontario, Canada',
-    previewImage: '/assets/images/experience/accelerated/preview.jpg',
     website: 'https://www.acceleratedsystems.com',
     description:
-      'Accelerated Systems Inc. is a Waterloo, Ontario-based designer and manufacturer of integrated electric vehicle \
-      drive systems, including electric motors, motor controllers, battery systems, and custom hardware used in e-bikes, \
-      motorcycles, golf cars, and other electric utility vehicles. The company also offers engineering services spanning \
-      custom product design, motor and controller design, and AI/machine learning system architecture.',
+      'During my co-op at Accelerated Systems, I split my time between the machine shop and software development \
+      for electric vehicle drive systems. On the mechanical side, I designed parts in SolidWorks, wrote CNC programs, \
+      and machined and welded test fixtures, a watertight motor jacket, grommet molds, and an integrated air cooling system, \
+      as well as assembling gearboxes on the production line. \n\
+      On the software side, I worked in Kotlin and in C++ with ROS2, building tools that supported the company\'s motor and vehicle projects.',
     skills: [
       'Kotlin', 'ROS2', 'C++',
       'SolidWorks', 'CNC Programming', 'Machining',
@@ -178,13 +242,16 @@ const experienceData = [
         id: 'accelerated-project-1',
         title: 'Machining and Manufacturing',
         description:
-          'I worked on a range of machining and manufacturing tasks supporting motor development and testing. \
-          I welded custom fixtures used to secure motors during test runs, and designed and built a watertight \
-          jacket to house a waterproof motor. To seal the motor\'s electrical connections, I machined a mold for \
-          producing the waterproof grommets. I also designed and machined an air cooling system integrated into the \
-          motor casing to manage heat during operation, and assembled gearboxes as part of the motor production line. \
-          Together, these projects gave me hands-on experience with fixture design, sealing and waterproofing methods, \
-          thermal management, and mechanical assembly in a manufacturing setting.',
+          'I worked on a range of machining and manufacturing tasks supporting motor development and testing: \n\
+          - Welded custom fixtures used to secure motors during test runs\n\
+          - Designed and built a watertight jacket to house a waterproof motor\n\
+          - To seal the motor\'s electrical connections, I machined a mold for producing the waterproof grommets and manufactured them\n\
+          - Designed and machined an air cooling system integrated into the motor casing to manage heat during operation\n\
+          - Assembled gearboxes as part of the motor production line \n\
+          - Designed and built an air cooling system and a water cooling system for high intensity motor testing\n\
+          Together, these projects gave me the hands-on machine shop and R&D design experiance that I can take into future\
+          endeavors. Thermal management, waterproofing methods, mechanical assembly, and design for manufacturing are important \
+          things I learned during this co-op.', 
         media: [
           {
             type: 'photo',
@@ -218,6 +285,32 @@ const experienceData = [
           },
         ],
       },
+      {
+        id: 'accelerated-project-2',
+        title: 'Software Development',
+        description:
+          ' As part of the autonomous tractor project at Accelerated Systems, I build a simple Kotlin app to display \
+          information in a user friendly way and control the mower. \n\
+          The app included a joystick to control the mower manually, and 4 pages displaying current status information: \n\
+          - Sensor proximity detection from an overhead view \n\
+          - Sensor proximity detection overlayed over time graph \n\
+          - Overhead object detection display \n\
+          - Map display showing mower position \n\
+          This application, while simple and not used other than in testing, was a very interesting project to work on \
+          and was a fun learning opportunity for learning a new language. \n\
+          On the ROS2 side, I built the simple nodes controlling safety stops for sensor procimity, geofencing, and joystick control.',
+        media: [
+          { type: 'photo', src: '/assets/images/experience/asi/App1.png', alt: 'Mower app screen 1', row: 0, width: 0.2, height: 0.43 },
+          { type: 'photo', src: '/assets/images/experience/asi/App2.png', alt: 'Mower app screen 2', row: 0, width: 0.2, height: 0.43 },
+          { type: 'photo', src: '/assets/images/experience/asi/App3.png', alt: 'Mower app screen 3', row: 0, width: 0.2, height: 0.43 },
+          { type: 'photo', src: '/assets/images/experience/asi/App4.png', alt: 'Mower app screen 4', row: 0, width: 0.2, height: 0.43 },
+          { type: 'photo', src: '/assets/images/experience/asi/App5.png', alt: 'Mower app screen 5', row: 0, width: 0.2, height: 0.43 },
+        ],
+      },
+    ],
+    gallery: [
+      { type: 'photo', caption: 'E-Bike stress testing setup', src: '/assets/images/experience/asi/bike_tester.jpg' },
+      { type: 'photo', caption: 'DIY linuxCNC controller for a 4th axis on a CNC', src: '/assets/images/experience/asi/cnc_controller.jpg' },
     ],
   },
 ]

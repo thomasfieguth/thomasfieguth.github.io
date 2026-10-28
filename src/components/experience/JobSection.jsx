@@ -1,14 +1,19 @@
 import ProjectSection from '../project/ProjectSection.jsx'
+import CaptionGrid from '../grids/CaptionGrid.jsx'
 import { useTractorQuirk } from '../../context/TractorQuirkContext.jsx'
 import styles from './JobSection.module.css'
 
 /**
  * JobSection
  *
- * One job on the Experience page: a header (company, role, period,
- * location, optional website link, overview description, skills) followed
- * by that job's individual projects, each rendered with ProjectSection's
- * media-grid-left / description-right layout.
+ * One job's tab on the Experience page (the company name itself is the
+ * hero title above it), in order:
+ *   1. Header: role, period, location, optional website link, skills,
+ *      then the summary of what I did in the job (job.description)
+ *   2. The job's individual projects, each rendered with ProjectSection's
+ *      media-grid-left / description-right layout
+ *   3. Gallery: captioned thumbnails (job.gallery), same CaptionGrid as
+ *      the project pages
  */
 export default function JobSection({ job }) {
   const { activate } = useTractorQuirk()
@@ -16,18 +21,18 @@ export default function JobSection({ job }) {
   return (
     <section id={job.id} className={styles.section}>
       <header className={styles.header}>
-        <div className={styles.heading}>
-          <h2 className={styles.company}>
-            {job.website ? (
-              <a href={job.website} target="_blank" rel="noopener noreferrer" className={styles.companyLink}>
-                {job.company}
-              </a>
-            ) : (
-              job.company
-            )}
-          </h2>
-          <p className={styles.role}>{job.role}</p>
+        <h2 className={styles.role}>{job.role}</h2>
+
+        <div className={styles.meta}>
+          {job.period && <span>{job.period}</span>}
+          {job.location && <span>{job.location}</span>}
+          {job.website && (
+            <a href={job.website} target="_blank" rel="noopener noreferrer" className={styles.websiteLink}>
+              {job.website.replace(/^https?:\/\/(www\.)?/, '')} ↗
+            </a>
+          )}
         </div>
+
         {job.skills?.length > 0 && (
           <ul className={styles.skills}>
             {job.skills.map((skill) => {
@@ -53,12 +58,13 @@ export default function JobSection({ job }) {
           </ul>
         )}
 
-        <div className={styles.meta}>
-          {job.period && <span>{job.period}</span>}
-          {job.location && <span>{job.location}</span>}
-        </div>
-
-        {job.description && <p className={styles.description}>{job.description}</p>}
+        {job.description && (
+          <div className={styles.summary}>
+            {job.description.split('\n').map((p) => p.trim()).filter(Boolean).map((p, i) => (
+              <p key={i} className={styles.description}>{p}</p>
+            ))}
+          </div>
+        )}
       </header>
 
       {job.projects?.length > 0 && (
@@ -67,6 +73,13 @@ export default function JobSection({ job }) {
             <ProjectSection key={project.id} project={project} />
           ))}
         </div>
+      )}
+
+      {job.gallery?.length > 0 && (
+        <section className={styles.block}>
+          <h2 className={styles.blockHeading}>Gallery</h2>
+          <CaptionGrid items={job.gallery} />
+        </section>
       )}
     </section>
   )

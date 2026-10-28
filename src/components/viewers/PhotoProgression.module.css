@@ -20,20 +20,19 @@
   /* aspect-ratio set inline from props */
 }
 
-/* Both images sit on top of each other; position: absolute stacks them */
-.photo {
+/* Both images sit on top of each other; position: absolute stacks them.
+   Each layer holds a MediaFrame, which crops its photo to fill the layer. */
+.layer {
   position: absolute;
   inset: 0;
-  width: 100%;
-  height: 100%;
-  object-fit: contain;
-  display: block;
   user-select: none;
   transition: opacity 0ms linear, transform var(--transition-fast);
 }
 
-/* Subtle zoom on hover to signal the frame is clickable */
-.frame:hover .photo {
+/* Subtle zoom on hover to signal the frame is clickable — applied to the
+   layers rather than via MediaFrame's zoomOnHover, since only the top
+   layer would receive :hover */
+.frame:hover .layer {
   transform: scale(1.03);
 }
 
@@ -47,4 +46,8 @@
   padding: var(--space-4) var(--space-6);
   border-top: 1px solid var(--color-border);
   background-color: var(--color-surface);
+}
+
+.hidden {
+  display: none;
 }

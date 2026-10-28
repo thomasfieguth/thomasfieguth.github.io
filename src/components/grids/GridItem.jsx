@@ -23,25 +23,22 @@ function ViewerFallback() {
  * GridItem
  *
  * Dispatches one media-item descriptor (the shapes documented in
- * src/data/projects/*.js: photo | photoProgression | gltfBasic |
+ * src/data/projects/*.js: photo | video | photoProgression | gltfBasic |
  * gltfProgression | gltfInternal) to the component that renders it.
- * RowFillGrid, ColumnFillGrid, and JustifiedGrid all use this instead of
- * each reimplementing the mapping.
+ * A photo, video, or photoProgression item may also carry the optional crop
+ * adjustments maximumCutoffRatio / xMove / yMove, forwarded to PhotoTile or
+ * PhotoProgression (see
+ * MediaFrame for what they do).
  *
- * GridItem has no sizing logic of its own — the calling grid computes
- * how big this item should be (that differs per layout) and hands down
- * a plain `style` object for the wrapper div. E.g. RowFillGrid passes
- * {height} for photos (width follows naturally) or {width,height} for
- * viewers; ColumnFillGrid passes {width:'100%'}; JustifiedGrid passes
- * both, exactly computed by its packing algorithm.
+ * GridItem has no sizing logic of its own — the calling grid (ManualGrid)
+ * computes how big this item should be and hands down a plain `style`
+ * object ({width, height}) for the wrapper div.
  *
  * Props:
  *   item           object   — the media-item descriptor
  *   style          object   — inline style for the wrapper div (sizing)
- *   photoFit       'box' | 'intrinsicHeight' | 'intrinsicWidth'
- *                  — passed straight through to PhotoTile; ignored for non-photo items
- *   ratioOverride  number?  — overrides item.config.aspectRatio (JustifiedGrid uses
- *                             this to apply its packed, possibly-nudged ratio)
+ *   ratioOverride  number?  — overrides item.config.aspectRatio (ManualGrid uses
+ *                             this to force a viewer/progression to its box's ratio)
  *   compact        boolean  — forwarded as the `compact` prop to viewers/progressions
  *                             (hides slider step-name labels at small rendered sizes)
  *   onOpen         ((item, snapshot?) => void)?  — when provided, called on click
@@ -56,28 +53,32 @@ function ViewerFallback() {
  *                  the calling grid's fullscreen view. Only consumed by PhotoProgression,
  *                  to pause its auto-advance while its enlarged copy is on screen.
  */
-export default function GridItem({ item, style, photoFit = 'box', ratioOverride, compact = false, onOpen, isOpenItem = false }) {
+export default function GridItem({ item, style, ratioOverride, compact = false, onOpen, isOpenItem = false }) {
   const config = ratioOverride != null
     ? { ...item.config, aspectRatio: ratioOverride }
     : item.config
 
   return (
     <div className={styles.itemBox} style={style}>
-      {renderItem(item, config, compact, photoFit, onOpen, isOpenItem)}
+      {renderItem(item, config, compact, onOpen, isOpenItem)}
     </div>
   )
 }
 
-function renderItem(item, config, compact, photoFit, onOpen, isOpenItem) {
+function renderItem(item, config, compact, onOpen, isOpenItem) {
   const openHandler = onOpen ? (snapshot) => onOpen(item, snapshot) : undefined
 
   switch (item.type) {
     case 'photo':
+    case 'video':
       return (
         <PhotoTile
+          type={item.type}
           src={item.src}
           alt={item.alt}
-          fit={photoFit}
+          maximumCutoffRatio={item.maximumCutoffRatio}
+          xMove={item.xMove}
+          yMove={item.yMove}
           onOpen={openHandler}
         />
       )
@@ -87,6 +88,9 @@ function renderItem(item, config, compact, photoFit, onOpen, isOpenItem) {
         <PhotoProgression
           steps={item.steps}
           config={config}
+          maximumCutoffRatio={item.maximumCutoffRatio}
+          xMove={item.xMove}
+          yMove={item.yMove}
           compact={compact}
           onOpen={openHandler}
           paused={isOpenItem}

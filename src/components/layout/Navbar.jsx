@@ -3,9 +3,10 @@ import { NavLink, useLocation } from 'react-router-dom'
 import useIsMobile from '../../hooks/useIsMobile.js'
 import styles from './Navbar.module.css'
 
-const NAV_LINKS = [
-  { to: '/',           label: 'Home' },
-  { to: '/experience', label: 'Experience' },
+const EXPERIENCE_LINKS = [
+  { to: '/experience/werkr', label: 'Werkr Tractors' },
+  { to: '/experience/gei',   label: 'GEI Consultants' },
+  { to: '/experience/asi',   label: 'Accelerated Systems' },
 ]
 
 const PROJECT_LINKS = [
@@ -15,13 +16,22 @@ const PROJECT_LINKS = [
   { to: '/projects/other',       label: 'Other Projects' },
 ]
 
-// Below the mobile breakpoint, the top-level "Home"/"Experience" buttons
-// and the "Projects" dropdown collapse into one flat hamburger menu —
-// there's no room for a nested Projects submenu on a phone-width screen,
-// so every destination sits at the same level.
+// Desktop: "Home" is a plain button; "Experience" and "Projects" are
+// dropdowns, each active whenever the current route is under its prefix.
+const DROPDOWNS = [
+  { id: 'experience', label: 'Experience', prefix: '/experience', links: EXPERIENCE_LINKS },
+  { id: 'projects',   label: 'Projects',   prefix: '/projects',   links: PROJECT_LINKS },
+]
+
+// Below the mobile breakpoint, the top-level buttons and both dropdowns
+// collapse into one flat hamburger menu — there's no room for nested
+// submenus on a phone-width screen, so every destination sits at the
+// same level.
 const MOBILE_LINKS = [
   { to: '/',                     label: 'Home' },
-  { to: '/experience',           label: 'Experience' },
+  { to: '/experience/werkr',     label: 'Werkr' },
+  { to: '/experience/gei',       label: 'GEI' },
+  { to: '/experience/asi',       label: 'ASI' },
   { to: '/projects/capstone',    label: 'Capstone' },
   { to: '/projects/woodworking', label: 'Woodworking' },
   { to: '/projects/code',        label: 'Code' },
@@ -29,34 +39,37 @@ const MOBILE_LINKS = [
 ]
 
 export default function Navbar() {
-  const [open, setOpen] = useState(false)
-  const dropdownRef = useRef(null)
+  // Id of the open menu ('mobile' or a DROPDOWNS id), or null when closed.
+  const [openMenu, setOpenMenu] = useState(null)
+  const navRef = useRef(null)
   const location = useLocation()
   const isMobile = useIsMobile()
-  const isProjectsActive = location.pathname.startsWith('/projects')
+
+  const toggle = (id) => setOpenMenu((prev) => (prev === id ? null : id))
 
   // Close whenever the route changes (e.g. a submenu link was clicked).
   useEffect(() => {
-    setOpen(false)
+    setOpenMenu(null)
   }, [location.pathname])
 
   // Close whenever we cross the mobile breakpoint — the button-nav and
   // hamburger-menu open states aren't interchangeable.
   useEffect(() => {
-    setOpen(false)
+    setOpenMenu(null)
   }, [isMobile])
 
-  // Close on outside click or Escape while open.
+  // Close on a click outside any dropdown, or on Escape, while open.
   useEffect(() => {
-    if (!open) return
+    if (!openMenu) return
 
     function handlePointerDown(event) {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
-        setOpen(false)
+      const dropdown = event.target.closest?.(`.${styles.dropdown}`)
+      if (!dropdown || !navRef.current?.contains(dropdown)) {
+        setOpenMenu(null)
       }
     }
     function handleKeyDown(event) {
-      if (event.key === 'Escape') setOpen(false)
+      if (event.key === 'Escape') setOpenMenu(null)
     }
 
     document.addEventListener('mousedown', handlePointerDown)
@@ -65,31 +78,31 @@ export default function Navbar() {
       document.removeEventListener('mousedown', handlePointerDown)
       document.removeEventListener('keydown', handleKeyDown)
     }
-  }, [open])
+  }, [openMenu])
 
   return (
     <header className={styles.header}>
-      <nav className={styles.nav}>
+      <nav className={styles.nav} ref={navRef}>
         <NavLink to="/" className={styles.wordmark}>
           Thomas Fieguth
         </NavLink>
 
         {isMobile ? (
-          <div className={styles.dropdown} ref={dropdownRef}>
+          <div className={styles.dropdown}>
             <button
               type="button"
               className={styles.hamburger}
               aria-haspopup="true"
-              aria-expanded={open}
+              aria-expanded={openMenu === 'mobile'}
               aria-label="Open menu"
-              onClick={() => setOpen((prev) => !prev)}
+              onClick={() => toggle('mobile')}
             >
               <span className={styles.hamburgerLine} />
               <span className={styles.hamburgerLine} />
               <span className={styles.hamburgerLine} />
             </button>
 
-            {open && (
+            {openMenu === 'mobile' && (
               <ul className={styles.submenu}>
                 {MOBILE_LINKS.map(({ to, label }) => (
                   <li key={to}>
@@ -109,48 +122,48 @@ export default function Navbar() {
           </div>
         ) : (
           <ul className={styles.links}>
-            {NAV_LINKS.map(({ to, label }) => (
-              <li key={to}>
-                <NavLink
-                  to={to}
-                  end={to === '/'}
-                  className={({ isActive }) =>
-                    isActive ? `${styles.link} ${styles.active}` : styles.link
-                  }
+            <li>
+              <NavLink
+                to="/"
+                end
+                className={({ isActive }) =>
+                  isActive ? `${styles.link} ${styles.active}` : styles.link
+                }
+              >
+                Home
+              </NavLink>
+            </li>
+
+            {DROPDOWNS.map(({ id, label, prefix, links }) => (
+              <li key={id} className={styles.dropdown}>
+                <button
+                  type="button"
+                  className={location.pathname.startsWith(prefix) ? `${styles.link} ${styles.active}` : styles.link}
+                  aria-haspopup="true"
+                  aria-expanded={openMenu === id}
+                  onClick={() => toggle(id)}
                 >
                   {label}
-                </NavLink>
+                </button>
+
+                {openMenu === id && (
+                  <ul className={styles.submenu}>
+                    {links.map(({ to, label: linkLabel }) => (
+                      <li key={to}>
+                        <NavLink
+                          to={to}
+                          className={({ isActive }) =>
+                            isActive ? `${styles.submenuLink} ${styles.active}` : styles.submenuLink
+                          }
+                        >
+                          {linkLabel}
+                        </NavLink>
+                      </li>
+                    ))}
+                  </ul>
+                )}
               </li>
             ))}
-
-            <li className={styles.dropdown} ref={dropdownRef}>
-              <button
-                type="button"
-                className={isProjectsActive ? `${styles.link} ${styles.active}` : styles.link}
-                aria-haspopup="true"
-                aria-expanded={open}
-                onClick={() => setOpen((prev) => !prev)}
-              >
-                Projects
-              </button>
-
-              {open && (
-                <ul className={styles.submenu}>
-                  {PROJECT_LINKS.map(({ to, label }) => (
-                    <li key={to}>
-                      <NavLink
-                        to={to}
-                        className={({ isActive }) =>
-                          isActive ? `${styles.submenuLink} ${styles.active}` : styles.submenuLink
-                        }
-                      >
-                        {label}
-                      </NavLink>
-                    </li>
-                  ))}
-                </ul>
-              )}
-            </li>
           </ul>
         )}
       </nav>

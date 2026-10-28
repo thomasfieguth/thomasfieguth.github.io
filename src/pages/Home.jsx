@@ -1,11 +1,44 @@
-import Hero from '../components/Hero.jsx'
 import FeaturedProjects from '../components/home/FeaturedProjects.jsx'
 import styles from './Home.module.css'
+
+const skills = [
+  'C++', 'Python', 'ROS2', 'Qt', 'Sensor Fusion',
+  'CAD', 'CNC Machining', 'Welding', 'Fabrication',
+]
+
+const achievements = [
+  'Studied at the University of Waterloo',
+  'Graduated with a BASc in Systems Design Engineering',
+  'Graduated with Distinction',
+]
 
 export default function Home() {
   return (
     <div className={styles.page}>
-      <Hero title="Thomas Fieguth" shortTitle="Thomas" image="assets/images/hero/home.jpg" />
+      <section className={styles.intro}>
+        <div className={styles.summary}>
+          <h1 className={styles.name}>Thomas Fieguth</h1>
+
+          <ul className={styles.skills}>
+            {skills.map((skill) => (
+              <li key={skill} className={styles.skillTag}>{skill}</li>
+            ))}
+          </ul>
+
+          <ul className={styles.achievements}>
+            {achievements.map((achievement) => (
+              <li key={achievement} className={styles.achievement}>{achievement}</li>
+            ))}
+          </ul>
+
+          <p className={styles.bio}>
+            I'm a Software Engineer at Werkr Tractors, writing the guidance software for an autonomous electric tractor.
+            Outside of work I build things that mix hardware and software, from CNC-routed wooden globes to a Stormbreaker replica.
+          </p>
+        </div>
+
+        <FeaturedProjects />
+      </section>
 
       <section className={styles.about}>
         <h2 className={styles.aboutHeading}>About Me</h2>
@@ -14,9 +47,7 @@ export default function Home() {
         <p className={styles.aboutBody}>Outside of formal engineering work, I build many different projects for fun: CNC-routed wooden globes, topographical maps, a stormbreaker replica, and a Catan combinatorial optimizer.</p>
       </section>
 
-      <FeaturedProjects />
-
-      <p className={styles.quirkHint}>There are 4 quirks hidden in this website, can you find them all?</p>
+      <p className={styles.quirkHint}>There are 4 easter eggs hidden in this website, can you find them all?</p>
     </div>
   )
 }
