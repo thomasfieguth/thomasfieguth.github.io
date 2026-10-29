@@ -25,6 +25,12 @@ import interRegularWoff2 from '@fontsource/inter/files/inter-latin-400-normal.wo
 import './index.css'
 import App from './App.jsx'
 
+// The site used to route with hash URLs (/#/projects/code). Rewrite any
+// old shared link to its real path before the router reads the URL.
+if (window.location.hash.startsWith('#/')) {
+  window.history.replaceState(null, '', window.location.hash.slice(1))
+}
+
 const fontPreload = document.createElement('link')
 fontPreload.rel = 'preload'
 fontPreload.as = 'font'

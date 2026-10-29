@@ -33,6 +33,17 @@ export default function JobSection({ job }) {
           )}
         </div>
 
+        {job.terms?.length > 0 && (
+          <ul className={styles.terms}>
+            {job.terms.map(({ role, period }) => (
+              <li key={period} className={styles.term}>
+                <span className={styles.termRole}>{role}</span>
+                <span>{period}</span>
+              </li>
+            ))}
+          </ul>
+        )}
+
         {job.skills?.length > 0 && (
           <ul className={styles.skills}>
             {job.skills.map((skill) => {

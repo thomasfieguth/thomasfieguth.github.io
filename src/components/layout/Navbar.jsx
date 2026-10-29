@@ -1,7 +1,12 @@
 import { useEffect, useRef, useState } from 'react'
 import { NavLink, useLocation } from 'react-router-dom'
 import useIsMobile from '../../hooks/useIsMobile.js'
+import contactLinks from '../../data/contactLinks.js'
 import styles from './Navbar.module.css'
+
+// The resume is a PDF, not a route, so it's a plain link that opens in a
+// new tab rather than a NavLink.
+const RESUME_HREF = contactLinks.find((link) => link.label === 'Resume').href
 
 const EXPERIENCE_LINKS = [
   { to: '/experience/werkr', label: 'Werkr Tractors' },
@@ -117,6 +122,11 @@ export default function Navbar() {
                     </NavLink>
                   </li>
                 ))}
+                <li>
+                  <a href={RESUME_HREF} target="_blank" rel="noopener noreferrer" className={styles.submenuLink}>
+                    Resume
+                  </a>
+                </li>
               </ul>
             )}
           </div>
@@ -164,6 +174,12 @@ export default function Navbar() {
                 )}
               </li>
             ))}
+
+            <li>
+              <a href={RESUME_HREF} target="_blank" rel="noopener noreferrer" className={styles.link}>
+                Resume
+              </a>
+            </li>
           </ul>
         )}
       </nav>

@@ -7,7 +7,14 @@ import styles from './Capstone.module.css'
 export default function Capstone() {
   return (
     <div className={styles.page}>
-      <Hero title="Capstone" image="assets/images/hero/capstone.png" />
+      <Hero title="Capstone" image="/assets/images/hero/capstone.jpg" />
+
+      <div className={styles.awardWrap}>
+        <p className={styles.award}>
+          <strong>Award winner:</strong> N.S. Robertson Foundation Capstone Design Award,
+          Systems Design Engineering, University of Waterloo
+        </p>
+      </div>
 
       {/* <header className={styles.header}>
         <h1 className={styles.title}>Depth Sensing Woodcarving Aid — Capstone</h1>

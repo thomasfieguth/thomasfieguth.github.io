@@ -15,6 +15,31 @@
   color: var(--color-text-primary);
 }
 
+.awardWrap {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: var(--space-8) var(--space-8) 0;
+}
+
+.award {
+  padding: var(--space-3) var(--space-4);
+  border-left: 3px solid var(--color-accent);
+  background-color: var(--color-surface);
+  border-radius: var(--radius-sm);
+  color: var(--color-text-primary);
+}
+
+.award strong {
+  color: var(--color-accent);
+  font-weight: var(--weight-semibold);
+}
+
+@media (max-width: 800px) {
+  .awardWrap {
+    padding: var(--space-6) var(--space-4) 0;
+  }
+}
+
 .gridSection {
   max-width: 1200px;
   margin: 0 auto;

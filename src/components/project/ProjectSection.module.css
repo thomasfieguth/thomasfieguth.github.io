@@ -58,11 +58,22 @@
   min-width: 0;
 }
 
+/* Media full width above the description (project.layout: 'stacked'). */
+.stacked {
+  flex-direction: column;
+}
+
 .description {
   flex: 1 1 auto;
   min-width: 0;
-  color: var(--color-text-secondary);
+  color: var(--color-text-body);
   line-height: 1.7;
+}
+
+/* Bold lead-ins ("**Problem:** ...") that let a skimmer find each part. */
+.description strong {
+  color: var(--color-text-primary);
+  font-weight: var(--weight-semibold);
 }
 
 .description p + p,
@@ -84,9 +95,5 @@
 
   .media {
     width: 100%;
-    /* Only single-image grids set --stacked-max-width (see ProjectSection.jsx);
-       multi-image grids fall back to "none" and stay unconstrained. */
-    max-width: var(--stacked-max-width, none);
-    margin: 0 auto;
   }
 }

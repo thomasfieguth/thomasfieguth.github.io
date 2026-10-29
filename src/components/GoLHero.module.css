@@ -6,6 +6,14 @@
   background-color: var(--color-border);
 }
 
+/* Matches Hero's deeper phone crop. GoLHero reads the stage's real
+   height, so the canvas re-centres itself for either ratio. */
+@media (max-width: 800px) {
+  .stage {
+    aspect-ratio: 16 / 6;
+  }
+}
+
 .stageExpanded {
   position: fixed;
   top: 50%;
@@ -29,6 +37,8 @@
 
 .stageExpanded .canvas {
   cursor: default;
+  /* Let a finger drag draw cells instead of scrolling the page. */
+  touch-action: none;
 }
 
 .hint {

@@ -34,6 +34,7 @@ import styles from './CaptionGrid.module.css'
  *                           // no image of its own to show at rest);
  *                           // optional for photo/video.
  *     alt?: string,
+ *     link?: { label: string, href: string },  // extra link after the caption, e.g. source code
  *     placeholder?: boolean,     // true if the source file doesn't exist yet
  *     note?: string,             // shown on placeholder tiles, e.g. what file is needed
  *     maximumCutoffRatio?: number,  // 0-1, default 1. Caps how much of the
@@ -107,7 +108,17 @@ export default function CaptionGrid({ items = [], onImageClick, onImageChange })
             )}
           </div>
           {item.type !== 'text' && (
-            <figcaption className={styles.caption}>{item.caption}</figcaption>
+            <figcaption className={styles.caption}>
+              {item.caption}
+              {item.link && (
+                <>
+                  {' · '}
+                  <a href={item.link.href} target="_blank" rel="noopener noreferrer" className={styles.captionLink}>
+                    {item.link.label}
+                  </a>
+                </>
+              )}
+            </figcaption>
           )}
         </figure>
       ))}

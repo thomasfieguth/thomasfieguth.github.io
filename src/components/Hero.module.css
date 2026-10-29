@@ -30,6 +30,17 @@
   background-color: #000;
 }
 
+/* A 16:3 strip is only ~70px tall on a phone; use a deeper crop there. */
+@media (max-width: 800px) {
+  .hero {
+    aspect-ratio: 16 / 6;
+  }
+
+  .compact {
+    aspect-ratio: 16 / 3;
+  }
+}
+
 .overlayGradient {
   position: absolute;
   inset: 0;

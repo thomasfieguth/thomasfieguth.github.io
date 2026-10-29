@@ -50,3 +50,12 @@
   color: var(--color-text-secondary);
   text-align: center;
 }
+
+.captionLink {
+  color: var(--color-accent);
+  transition: color var(--transition-fast);
+}
+
+.captionLink:hover {
+  color: var(--color-accent-hover);
+}

@@ -12,18 +12,17 @@ export const writeups = [
     title: 'Stormbreaker Axe',
     date: 'Oct 2025 - present',
     description:
-      'My brother and I are working on building a replica of Thor\'s Stormbreaker axe from Marvel. \n\
-      The main challenge of this project was to balance movie accuracy and usability: \
-      It needs to be large enough to look like the movie prop, light enough to hold, \
+      'My brother and I are building a working replica of Thor\'s Stormbreaker axe from Marvel. \n\
+      **Problem:** The design has to balance movie accuracy against usability: \
+      the axe needs to be large enough to look like the movie prop, light enough to hold, \
       and strong enough to absorb the impact of regular axe use. \n\
-      My solution to that problem was to design an internal structure to bear the impact. \
-      This structure was a cross shape made from 1/4" steel with holes cut out in non load-bearing places \
-      to save weight. The outer shell is made from thin sheet metal to save weight. \
-      Since the axe tip was made from the same mild steel as the rest of the internal structure, \
-      it would be soft and loose its sharpness quickly. \
-      Therefore we heat treated the tip to increase its hardness. \n\
-      Overall the axe is 13 inches long and roughly 10 lbs',
-    skills: ['CAD', 'Metalworking', 'Welding'],
+      **Load path:** Instead of relying on the outer shell for strength, impact loads go through an internal skeleton: \
+      a cross shape made from 1/4" steel. The outer shell is thin sheet metal, since it doesn\'t have to carry those loads. \n\
+      **Weight budget:** Holes are cut out of the skeleton wherever it isn\'t load-bearing, and the thin shell keeps the rest of the weight down. \
+      Overall the axe is 13 inches long and roughly 10 lbs. \n\
+      **Edge retention:** The tip is the same mild steel as the rest of the skeleton, which is too soft to hold an edge for long, \
+      so we heat treated it to increase its hardness.',
+    skills: ['CAD', 'Structural Design', 'Metalworking', 'Welding', 'Heat Treating'],
     media: [
       {
         type: 'photo',
@@ -34,8 +33,8 @@ export const writeups = [
       {
         type: 'gltfInternal',
         models: [
-          { path: '/assets/models/stormbreaker/Stormbreaker_outside.gltf', label: 'Cosmetics', opacity: 0.1 },
-          { path: '/assets/models/stormbreaker/Stormbreaker_internal.gltf', label: 'Skeleton', opacity: 1.0 },
+          { path: '/assets/models/stormbreaker/Stormbreaker_outside.glb', label: 'Cosmetics', opacity: 0.1 },
+          { path: '/assets/models/stormbreaker/Stormbreaker_internal.glb', label: 'Skeleton', opacity: 1.0 },
         ],
         config: {
           rotationSpeed: 0.4,
@@ -67,41 +66,41 @@ export const gridItems = [
   {
     type: 'photo',
     caption: 'Welded Cutlery Birds',
-    src: '/assets/images/projects/other/welded_birds.jpg',
+    src: '/assets/images/projects/other/welded_birds.jpg', thumb: '/assets/images/projects/other/welded_birds_thumb.jpg',
     maximumCutoffRatio: 0.1
   },
   {
     type: 'photo',
     caption: 'Custom Lego Sets',
-    src: '/assets/images/projects/other/lego.jpg',
+    src: '/assets/images/projects/other/lego.jpg', thumb: '/assets/images/projects/other/lego_thumb.jpg',
     maximumCutoffRatio: 0.0
   },
   {
     type: 'photo',
     caption: 'Tool Organization CNCing',
-    src: '/assets/images/projects/other/tool_storage.jpg'
+    src: '/assets/images/projects/other/tool_storage.jpg', thumb: '/assets/images/projects/other/tool_storage_thumb.jpg'
   },
   {
     type: 'video', 
     caption: 'Gingerbread (Rotating Christmas Pyramid) - 2025', 
-    src: '/assets/videos/other/gingerbread.MOV', 
+    src: '/assets/videos/other/gingerbread.mp4', 
     maximumCutoffRatio: 0.2
   },
   {
     type: 'photo', 
     caption: 'Gingerbread (Eiffel Tower) - 2024', 
-    src: '/assets/images/projects/other/gingerbread_eiffel.jpg', 
+    src: '/assets/images/projects/other/gingerbread_eiffel.jpg', thumb: '/assets/images/projects/other/gingerbread_eiffel_thumb.jpg', 
     maximumCutoffRatio: 0.2
   },
   {
     type: 'photo', 
     caption: 'Gingerbread (Airport) - 2023', 
-    src: '/assets/images/projects/other/gingerbread_airport.jpg'
+    src: '/assets/images/projects/other/gingerbread_airport.jpg', thumb: '/assets/images/projects/other/gingerbread_airport_thumb.jpg'
   }, 
   {
     type: 'photo', 
-    caption: 'Gingerbread (Dr Suess style Tree House) - 2022', 
-    src: '/assets/images/projects/other/gingerbread_suess.jpg', 
+    caption: 'Gingerbread (Dr. Seuss Style Tree House) - 2022', 
+    src: '/assets/images/projects/other/gingerbread_suess.jpg', thumb: '/assets/images/projects/other/gingerbread_suess_thumb.jpg', 
     yMove: 0.2
   }
 ]

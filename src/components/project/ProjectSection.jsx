@@ -3,13 +3,13 @@ import styles from './ProjectSection.module.css'
 
 const DEFAULT_GRID_WIDTH = 0.55
 
-// Below the stacked-layout breakpoint (see .media in ProjectSection.module.css),
-// the grid normally goes to 100% of the column width. For a lone image that
-// reads as oversized, so cap it to a fraction of the *viewport* width instead —
-// expressed in vw (not px) so the cap scales continuously with window size
-// rather than sitting at one fixed size. Only single-image grids get this;
-// multi-image grids already split their row across items and don't blow up.
-const SINGLE_IMAGE_STACKED_MAX_WIDTH_VW = 0.6
+// Renders **bold** spans (used for short lead-ins like "**Problem:**")
+// inside an otherwise plain line of text.
+function renderInline(text) {
+  return text.split(/\*\*(.+?)\*\*/g).map((part, i) =>
+    i % 2 === 1 ? <strong key={i}>{part}</strong> : part
+  )
+}
 
 // Splits a description on newlines into blocks. Plain lines become
 // paragraphs; runs of consecutive lines starting with "- " are grouped into
@@ -35,21 +35,24 @@ function parseDescription(text) {
  * Every project renders in the same fixed order: title, date, skills,
  * then a row pairing the media grid (left) with the description (right).
  * `project.gridWidth` (0..1, fraction of the row's width) sets the split;
- * defaults to DEFAULT_GRID_WIDTH. Projects with no media (project.media
- * is empty) skip the grid column entirely rather than leaving a blank box.
+ * defaults to DEFAULT_GRID_WIDTH. `project.layout: 'stacked'` instead puts
+ * the media full width above the description, for a wide image (like a
+ * screenshot) that would be unreadably small in a side column. Projects
+ * with no media (project.media is empty) skip the grid column entirely
+ * rather than leaving a blank box.
  */
 export default function ProjectSection({ project }) {
   const hasMedia = project.media?.length > 0
-  const gridWidth = project.gridWidth ?? DEFAULT_GRID_WIDTH
-  const isSingleImage = project.media?.length === 1
+  const isStacked = project.layout === 'stacked'
+  const gridWidth = isStacked ? 1 : (project.gridWidth ?? DEFAULT_GRID_WIDTH)
   const blocks = project.description ? parseDescription(project.description) : []
   const description = blocks.map((block, i) =>
     block.type === 'list' ? (
       <ul key={i}>
-        {block.items.map((item, j) => <li key={j}>{item}</li>)}
+        {block.items.map((item, j) => <li key={j}>{renderInline(item)}</li>)}
       </ul>
     ) : (
-      <p key={i}>{block.text}</p>
+      <p key={i}>{renderInline(block.text)}</p>
     )
   )
 
@@ -67,14 +70,8 @@ export default function ProjectSection({ project }) {
       )}
 
       {hasMedia ? (
-        <div className={styles.body}>
-          <div
-            className={styles.media}
-            style={{
-              '--grid-width': `${gridWidth * 100}%`,
-              ...(isSingleImage && { '--stacked-max-width': `${SINGLE_IMAGE_STACKED_MAX_WIDTH_VW * 100}vw` }),
-            }}
-          >
+        <div className={isStacked ? `${styles.body} ${styles.stacked}` : styles.body}>
+          <div className={styles.media} style={{ '--grid-width': `${gridWidth * 100}%` }}>
             <ManualGrid items={project.media} />
           </div>
           <div className={styles.description}>{description}</div>

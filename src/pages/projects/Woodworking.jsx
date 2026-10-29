@@ -6,7 +6,7 @@ import CaptionGrid from '../../components/grids/CaptionGrid.jsx'
 import styles from './Woodworking.module.css'
 
 // Hidden quirk: 5 clicks on the enlarged CNC Cow photo plays a moo.
-const COW_IMAGE_SRC = '/assets/images/projects/woodworking/cow.jpeg'
+const COW_IMAGE_SRC = '/assets/images/projects/woodworking/cow.jpg'
 const MOO_AUDIO_SRC = '/assets/audio/moo.mp3'
 
 export default function Woodworking() {

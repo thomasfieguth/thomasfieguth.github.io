@@ -1,16 +1,14 @@
-import FeaturedProjects from '../components/home/FeaturedProjects.jsx'
+// FeaturedGrid replaced the FeaturedProjects carousel; swap the import and
+// the <FeaturedGrid /> below back to restore it.
+import FeaturedGrid from '../components/home/FeaturedGrid.jsx'
+import contactLinks from '../data/contactLinks.js'
+import { highlights, skills, about } from '../data/home.js'
 import styles from './Home.module.css'
 
-const skills = [
-  'C++', 'Python', 'ROS2', 'Qt', 'Sensor Fusion',
-  'CAD', 'CNC Machining', 'Welding', 'Fabrication',
-]
-
-const achievements = [
-  'Studied at the University of Waterloo',
-  'Graduated with a BASc in Systems Design Engineering',
-  'Graduated with Distinction',
-]
+// Contact buttons, pulled from the footer's contact links so the URLs
+// live in one place.
+const CTA_LABELS = ['Resume', 'Email', 'LinkedIn']
+const ctaLinks = CTA_LABELS.map((label) => contactLinks.find((link) => link.label === label))
 
 export default function Home() {
   return (
@@ -26,25 +24,33 @@ export default function Home() {
           </ul>
 
           <ul className={styles.achievements}>
-            {achievements.map((achievement) => (
-              <li key={achievement} className={styles.achievement}>{achievement}</li>
+            {highlights.map((highlight) => (
+              <li key={highlight} className={styles.achievement}>{highlight}</li>
             ))}
           </ul>
 
-          <p className={styles.bio}>
-            I'm a Software Engineer at Werkr Tractors, writing the guidance software for an autonomous electric tractor.
-            Outside of work I build things that mix hardware and software, from CNC-routed wooden globes to a Stormbreaker replica.
-          </p>
+          <div className={styles.ctas}>
+            {ctaLinks.map(({ label, href, external }) => (
+              <a
+                key={label}
+                href={href}
+                {...(external && { target: '_blank', rel: 'noopener noreferrer' })}
+                className={styles.cta}
+              >
+                {label}
+              </a>
+            ))}
+          </div>
         </div>
 
-        <FeaturedProjects />
+        <FeaturedGrid />
       </section>
 
       <section className={styles.about}>
         <h2 className={styles.aboutHeading}>About Me</h2>
-        <p className={styles.aboutBody}>I am a Systems Design Engineering graduate from the University of Waterloo, now working as a Software Engineer at Werkr Tractors. My five co-op terms took me from Accelerated Systems to GEI Consultants to Werkr Tractors, where I learned mechanical design, CNC machining, data analysis, and autonomous robotics. </p>
-        <p className={styles.aboutBody}>I work across the full stack of a physical project: CAD design, CNC fabrication, welding and machining, and software ranging from embedded C++/ROS2 control systems to Qt-based GUIs and 3D visualization tools. I end up using the same combination of hardware and software skills whether I'm building the onboard interface for an autonomous tractor, the depth-sensing feedback system in my capstone, or the terrain and river logic for a custom Catan tile set. </p>
-        <p className={styles.aboutBody}>Outside of formal engineering work, I build many different projects for fun: CNC-routed wooden globes, topographical maps, a stormbreaker replica, and a Catan combinatorial optimizer.</p>
+        {about.map((paragraph) => (
+          <p key={paragraph} className={styles.aboutBody}>{paragraph}</p>
+        ))}
       </section>
 
       <p className={styles.quirkHint}>There are 4 easter eggs hidden in this website, can you find them all?</p>

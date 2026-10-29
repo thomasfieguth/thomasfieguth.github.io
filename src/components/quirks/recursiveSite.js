@@ -11,7 +11,7 @@ function currentDepth() {
 }
 
 /**
- * Source the self-embedding grid item ("Prompt Engineering: Website") loads
+ * Source the self-embedding grid item ("This Website") loads
  * in its lightbox.
  *
  * Each level gets a distinct `d` value because browsers refuse to load a

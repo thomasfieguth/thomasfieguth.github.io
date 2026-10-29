@@ -1,7 +1,8 @@
 import { Suspense, lazy } from 'react'
-import { HashRouter, Routes, Route, Navigate } from 'react-router-dom'
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import Navbar from './components/layout/Navbar.jsx'
 import Footer from './components/layout/Footer.jsx'
+import PageMeta from './components/layout/PageMeta.jsx'
 import TractorOverlay from './components/quirks/TractorOverlay.jsx'
 import { TractorQuirkProvider } from './context/TractorQuirkContext.jsx'
 import Home from './pages/Home.jsx'
@@ -21,7 +22,8 @@ const NotFound    = lazy(() => import('./pages/NotFound.jsx'))
 export default function App() {
   return (
     <TractorQuirkProvider>
-      <HashRouter>
+      <BrowserRouter>
+        <PageMeta />
         <Navbar />
         <main>
           <Suspense fallback={null}>
@@ -39,7 +41,7 @@ export default function App() {
         </main>
         <Footer />
         <TractorOverlay />
-      </HashRouter>
+      </BrowserRouter>
     </TractorQuirkProvider>
   )
 }

@@ -68,7 +68,7 @@ function tractorTransform(x, y, headingRad) {
 /**
  * TractorOverlay
  *
- * Mounted once, always, as a sibling of the route tree inside HashRouter so
+ * Mounted once, always, as a sibling of the route tree inside BrowserRouter so
  * it can call useLocation() — but it only renders (and only wires up
  * listeners / the rAF loop) while the quirk is active, via
  * TractorOverlayContent. Route changes after activation deactivate it.

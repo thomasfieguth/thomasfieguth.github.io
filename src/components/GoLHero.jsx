@@ -41,6 +41,7 @@ export default function GoLHero({ title }) {
   // view is showing keep simulating instead of being dropped.
   const worldSizeRef = useRef({ width: 0, height: 0 })
   const [isExpanded, setIsExpanded] = useState(false)
+  const [canHover] = useState(() => window.matchMedia('(hover: hover)').matches)
 
   // Collapsed: canvas buffer tracks the hero strip's width (16:9), cropped
   // to the visible 16:3 band via translateY. Expanded: the buffer is left
@@ -66,7 +67,10 @@ export default function GoLHero({ title }) {
         canvas.style.width = `${canvasWidth}px`
         canvas.style.height = `${canvasHeight}px`
 
-        const offsetY = (canvasWidth * 3) / 16
+        // Centre the 16:9 sim vertically in the strip, whatever ratio the
+        // strip has at this width (16:3 on desktop, 16:6 on phones).
+        const stageHeight = stage.getBoundingClientRect().height
+        const offsetY = (canvasHeight - stageHeight) / 2
         canvas.style.transform = `translate(0px, -${offsetY}px)`
 
         resize(stateRef.current, canvasWidth, canvasHeight)
@@ -146,9 +150,15 @@ export default function GoLHero({ title }) {
     return () => document.removeEventListener('keydown', onKeyDown)
   }, [isExpanded])
 
-  const handleMouseMove = (e) => {
+  const handlePointerMove = (e) => {
     const rect = canvasRef.current.getBoundingClientRect()
     mousePosRef.current = { x: e.clientX - rect.left, y: e.clientY - rect.top }
+  }
+
+  // A finger has no resting position like a mouse cursor, so stop
+  // spawning cells as soon as it lifts.
+  const handlePointerEnd = (e) => {
+    if (e.pointerType !== 'mouse') mousePosRef.current = null
   }
 
   const handleReset = () => {
@@ -168,13 +178,23 @@ export default function GoLHero({ title }) {
         <canvas
           ref={canvasRef}
           className={styles.canvas}
-          onMouseMove={handleMouseMove}
+          onPointerMove={handlePointerMove}
+          onPointerDown={isExpanded ? handlePointerMove : undefined}
+          onPointerUp={handlePointerEnd}
+          onPointerCancel={handlePointerEnd}
+          onPointerLeave={handlePointerEnd}
           onClick={!isExpanded ? () => setIsExpanded(true) : undefined}
         />
 
         {!isExpanded && <HeroTitle>{title}</HeroTitle>}
-        {!isExpanded && (
+        {/* Touch screens can't hover, and the hint would collide with the
+            title on a phone-width banner, so they only get a hint once
+            the expanded view has room for it. */}
+        {!isExpanded && canHover && (
           <span className={styles.hint}>Hover mouse to start game of life</span>
+        )}
+        {isExpanded && !canHover && (
+          <span className={styles.hint}>Drag to add cells</span>
         )}
       </div>
 

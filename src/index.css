@@ -6,6 +6,7 @@
   --color-border:        #2A2A2A;
   --color-text-primary:  #F0F0F0;
   --color-text-secondary:#888888;
+  --color-text-body:     #b5b5b5;  /* long-form paragraphs; brighter than secondary for readability */
   --color-accent:        #ec96ff;
   --color-accent-hover:  #df50ff;
 

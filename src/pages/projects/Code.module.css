@@ -27,3 +27,33 @@
   color: var(--color-text-primary);
   margin-bottom: var(--space-8);
 }
+
+.listHeading {
+  font-size: var(--text-lg);
+  font-weight: var(--weight-semibold);
+  color: var(--color-text-primary);
+  margin: var(--space-12) 0 var(--space-4);
+}
+
+.textList {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: var(--space-2) var(--space-8);
+}
+
+.textListItem {
+  position: relative;
+  padding-left: var(--space-6);
+  color: var(--color-text-secondary);
+}
+
+.textListItem::before {
+  content: '';
+  position: absolute;
+  left: var(--space-1);
+  top: 0.65em;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background-color: var(--color-accent);
+}
