@@ -2,7 +2,7 @@
 // the <FeaturedGrid /> below back to restore it.
 import FeaturedGrid from '../components/home/FeaturedGrid.jsx'
 import contactLinks from '../data/contactLinks.js'
-import { highlights, skills, about } from '../data/home.js'
+import { highlights, skills, aboutSections } from '../data/home.js'
 import styles from './Home.module.css'
 
 // Contact buttons, pulled from the footer's contact links so the URLs
@@ -47,9 +47,13 @@ export default function Home() {
       </section>
 
       <section className={styles.about}>
-        <h2 className={styles.aboutHeading}>About Me</h2>
-        {about.map((paragraph) => (
-          <p key={paragraph} className={styles.aboutBody}>{paragraph}</p>
+        {aboutSections.map(({ heading, paragraphs }) => (
+          <div key={heading} className={styles.aboutColumn}>
+            <h2 className={styles.aboutHeading}>{heading}</h2>
+            {paragraphs.map((paragraph) => (
+              <p key={paragraph} className={styles.aboutBody}>{paragraph}</p>
+            ))}
+          </div>
         ))}
       </section>
 

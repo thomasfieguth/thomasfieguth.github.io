@@ -95,9 +95,11 @@ const bodies = {
     '<section><h2>Featured Projects</h2>',
     list(featuredProjects.map((p) => `${link(p.to, p.title)}: ${esc(p.blurb)}`)),
     '</section>',
-    '<section><h2>About Me</h2>',
-    ...home.about.map((p) => `<p>${esc(p)}</p>`),
-    '</section>',
+    ...home.aboutSections.map(({ heading, paragraphs }) => [
+      `<section><h2>${esc(heading)}</h2>`,
+      ...paragraphs.map((p) => `<p>${esc(p)}</p>`),
+      '</section>',
+    ].join('\n')),
   ].join('\n'),
 
   ...Object.fromEntries(experienceData.map((job) => [`/experience/${job.id}`, [

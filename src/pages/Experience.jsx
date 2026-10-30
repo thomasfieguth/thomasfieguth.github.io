@@ -29,6 +29,8 @@ export default function Experience() {
         title={job.company}
         shortTitle={job.tabLabel}
         image={job.heroImage}
+        xMove={job.heroXMove}
+        yMove={job.heroYMove}
         blank
       />
 

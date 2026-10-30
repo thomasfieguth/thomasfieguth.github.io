@@ -118,6 +118,7 @@
   color: var(--color-text-secondary);
   letter-spacing: 0.04em;
   text-transform: uppercase;
+  white-space: nowrap;
   border-radius: var(--radius-sm);
   transition: color var(--transition-fast), background-color var(--transition-fast);
 }

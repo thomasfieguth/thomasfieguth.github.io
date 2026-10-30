@@ -19,7 +19,7 @@ export const writeups = [
       **Load path:** Instead of relying on the outer shell for strength, impact loads go through an internal skeleton: \
       a cross shape made from 1/4" steel. The outer shell is thin sheet metal, since it doesn\'t have to carry those loads. \n\
       **Weight budget:** Holes are cut out of the skeleton wherever it isn\'t load-bearing, and the thin shell keeps the rest of the weight down. \
-      Overall the axe is 13 inches long and roughly 10 lbs. \n\
+      Overall the axe is 13 inches head size and roughly 10 lbs. \n\
       **Edge retention:** The tip is the same mild steel as the rest of the skeleton, which is too soft to hold an edge for long, \
       so we heat treated it to increase its hardness.',
     skills: ['CAD', 'Structural Design', 'Metalworking', 'Welding', 'Heat Treating'],
@@ -80,6 +80,11 @@ export const gridItems = [
     caption: 'Tool Organization CNCing',
     src: '/assets/images/projects/other/tool_storage.jpg', thumb: '/assets/images/projects/other/tool_storage_thumb.jpg'
   },
+  {
+    type: 'photo', 
+    caption: 'Fixing Car Exhaust', 
+    src: '/assets/images/projects/other/exhaust_fix.jpg', thumb: '/assets/images/projects/other/exhaust_fix_thumb.jpg', 
+  }, 
   {
     type: 'video', 
     caption: 'Gingerbread (Rotating Christmas Pyramid) - 2025', 

@@ -8,7 +8,7 @@ import styles from './Other.module.css'
 export default function Other() {
   return (
     <div className={styles.page}>
-      <Hero title="Other Projects" image="/assets/images/hero/other.jpg" />
+      <Hero title="Other Projects" image="/assets/images/hero/other.jpg" yMove={-0.5} />
 
       {/* <header className={styles.header}>
         <h1 className={styles.title}>Other Projects</h1>

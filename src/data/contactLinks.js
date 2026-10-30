@@ -12,7 +12,7 @@ const contactLinks = [
   { label: 'Email', href: 'mailto:thomas.fieguth@gmail.com' },
   { label: 'LinkedIn', href: 'https://www.linkedin.com/in/thomas-fieguth-59b19427b/', external: true },
   { label: 'Resume', href: '/assets/resume.pdf', external: true },
-  { label: 'GitHub', href: 'https://github.com/thomasfieguth', external: true },
+  // { label: 'GitHub', href: 'https://github.com/thomasfieguth', external: true },
 ]
 
 export default contactLinks

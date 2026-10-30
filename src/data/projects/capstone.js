@@ -16,6 +16,8 @@ const capstoneData = [
       '**Problem:** Woodcarving Dexterity is a capstone project I built with a team of four to lower the barrier to entry for beginner woodcarvers. \
       Learning woodcarving demands strong spatial reasoning and depth judgment that most beginners lack, \
       and the fear of making an unfixable mistake discourages many from starting at all. \n\
+      **My role:** I did all of the CAD and mechanical manufacturing, helped build and debug the camera-to-projection \
+      pipeline, and implemented three iterations of the user interface. \n\
       **Solution:** Our system turns woodcarving into a "trace the light" experience: it scans the wood stock with a 3D depth camera, \
       compares the resulting point cloud against a user-uploaded CAD model, and calculates the difference in depth between the two. \
       This difference is projected directly onto the stock as a colour map, showing exactly where and how deep to carve next. \n\
@@ -42,7 +44,7 @@ const capstoneData = [
     id: 'capstone-mech',
     title: 'Mechanical Iterations',
     description:
-      '**Approach:** Multiple iterations were designed, built, and tested to continuously improve the design, \
+      '**Approach:** I did all of the CAD and fabrication for the rig, designing, building, and testing multiple iterations, \
       with each iteration solving issues identified during testing of the one before it.\n\
       **Main frame:** The main prototype went through three iterations. The first was built quickly as a proof of concept. \
       The second improved stability and added support for the projector\'s weight. \
@@ -115,7 +117,8 @@ const capstoneData = [
       **Challenges:** Getting ICP to run consistently and accurately proved more difficult than expected. \
       We had to segment out background points even when the base was not coplanar with the camera, and segment out the bolts, \
       which were not included in the CAD file ICP used for comparison. \
-      Significant effort also went into optimizing the algorithm itself to reliably find the correct origin every time.',
+      Significant effort also went into optimizing the algorithm itself to reliably find the correct origin every time.\n\
+      **My part:** I helped build and debug the camera-to-projection pipeline that turns the zeroed point cloud into the projected colour map.',
     skills: ['Depth Sensing', 'Point Cloud Processing', 'ICP', 'Python', 'Troubleshooting'],
     gridWidth: 0.2, 
     media: [
@@ -131,7 +134,8 @@ const capstoneData = [
     id: 'capstone-ui',
     title: 'UI Development',
     description:
-      '**Flow:** The user interface was designed to guide users through a clear, low-effort action at each stage, \
+      '**My part:** I implemented all three iterations of the interface in Qt, working from a design mostly co-created by me and another teammate.\n\
+      **Flow:** The user interface was designed to guide users through a clear, low-effort action at each stage, \
       minimizing cognitive load. Users begin by uploading a CAD file, \
       are walked through an onboarding sequence explaining cutting stages and recommended tools, \
       and then reach a home screen where they can manually or automatically update the projected colour map. \
@@ -182,6 +186,16 @@ export const gridItems = [
     caption: 'Poster',
     src: '/assets/images/projects/capstone/poster.jpg', thumb: '/assets/images/projects/capstone/poster_thumb.jpg',
   },
+  {
+    type: 'photo', 
+    caption: 'Debugging', 
+    src: '/assets/images/projects/capstone/capstone_debug.jpg', thumb: '/assets/images/projects/capstone/capstone_debug_thumb.jpg', 
+  }, 
+  {
+    type: 'photo', 
+    caption: 'Symposium', 
+    src: '/assets/images/projects/capstone/capstone_symposium.jpg', thumb: '/assets/images/projects/capstone/capstone_symposium_thumb.jpg', 
+  }, 
 ]
 
 export default capstoneData

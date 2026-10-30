@@ -31,16 +31,17 @@ const DROPDOWNS = [
 // Below the mobile breakpoint, the top-level buttons and both dropdowns
 // collapse into one flat hamburger menu — there's no room for nested
 // submenus on a phone-width screen, so every destination sits at the
-// same level.
+// same level. Each label is prefixed with its section so the flattened
+// list still reads as Experience vs. Projects.
 const MOBILE_LINKS = [
   { to: '/',                     label: 'Home' },
-  { to: '/experience/werkr',     label: 'Werkr' },
-  { to: '/experience/gei',       label: 'GEI' },
-  { to: '/experience/asi',       label: 'ASI' },
-  { to: '/projects/capstone',    label: 'Capstone' },
-  { to: '/projects/woodworking', label: 'Woodworking' },
-  { to: '/projects/code',        label: 'Code' },
-  { to: '/projects/other',       label: 'Other Projects' },
+  { to: '/experience/werkr',     label: 'Experience - Werkr' },
+  { to: '/experience/gei',       label: 'Experience - GEI' },
+  { to: '/experience/asi',       label: 'Experience - ASI' },
+  { to: '/projects/capstone',    label: 'Projects - Capstone' },
+  { to: '/projects/woodworking', label: 'Projects - Woodworking' },
+  { to: '/projects/code',        label: 'Projects - Code' },
+  { to: '/projects/other',       label: 'Projects - Other' },
 ]
 
 export default function Navbar() {

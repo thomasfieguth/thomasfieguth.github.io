@@ -9,6 +9,10 @@
  *   tabLabel      string      — Short name for the mobile hero title
  *   company       string      — Company name (hero title)
  *   heroImage     string?     — Hero banner image; omit for a plain black banner
+ *   heroXMove     number?     — Shift the hero image right (negative = left) by this
+ *                               fraction of the banner's width (see MediaFrame)
+ *   heroYMove     number?     — Shift the hero image down (negative = up) by this
+ *                               fraction of the banner's height (see MediaFrame)
  *   role          string      — Role title or progression summary
  *   period        string      — Display date range
  *   terms         {role, period}[]?
@@ -138,16 +142,22 @@ const experienceData = [
       },
     ],
     gallery: [
-      { type: 'photo', caption: 'Tractor V1', src: '/assets/images/experience/werkr/tractor_v1.jpg', thumb: '/assets/images/experience/werkr/tractor_v1_thumb.jpg' },
+      { type: 'photo', caption: 'Old Tractor', src: '/assets/images/experience/werkr/tractor_v1.jpg', thumb: '/assets/images/experience/werkr/tractor_v1_thumb.jpg' },
       { type: 'photo', caption: 'New Tractor', src: '/assets/images/experience/werkr/werkr_tractor.jpg', thumb: '/assets/images/experience/werkr/werkr_tractor_thumb.jpg' },
       { type: 'photo', caption: 'Autonomous Seeding', src: '/assets/images/experience/werkr/werkr_seeder.jpg', thumb: '/assets/images/experience/werkr/werkr_seeder_thumb.jpg'}, 
       { type: 'photo', caption: 'EKF Tuning Plot', src: '/assets/images/experience/werkr/full_5.svg' },
+      { type: 'photo', caption: 'Debugging Tractor', src: '/assets/images/experience/werkr/werkr_debug.jpg', thumb: '/assets/images/experience/werkr/werkr_debug_thumb.jpg'}, 
+      { type: 'photo', caption: 'Debugging Tractor', src: '/assets/images/experience/werkr/werkr_debug2.jpg', thumb: '/assets/images/experience/werkr/werkr_debug2_thumb.jpg'}, 
+      { type: 'photo', caption: 'Debugging Tractor', src: '/assets/images/experience/werkr/werkr_debug3.jpg', thumb: '/assets/images/experience/werkr/werkr_debug3_thumb.jpg'},  
+      { type: 'photo', caption: 'Autonomy System Diagram', src: '/assets/images/experience/werkr/werkr_autonomy_layout.svg', thumb: '/assets/images/experience/werkr/werkr_autonomy_layout_thumb.jpg'},      
     ],
   },
   {
     id: 'gei',
     tabLabel: 'GEI',
     company: 'GEI Consultants',
+    heroImage: '/assets/images/hero/gei.jpg',
+    heroYMove: 0.5,
     role: 'Project Designer Co-op',
     period: 'May – Aug 2023',
     location: 'Kitchener, Ontario, Canada',
@@ -213,13 +223,13 @@ const experienceData = [
             type: 'photo',
             src: '/assets/images/experience/gei/WTP_flowrate.jpg',
             alt: 'Water Treatment Plant Cost as a Function of Flowrate',
-            x: 0.4, y: 0, width: 0.6, height: 0.34,
+            x: 0.4, y: 0, width: 0.6, height: 0.35,
           },
           {
             type: 'photo',
             src: '/assets/images/experience/gei/WTP_building_block.jpg',
             alt: 'Water Treatment Plant Cost as a Function of Flowrate and Components',
-            x: 0.4, y: 0.34, width: 0.6, height: 0.34,
+            x: 0.4, y: 0.35, width: 0.6, height: 0.35,
           },
         ],
       },

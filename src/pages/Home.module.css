@@ -92,15 +92,21 @@
   letter-spacing: 0.05em;
 }
 
+/* About Me / How I Work / What I'm Looking For, side by side. Stacks at a
+   wider breakpoint than the rest of the page (see below), since three
+   columns get too narrow to read comfortably well before the 800px mobile cutoff. */
 .about {
   max-width: 1200px;
   margin: 0 auto var(--space-12);
   padding: var(--space-12) var(--space-8) 0;
   border-top: 1px solid var(--color-border);
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--space-12);
 }
 
 .aboutHeading {
-  font-size: var(--text-2xl);
+  font-size: var(--text-xl);
   font-weight: var(--weight-semibold);
   color: var(--color-text-primary);
   margin-bottom: var(--space-4);
@@ -119,6 +125,13 @@
   color: var(--color-text-secondary);
   font-size: var(--text-xs);
   text-align: center;
+}
+
+@media (max-width: 1000px) {
+  .about {
+    grid-template-columns: minmax(0, 1fr);
+    gap: var(--space-8);
+  }
 }
 
 @media (max-width: 800px) {

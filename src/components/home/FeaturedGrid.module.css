@@ -19,11 +19,19 @@
   gap: var(--space-3);
 }
 
+/* Each <li> stretches to its row's height; flexing the card into it keeps
+   cards in a row equal-height without a percentage height, which WebKit
+   (every iOS browser) resolves inconsistently inside grid rows. */
+.grid > li {
+  display: flex;
+}
+
 .card {
+  flex: 1;
+  min-width: 0;
   display: flex;
   flex-direction: column;
   gap: var(--space-1);
-  height: 100%;
   padding: var(--space-2);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-md);
@@ -37,13 +45,24 @@
 }
 
 /* Fixed-ratio box for the card's MediaFrame or Placeholder to fill
-   (matches the 4:3 box featuredProjects.js crop settings assume). */
+   (matches the 4:3 box featuredProjects.js crop settings assume). Uses
+   padding-top rather than aspect-ratio: on iOS, WebKit sized the grid rows
+   shorter than the aspect-ratio boxes ended up, so the cards spilled into
+   the About section below. The media is absolutely positioned so it can't
+   affect the box's height. */
 .media {
-  aspect-ratio: 4 / 3;
+  position: relative;
   width: 100%;
+  height: 0;
+  padding-top: 75%;
   margin-bottom: var(--space-1);
   border-radius: var(--radius-sm);
   overflow: hidden;
+}
+
+.mediaInner {
+  position: absolute;
+  inset: 0;
 }
 
 .title {
