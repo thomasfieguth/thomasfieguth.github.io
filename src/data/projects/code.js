@@ -119,8 +119,8 @@ export const gridItems = [
   {
     type: 'iframe',
     caption: 'This Website: React + Three.js, Built With AI-Assisted Development',
-    link: { label: 'Source', href: 'https://github.com/thomasfieguth/thomasfieguth.github.io' },
-    src: 'https://thomasfieguth.github.io/',
+    link: { label: 'Source', href: 'https://github.com/thomasfieguth/thomasfieguth.ca' },
+    src: 'https://thomasfieguth.ca',
     thumb: '/assets/images/projects/code/website_thumb.jpg',
   },
   {
