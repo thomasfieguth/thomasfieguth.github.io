@@ -185,8 +185,8 @@ const experienceData = [
           **Method:** Each calculation compared the expected flow rate (based on the pump specifications, length of the pipe, shape of the pipes, \
           and height it needs to pump) against the actual measured flow rate calculated using the derivative of liquid height \
           (compensating for changes in well shape). \n**Result:** The final graph shows the operating point of the pumps. \
-          The pumps were operating at 93% of their expected capacity, whereas the rest of the system added much more resistance, \
-          which was the main limiting factor of the pumping station\'s performance.',
+          The system was operating at 73% of their expected flow rate dispite the pumps running at 93% of their expected capacity.\
+          Therefore we advised the client that to improve the flow rate, the best course of action was to clean or refurbish the pipes.', 
         media: [
           {
             type: 'photo',
