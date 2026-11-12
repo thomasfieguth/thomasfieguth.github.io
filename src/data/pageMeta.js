@@ -8,18 +8,18 @@
  */
 import experienceData from './experienceData.js'
 
-export const SITE_URL = 'https://thomasfieguth.github.io'
+export const SITE_URL = 'https://thomasfieguth.ca'
 export const SITE_NAME = 'Thomas Fieguth'
 export const OG_IMAGE = '/assets/images/og.jpg'
 
 const DEFAULT_DESCRIPTION =
-  'Robotics & mechatronics engineer. Portfolio of autonomous tractor guidance software, an award-winning ' +
-  'depth-sensing capstone, CNC woodworking and fabrication projects.'
+  'Thomas Fieguth, robotics engineer. Autonomous tractor guidance software, an award-winning ' +
+  'depth-sensing capstone, CNC woodworking and welding projects.'
 
 export const pages = [
   {
     path: '/',
-    title: `${SITE_NAME} · Robotics & Mechatronics Engineer`,
+    title: `${SITE_NAME} | Robotics Engineer`,
     description: DEFAULT_DESCRIPTION,
   },
   ...experienceData.map((job) => ({
